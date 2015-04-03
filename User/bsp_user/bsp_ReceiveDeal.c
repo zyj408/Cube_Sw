@@ -10,11 +10,11 @@ enum TEST_STATUS
 
 
 enum TEST_STATUS GT_TestState=TEST_IDLE;  /* 地面测试状态初始化 */
-unsigned char GT_TestIndex;
-char GT_RcvBuff[GT_RCV_SIZE];
-char GT_RcvEndFlag=0;            /* 地面测试结束标志位 */
-char GT_RcvErr=0;
-
+uint8_t GT_TestIndex;
+uint8_t GT_RcvBuff[GT_RCV_SIZE];
+uint8_t GT_RcvEndFlag=0;            /* 地面测试结束标志位 */
+uint8_t GT_RcvErr=0;
+uint8_t GT_ConnStat=0;  /* 没有上位机链接 */
 CPU_INT08U TestRcv(unsigned char rev_data)
 {
 	OS_ERR err;
@@ -55,8 +55,11 @@ CPU_INT08U TestRcv(unsigned char rev_data)
 				{
 					if(rev_data == 0xA5)
 					{
-						Mem_Copy(GT_RcvBuff, ID_CommandBuf, GT_TestIndex);
-						ID_CommandCnt++;
+						//Mem_Copy(GT_RcvBuff, ID_CommandBuf, GT_TestIndex);
+						//ID_CommandCnt++;
+						
+						InsDecode(GT_RcvBuff, GT_TestIndex);
+						
 						GT_TestIndex = 0; 
 						GT_TestState = TEST_IDLE;
 					}else
@@ -100,7 +103,7 @@ void TestOT_CallBack (OS_TMR *p_tmr, void *p_arg)
 	}
 }
 
-CPU_INT16U GetCheckSum(CPU_INT16U *Ptr, CPU_INT08U BufSize)
+CPU_INT16U GetCheckSum(CPU_INT16U *Ptr, uint8_t BufSize)
 {
 	CPU_INT32U CheckSumTemp;
 	CPU_INT16U index;
@@ -114,12 +117,21 @@ CPU_INT16U GetCheckSum(CPU_INT16U *Ptr, CPU_INT08U BufSize)
 }
 
 
-CPU_INT08U InsDecode(char *InsBuf, CPU_INT16U BufSize)
+CPU_INT08U InsDecode(uint8_t *InsBuf, uint8_t BufSize)
 {
 
 	
 	switch(*InsBuf)
 	{
+		case 0x00 /* 建立链接 */
+		{
+			if(GT_ConnStat == 0)
+				GT_ConnStat = 1;
+			
+		}
+		
+		
+		#if 0
 		/* 测试指令 */
 		case INS_CONN_TST:
 		{
@@ -169,9 +181,20 @@ CPU_INT08U InsDecode(char *InsBuf, CPU_INT16U BufSize)
 			//UartSend(USART1,0xFF);
 			break;
 		}
-			
+		#endif
 	}
 	
 	return 0;
 }
 
+
+void GndTsRxHandle(void)
+{
+	uint8_t response;
+	
+	if(comGetChar(COM1, &response)) //获取一个字符
+	{
+		TestRcv(response);
+	}
+	
+}

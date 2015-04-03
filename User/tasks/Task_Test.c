@@ -17,7 +17,6 @@ char wheela_sw = 2;
 char wheelb_sw = 2;
 
 
-
 void TEST_TASK(void *p_arg)
 {	
 	int j = 0;
@@ -32,7 +31,6 @@ void TEST_TASK(void *p_arg)
 	
 	while(1)
 	{
-		
 		
 		#if debug_enable
 		if (comGetChar(COM1, &response))
@@ -142,9 +140,7 @@ void TEST_TASK(void *p_arg)
 			}
 			
 		#endif 
-			
-			
-			
+		GndTsRxHandle();
 		
 		
 		/* ADC1DMA≤‚ ‘ */

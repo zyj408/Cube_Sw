@@ -3,8 +3,8 @@
 
 #include <includes.h>
 
-CPU_INT08U InsDecode(char *InsBuf, CPU_INT16U BufSize);
-CPU_INT16U GetCheckSum(CPU_INT16U *Ptr, CPU_INT08U BufSize);
-
+CPU_INT08U InsDecode(uint8_t *InsBuf, uint8_t BufSize);
+CPU_INT16U GetCheckSum(CPU_INT16U *Ptr, uint8_t BufSize);
+void GndTsRxHandle(void);
 #endif
 
