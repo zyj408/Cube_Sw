@@ -91,8 +91,9 @@ typedef struct pld_frm
 
 
 /********************************** GPS接收相关变量 **********************************/
-volatile CPU_INT08U GpsRevBuf[GPS_MAX_REV_SIZE];    /* GPS接收数据结构体 */
-volatile CPU_INT08U GpsRevCnt = 0;									/* GPS接收数据计数 */
+NMEA_MSG GpsCurInfo;                                /* GPS当前状态量集 */
+CPU_INT08U GpsRevBuf[GPS_MAX_REV_SIZE];    /* GPS接收数据结构体 */
+volatile CPU_INT16U GpsRevCnt = 0;									/* GPS接收数据计数 */
 //NMEA_MSG GpsCurInfo;                                /* GPS当前状态量集 */
 /********************************** 电源相关变量 **********************************/
 /* 电源变量 */

@@ -456,11 +456,6 @@
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_sdio_sd.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_uart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_uart.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_fsmc_sram.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_fsmc_sram.c</FilePath>
@@ -486,9 +481,9 @@
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_iwdg.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_printf.c</FileName>
+              <FileName>bsp_uart_fifo.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_printf.c</FilePath>
+              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_uart_fifo.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1449,11 +1444,6 @@
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_sdio_sd.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_uart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_uart.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_fsmc_sram.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_fsmc_sram.c</FilePath>
@@ -1479,9 +1469,9 @@
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_iwdg.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_printf.c</FileName>
+              <FileName>bsp_uart_fifo.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_printf.c</FilePath>
+              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_uart_fifo.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2442,11 +2432,6 @@
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_sdio_sd.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_uart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_uart.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_fsmc_sram.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_fsmc_sram.c</FilePath>
@@ -2472,9 +2457,9 @@
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_iwdg.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_printf.c</FileName>
+              <FileName>bsp_uart_fifo.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_printf.c</FilePath>
+              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_uart_fifo.c</FilePath>
             </File>
           </Files>
         </Group>

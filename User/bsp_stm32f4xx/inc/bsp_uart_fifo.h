@@ -28,7 +28,7 @@
 	#define	UART6_FIFO_EN	0
 #else
 	#define	UART1_FIFO_EN	1
-	#define	UART2_FIFO_EN	0
+	#define	UART2_FIFO_EN	1
 	#define	UART3_FIFO_EN	0
 	#define	UART4_FIFO_EN	0
 	#define	UART5_FIFO_EN	0
@@ -62,9 +62,9 @@ typedef enum
 #endif
 
 #if UART2_FIFO_EN == 1
-	#define UART2_BAUD			9600
+	#define UART2_BAUD			115200
 	#define UART2_TX_BUF_SIZE	1
-	#define UART2_RX_BUF_SIZE	2*1024
+	#define UART2_RX_BUF_SIZE	1*1024
 #endif
 
 #if UART3_FIFO_EN == 1
@@ -116,7 +116,7 @@ void bsp_InitUart(void);
 void comSendBuf(COM_PORT_E _ucPort, uint8_t *_ucaBuf, uint16_t _usLen);
 void comSendChar(COM_PORT_E _ucPort, uint8_t _ucByte);
 uint8_t comGetChar(COM_PORT_E _ucPort, uint8_t *_pByte);
-
+void comWaitFifoFull(COM_PORT_E _ucPort, uint16_t size);
 void comClearTxFifo(COM_PORT_E _ucPort);
 void comClearRxFifo(COM_PORT_E _ucPort);
 

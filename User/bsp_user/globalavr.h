@@ -165,9 +165,9 @@ extern OS_SEM   SEM_TEL_STO;
 extern OS_SEM   SEM_PLOAD_STO;
 
 /* 声明GPS接收缓冲变量 */
-extern volatile CPU_INT08U GpsRevBuf[GPS_MAX_REV_SIZE]; 
-extern volatile CPU_INT08U GpsRevCnt;
-
+extern CPU_INT08U GpsRevBuf[GPS_MAX_REV_SIZE]; 
+extern volatile CPU_INT16U GpsRevCnt;
+extern NMEA_MSG GpsCurInfo;            
 /* 外部变量声明 */
 /* 星上指令接收状态量 */
 extern CPU_INT08U IntBuf[BUFFER_SIZE];            /* 指令接收缓冲变量 */

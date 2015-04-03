@@ -63,7 +63,8 @@ int NMEA_Str2num(u8 *buf,u8*dx)
 	res=ires*NMEA_Pow(10,flen)+fres;
 	if(mask&0X02)res=-res;		   
 	return res;
-}	  							 
+}	  		
+
 //分析GPGSV信息
 //gpsx:nmea信息结构体
 //buf:接收到的GPS数据缓冲区首地址
@@ -99,6 +100,7 @@ void NMEA_GPGSV_Analysis(NMEA_MSG *gpsx,u8 *buf)
  		p=p1+1;//切换到下一个GPGSV信息
 	}   
 }
+
 //分析GPGGA信息
 //gpsx:nmea信息结构体
 //buf:接收到的GPS数据缓冲区首地址
@@ -114,6 +116,7 @@ void NMEA_GPGGA_Analysis(NMEA_MSG *gpsx,u8 *buf)
 	posx=NMEA_Comma_Pos(p1,9);								//得到海拔高度
 	if(posx!=0XFF)gpsx->altitude=NMEA_Str2num(p1+posx,&dx);  
 }
+
 //分析GPGSA信息
 //gpsx:nmea信息结构体
 //buf:接收到的GPS数据缓冲区首地址
@@ -138,6 +141,7 @@ void NMEA_GPGSA_Analysis(NMEA_MSG *gpsx,u8 *buf)
 	posx=NMEA_Comma_Pos(p1,17);								//得到VDOP位置精度因子
 	if(posx!=0XFF)gpsx->vdop=NMEA_Str2num(p1+posx,&dx);  
 }
+
 //分析GPRMC信息
 //gpsx:nmea信息结构体
 //buf:接收到的GPS数据缓冲区首地址
@@ -185,6 +189,7 @@ void NMEA_GPRMC_Analysis(NMEA_MSG *gpsx,u8 *buf)
 		gpsx->utc.year=2000+temp%100;	 	 
 	} 
 }
+
 //分析GPVTG信息
 //gpsx:nmea信息结构体
 //buf:接收到的GPS数据缓冲区首地址
@@ -200,6 +205,7 @@ void NMEA_GPVTG_Analysis(NMEA_MSG *gpsx,u8 *buf)
 		if(dx<3)gpsx->speed*=NMEA_Pow(10,3-dx);	 	 		//确保扩大1000倍
 	}
 }  
+
 //提取NMEA-0183信息
 //gpsx:nmea信息结构体
 //buf:接收到的GPS数据缓冲区首地址

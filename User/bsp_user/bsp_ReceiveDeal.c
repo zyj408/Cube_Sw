@@ -123,13 +123,13 @@ CPU_INT08U InsDecode(uint8_t *InsBuf, uint8_t BufSize)
 	
 	switch(*InsBuf)
 	{
-		case 0x00 /* 建立链接 */
+		case 0x00: /* 建立链接 */
 		{
 			if(GT_ConnStat == 0)
 				GT_ConnStat = 1;
 			
 		}
-		
+		break;
 		
 		#if 0
 		/* 测试指令 */
