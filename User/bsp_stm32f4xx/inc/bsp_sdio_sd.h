@@ -50,9 +50,9 @@
 	#define SD_DETECT_GPIO_PORT              GPIOE
 	#define SD_DETECT_GPIO_CLK               RCC_AHB1Periph_GPIOE
 #else	/* STM32_F4 */
-	#define SD_DETECT_PIN                    GPIO_Pin_2
-	#define SD_DETECT_GPIO_PORT              GPIOE
-	#define SD_DETECT_GPIO_CLK               RCC_AHB1Periph_GPIOE
+	#define SD_DETECT_PIN                    GPIO_Pin_7
+	#define SD_DETECT_GPIO_PORT              GPIOD
+	#define SD_DETECT_GPIO_CLK               RCC_AHB1Periph_GPIOD
 #endif
 
 
@@ -64,7 +64,7 @@
 /**
   * @brief  SDIO Data Transfer Frequency (25MHz max)
   */
-#define SDIO_TRANSFER_CLK_DIV            ((uint8_t)0x0)		/* 缺省是0， */
+#define SDIO_TRANSFER_CLK_DIV            ((uint8_t)0x2)		/* 缺省是0， */
 
 #define SD_SDIO_DMA                   DMA2
 #define SD_SDIO_DMA_CLK               RCC_AHB1Periph_DMA2
@@ -437,6 +437,8 @@ SD_Error SD_ProcessIRQSrc(void);
 void SD_ProcessDMAIRQ(void);
 SD_Error SD_WaitReadOperation(void);
 SD_Error SD_WaitWriteOperation(void);
+
+void bsp_FileSystem(void);
 
 /*********************************/
 void SD_LowLevel_DeInit(void);

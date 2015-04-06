@@ -56,6 +56,16 @@
 #endif
 
 /***************************************************************/
+#define SW_GPSA_PIN()         GPIO_ReadOutputDataBit(GPIO_GPSA_EN_PORT, GPIO_GPSA_EN_PIN)
+#define SW_GPSB_PIN()         GPIO_ReadOutputDataBit(GPIO_GPSB_EN_PORT, GPIO_GPSB_EN_PIN)
+#define SW_WHEELA_PIN()       GPIO_ReadOutputDataBit(GPIO_WHEEL_A_PORT, GPIO_WHEEL_A_PIN)
+#define SW_WHEELB_PIN()       GPIO_ReadOutputDataBit(GPIO_WHEEL_B_PORT, GPIO_WHEEL_B_PIN)
+#define SW_MTQ_PIN()          GPIO_ReadOutputDataBit(GPIO_MTQ_EN_PORT, GPIO_MTQ_EN_PIN)
+#define SW_USB_PIN()          GPIO_ReadOutputDataBit(GPIO_USB_EN_PORT, GPIO_USB_EN_PIN)
+#define SW_SOLAR_PIN()        GPIO_ReadOutputDataBit(GPIO_SOLAR_EN_PORT, GPIO_SOLAR_EN_PIN)
+#define SW_RES_PIN()        	GPIO_ReadOutputDataBit(GPIO_RES_PORT, GPIO_RES_PIN)
+
+
 
 #define MTQ_POWER_PIN()       GPIO_ReadOutputDataBit(GPIO_MTQ_EN_PORT, GPIO_MTQ_EN_PIN)      
 #define MTQ_SLEEP_PIN()       GPIO_ReadOutputDataBit(GPIO_MTQ_SLEEP_PORT, GPIO_MTQ_SLEEP_PIN)  

@@ -17,18 +17,28 @@ char wheela_sw = 2;
 char wheelb_sw = 2;
 
 
+void MenuPrint(void)
+{
+	printf("--------On Broad Computer Debug Mode--------\r\n");
+  printf("--------------------------------------------\r\n");
+	printf("[1] RTC Function Test\r\n");
+	printf("[2] NorFlash Function Test\r\n");
+	printf("[3] EPS System Function Test\r\n");
+	printf("[4] Obc ADSystem Function Test\r\n");
+}
+void TimeRegular(void)
+{
+	printf("----------------Set OBC Time----------------\r\n");
+	printf("--------------------------------------------\r\n");
+	printf("---------------Function to do---------------\r\n");
+}
 void TEST_TASK(void *p_arg)
 {	
 	int j = 0;
 	uint8_t response = 0;
 	(void)p_arg;
 
-	printf("--------On Broad Computer Debug Mode--------\r\n");
-  printf("--------------------------------------------\r\n");
-	printf("[1] RTC Function Test\r\n");
-	printf("[2] NorFlash Function Test\r\n");
-	printf("[3] EPSSystem Function Test\r\n");
-	
+		MenuPrint();
 	while(1)
 	{
 		
@@ -37,12 +47,16 @@ void TEST_TASK(void *p_arg)
 		{
 		switch(DebugMode)
 		{
-			case '0':
+			case '0':  //主菜单
 				DebugMode = response;
 			break;
 				
-			case '1':
-				if(response != '1')
+			case '1':  //RTC时钟模块
+				if(response == '2')  //修改时间
+					TimeRegular();
+				else if(response == '1');
+				
+				else
 					DebugMode = '0';
 			break;
 				
@@ -86,16 +100,12 @@ void TEST_TASK(void *p_arg)
 				else
 					DebugMode = '0';
 				break;
-			}
+		}
 			
 			switch(DebugMode)
 			{
 				case '0':
-					printf("--------On Broad Computer Debug Mode--------\r\n");
-					printf("--------------------------------------------\r\n");
-					printf("[1] RTC Function Test\r\n");
-					printf("[2] NorFlash Function Test\r\n");
-					printf("[3] EPSSystem Function Test\r\n");
+					MenuPrint();
 				break;
 					
 				case '1':
@@ -104,12 +114,14 @@ void TEST_TASK(void *p_arg)
 					if(OBCBootInfo.BootRTC_Source == 0)
 						printf("RTC current source: LSE\r\n");
 					else if(OBCBootInfo.BootRTC_Source == 1)
-					 printf("RTC current source: LSI\r\n");
+					  printf("RTC current source: LSI\r\n");
 					else
-					 printf("RTC have No source!\r\n");
+					  printf("RTC have No source!\r\n");
+					
 					printf("Current RTC :%d:%d:%d\r\n", CurTime.RTC_Hours, CurTime.RTC_Minutes, CurTime.RTC_Seconds);	
 					printf("Fuction:\r\n");
 					printf("[1] Update current time\r\n");
+					printf("[2] Set current time\r\n");
 				break;
 					
 				case '2':
@@ -122,9 +134,51 @@ void TEST_TASK(void *p_arg)
 					printf("[2] read NorFlash block (Section1)\r\n");
 				  printf("[3] Eraser NorFlash block (Section1)\r\n");
 				break;
+				
+				case '3':
+					printf("-------------EPS System Function Test-----------\r\n");
+					printf("          EPS System current infomation:\r\n");
+				  printf(" SwitchCurrent:\r\n");
+				  if(SW_GPSA_PIN())
+						printf("  GPSA: ON ||");
+					else
+						printf("  GPSA: OFF||");
+					
+				  if(SW_GPSB_PIN())
+						printf("  GPSB: ON ||");
+					else
+						printf("  GPSB: OFF||");
+				  if(SW_WHEELA_PIN())
+						printf("WHEELA: ON ||");
+					else
+						printf("WHEELA: OFF||");
+				  if(SW_WHEELB_PIN())
+						printf("WHEELB: ON ");
+					else
+						printf("WHEELB: OFF\r\n");
+				  if(SW_MTQ_PIN())
+						printf("   MTQ: ON ||");
+					else
+						printf("   MTQ: OFF||");
+				  if(SW_USB_PIN())
+						printf("   USB: ON ||");
+					else
+						printf("   USB: OFF||");		
+				  if(SW_SOLAR_PIN())
+						printf(" SOLAR: ON ||");
+					else
+						printf(" SOLAR: OFF||");						
+				  if(SW_RES_PIN())
+						printf(" RES: ON ||");
+					else
+						printf(" RES: OFF||");		
+					
+					break;
 			}
 			
 		}
+		#else
+			GndTsRxHandle();
 		#endif	
 			
 		#if	debug_adcs
@@ -140,7 +194,7 @@ void TEST_TASK(void *p_arg)
 			}
 			
 		#endif 
-		GndTsRxHandle();
+		
 		
 		
 		/* ADC1DMA测试 */

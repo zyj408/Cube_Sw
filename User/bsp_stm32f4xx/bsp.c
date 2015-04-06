@@ -61,7 +61,7 @@ void bsp_Init(void)
 	bsp_PVD_Init();      /* 初始化电压监视模块 */
 	bsp_InitRNG();       /* 初始化随机数发生器模块 */
 
-	//bsp_FileSystem();    /* 初始化文件系统 */
+	bsp_FileSystem();    /* 初始化文件系统 */
 	
 	//bsp_InitIwdg(10000);    /* 独立看门狗初始化1000ms */
 
@@ -106,34 +106,41 @@ void NVIC_Configuration(void)
 */
 void bsp_DelayUS(uint32_t _ulDelayTime)
 {
-	uint32_t ticks;
-	uint32_t told,tnow,tcnt=0;
-		    	 
-	ticks = _ulDelayTime * 168;      /* 需要的节拍数 */	  		 
-	tcnt = 0;
-	told = (uint32_t)CPU_TS_TmrRd();           /* 刚进入时的计数器值 */
+//	uint32_t ticks;
+//	uint32_t told,tnow,tcnt=0;
+//		    	 
+//	ticks = _ulDelayTime * 168;      /* 需要的节拍数 */	  		 
+//	tcnt = 0;
+//	told = (uint32_t)CPU_TS_TmrRd();           /* 刚进入时的计数器值 */
 
-	while(1)
-	{
-		tnow = (uint32_t)CPU_TS_TmrRd();	
-		if(tnow != told)
-		{	
-		    /* 这里注意一下SYSTICK是一个递减的计数器 */    
-			if(tnow > told)
-			{
-				tcnt += tnow - told;	
-			}
-			/* 重新装载递减 */
-			else 
-			{
-				tcnt += UINT32_MAX - told + tnow;	
-			}	    
-			told = tnow;
+//	while(1)
+//	{
+//		tnow = (uint32_t)CPU_TS_TmrRd();	
+//		if(tnow != told)
+//		{	
+//		    /* 这里注意一下SYSTICK是一个递减的计数器 */    
+//			if(tnow > told)
+//			{
+//				tcnt += tnow - told;	
+//			}
+//			/* 重新装载递减 */
+//			else 
+//			{
+//				tcnt += UINT32_MAX - told + tnow;	
+//			}	    
+//			told = tnow;
 
-			/*时间超过/等于要延迟的时间,则退出 */
-			if(tcnt >= ticks)break;
-		}  
-	}
+//			/*时间超过/等于要延迟的时间,则退出 */
+//			if(tcnt >= ticks)break;
+//		}  
+//	}
+uint8_t i;
+
+while(_ulDelayTime--)
+{
+	for(i = 0; i < 168; i++)
+		__nop();
+}
 }
 
 /*

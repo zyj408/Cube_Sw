@@ -518,10 +518,10 @@ uint8_t SD_Detect(void)
   __IO uint8_t status = SD_PRESENT;
 
   /*!< Check GPIO to detect SD */
-  if (GPIO_ReadInputDataBit(SD_DETECT_GPIO_PORT, SD_DETECT_PIN) != Bit_RESET)
-  {
-    status = SD_NOT_PRESENT;
-  }
+//  if (GPIO_ReadInputDataBit(SD_DETECT_GPIO_PORT, SD_DETECT_PIN) != Bit_RESET)
+//  {
+//    status = SD_NOT_PRESENT;
+//  }
   return status;
 }
 
@@ -2890,10 +2890,10 @@ void SD_LowLevel_Init(void)
   GPIO_Init(GPIOC, &GPIO_InitStructure);
 
   /*!< Configure SD_SPI_DETECT_PIN pin: SD Card detect pin */
-  GPIO_InitStructure.GPIO_Pin = SD_DETECT_PIN;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-  GPIO_Init(SD_DETECT_GPIO_PORT, &GPIO_InitStructure);
+//  GPIO_InitStructure.GPIO_Pin = SD_DETECT_PIN;
+//  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+//  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+//  GPIO_Init(SD_DETECT_GPIO_PORT, &GPIO_InitStructure);
 
   /* Enable the SDIO APB2 Clock */
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SDIO, ENABLE);
@@ -3017,14 +3017,24 @@ void SDIO_Interrupts_Config(void)
 
 void bsp_FileSystem(void)
 {
-	
+	UINT br, bw;
+	char str[100] = {0};
 	f_result = f_mount(FS_SD, &f_fs);
 	if(f_result == FR_OK)
 	{
 		printf("File System Init OK\r\n");
 	}
 	
-	f_open(&f_file, "0:/haha.txt", FA_READ | FA_CREATE_ALWAYS);
+	f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE | FA_CREATE_ALWAYS);  // NOTE:建立文件名最好全英文
+	f_write(&f_file, "haha2", 18, &bw);
+		printf("Current write size of Byte: %d\r\n", bw);
+	f_close(&f_file);
+	
+		f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE);
+		f_read(&f_file, (void *)str, bw, &br);
+		printf("read data: %s\r\n Read size of Byte: %d", str, br);
+	f_close(&f_file);	
+	
 	
 	printf("haha\r\n");
 }

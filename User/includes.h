@@ -57,7 +57,7 @@
 *********************************************************************************************************
 */
 
-#define debug_enable 0
+#define debug_enable 1
 #define debug_adcs 0
 
 #include  <bsp.h>

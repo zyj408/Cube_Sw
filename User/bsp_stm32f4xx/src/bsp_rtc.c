@@ -2,11 +2,10 @@
 #include "globalavr.h"
 
 /* 选择RTC的时钟源 */
-//#define RTC_CLOCK_SOURCE_LSE       /* LSE */
-#define RTC_CLOCK_SOURCE_LSI     /* LSI */ 
+
 
 /* 变量 */
-
+#define RTC_TIMEOUT_US 100000
 /* 用于设置RTC分频 */
 __IO uint32_t uwAsynchPrediv = 0;
 __IO uint32_t uwSynchPrediv = 0;
@@ -20,6 +19,14 @@ __IO uint32_t uwSynchPrediv = 0;
 */
 void bsp_InitRTC(void)
 {
+	#if debug_enable
+	if(RCC_GetSYSCLKSource() == 0x00)
+		printf("Current system clock:HSI\r\n");
+	if(RCC_GetSYSCLKSource() == 0x04)
+		printf("Current system clock:HSE\r\n");
+	else if(RCC_GetSYSCLKSource() == 0x08)
+		printf("Current system clock:PLL\r\n");
+	#endif
 	//RTC_DeInit();
 	RTC_Config();   /* 配置RTC模块 */
 	
@@ -93,16 +100,19 @@ void RTC_Config(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);/* 使能PWR时钟 */
 	PWR_BackupAccessCmd(ENABLE);/* 允许访问RTC */
 	
+	
+
 	if(OBCBootInfo.BootRTC_Source == 0)  /* 选择LSE作为时钟源 */
 	{
 		RCC_LSEConfig(RCC_LSE_ON);   	     /* 使能LSE振荡器  */
 		RtcTimeout = 0;	                   /* 等待就绪 */  
-		while((RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) && ((RtcTimeout++)<20))
+
+		while((RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) && ((RtcTimeout++) < RTC_TIMEOUT_US))//20
 		{
-			bsp_DelayUS(100);             /* STM32延迟函数 */
+			bsp_DelayUS(1);             /* STM32延迟函数 */
 		}
 
-		if(RtcTimeout > 18)                /* 判断是否有超时 */
+		if(RtcTimeout > RTC_TIMEOUT_US)  //18              /* 判断是否有超时 */
 		{	
 			#if debug_enable
 			printf("Init RTC Wrong: Oscillator time out! \r\n");
@@ -111,7 +121,7 @@ void RTC_Config(void)
 			OBCBootInfo.BootLSE_Error = 1;
 			OBCBootInfo.BootRTC_Source = 1;   /* 自动配置RTC为内部时钟 */
 		}
-		
+	
 		if(OBCBootInfo.BootRTC_Source == 0)
 		{
 			#if debug_enable
@@ -123,18 +133,17 @@ void RTC_Config(void)
 		}
 	}
 
-	
 	if(OBCBootInfo.BootRTC_Source == 1)	/* 选择LSI作为时钟源 */
 	{
 		RCC_LSICmd(ENABLE);  /* 使能内部时钟 */
 
 		RtcTimeout = 0;      /*  等待内部时钟稳定*/
-		while((RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET) && ((RtcTimeout++)<20))
+		while((RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET) && ((RtcTimeout++) < RTC_TIMEOUT_US))
 		{
-			bsp_DelayUS(1);/* STM32延迟函数 */
+			__nop();__nop();__nop();__nop();__nop();/* STM32延迟函数 */
 		}
 		
-		if(RtcTimeout > 18)
+		if(RtcTimeout > RTC_TIMEOUT_US)
 		{
 			#if debug_enable
 			printf("All Oscillator time out! \r\n");
@@ -187,3 +196,18 @@ void RTC_Config(void)
 	}
 }
 
+
+void bsp_RTCSet(uint8_t hour, uint8_t minute, uint8_t second)
+{
+	RTC_TimeTypeDef RTC_TimeStructure;
+	
+	RTC_TimeStructure.RTC_H12 = RTC_H12_AM;
+	RTC_TimeStructure.RTC_Hours = hour; 
+  RTC_TimeStructure.RTC_Minutes = minute;
+  RTC_TimeStructure.RTC_Seconds = second;
+	
+	if(RTC_SetTime(RTC_Format_BIN, &RTC_TimeStructure) == ERROR)
+	{
+		printf("\n\r>> !! RTC Set Time failed. !! <<\n\r");
+	} 
+}

@@ -149,7 +149,7 @@ void ObcAdStart(void)
 	command = WRITE | SEQ_CFG | CHANNEL_0 | POWER_NORMAL | RANGE_DOUBLE | DATA_BIN;
   
 	ObcSendByte(command);
-	bsp_DelayUS(10);
+	__nop();__nop();__nop();;
 	ObcSendByte(ALL_CHANNEL);
 
 }
@@ -171,7 +171,7 @@ CPU_INT16U ObcSendByte(uint16_t _ucValue)
 	/* 等待上次数据发送完毕 */
 	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET)
 	{
-		bsp_DelayUS(10);
+		__nop();__nop();__nop();;
 		if(i++ > 200000)
 		{
 			//EpsTranOTCnt++;
@@ -185,7 +185,7 @@ CPU_INT16U ObcSendByte(uint16_t _ucValue)
 	/* 等待接接收一个字节完成 */
 	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET)
 	{
-		bsp_DelayUS(10);
+		__nop();__nop();__nop();;
 	  if(i++ > 200000)
 	  {
 		  //EpsRevOTCnt++;
@@ -204,11 +204,11 @@ void EpsAdStart(void)
 	command = WRITE | SEQ_CFG | CHANNEL_0 | POWER_NORMAL | RANGE_NORMAL | DATA_BIN;
   
 	EpsSendByte(command, EPS_AD_CS1);
-	bsp_DelayUS(10);
+	__nop();__nop();__nop();
 	EpsSendByte(ALL_CHANNEL, EPS_AD_CS1);
 
 	EpsSendByte(command, EPS_AD_CS2);
-	bsp_DelayUS(10);
+	__nop();__nop();__nop();
 	EpsSendByte(ALL_CHANNEL, EPS_AD_CS2);
 }
 
@@ -263,7 +263,7 @@ CPU_INT16U EpsSendByte(uint16_t _ucValue, uint8_t _chipNum)
 	/* 等待上次数据发送完毕 */
 	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET)
 	{
-		bsp_DelayUS(10);
+		__nop();__nop();__nop();
 		if(i++ > 200000)
 		{
 			EpsTranOTCnt++;
@@ -286,7 +286,7 @@ CPU_INT16U EpsSendByte(uint16_t _ucValue, uint8_t _chipNum)
 	/* 等待接接收一个字节完成 */
 	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET)
 	{
-		bsp_DelayUS(10);
+		__nop();__nop();__nop();
 	  if(i++ > 200000)
 	  {
 		  EpsRevOTCnt++;

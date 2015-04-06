@@ -91,20 +91,20 @@ void WriteToAD5754RViaSpi(long int *RegisterData)
 
 	
 	SET_SYNC();
-	bsp_DelayUS(10);
+	__nop();__nop();__nop();
 	CLR_SYNC();	 /* Çå³ýSYNCÐÅºÅ */
-	bsp_DelayUS(1);
+	__nop();
 	
 
   AD5722_RegEdit(WriteBuf, ReadBuf, 3);
 
-	bsp_DelayUS(5);
+	__nop();__nop();__nop();
 		
 //	ValueToWrite <<= 1;	//Rotate data
 //	Delay(5);
 
 	SET_SYNC();
-  bsp_DelayUS(10);
+  __nop();__nop();__nop();
 
 }
 
@@ -121,7 +121,7 @@ void ConfigAD5754R(void)
 	for(i=0; i<2; i++)
 	{ 
 		WriteToAD5754RViaSpi(p);
-		bsp_DelayUS(200);   /* NOTE */
+		__nop();__nop();__nop();__nop();__nop();   /* NOTE */
 		p++;
 	}
 }
