@@ -53,6 +53,7 @@ void bsp_Init(void)
 	bsp_InitSPI1();      /* 初始化板载AD转换芯片 */
   bsp_InitSwitch();
 	bsp_PWMInit();
+	bsp_PWMCaptureInit();
 	bsp_InitI2C0();      /* 初始化软件I2C0 */
 	bsp_InitI2C1();      /* 初始化软件I2C0 */
 	bsp_InitNorFlash();  /* 初始化NOR_Flash模块 */		

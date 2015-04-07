@@ -4,6 +4,6 @@
 
 void bsp_PWMInit(void);
 void bsp_SetPWMDutyCycle(uint16_t PWMValue, unsigned char PWMChannel);
-
+void bsp_PWMCaptureInit(void);
 
 #endif

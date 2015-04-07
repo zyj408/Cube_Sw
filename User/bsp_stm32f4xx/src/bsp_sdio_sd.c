@@ -3025,15 +3025,15 @@ void bsp_FileSystem(void)
 		printf("File System Init OK\r\n");
 	}
 	
-	f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE | FA_CREATE_ALWAYS);  // NOTE:建立文件名最好全英文
-	f_write(&f_file, "haha2", 18, &bw);
-		printf("Current write size of Byte: %d\r\n", bw);
-	f_close(&f_file);
+	//f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE | FA_CREATE_ALWAYS);  // NOTE:建立文件名最好全英文
+	//f_write(&f_file, "haha2", 18, &bw);
+	//	printf("Current write size of Byte: %d\r\n", bw);
+	//f_close(&f_file);
 	
-		f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE);
-		f_read(&f_file, (void *)str, bw, &br);
-		printf("read data: %s\r\n Read size of Byte: %d", str, br);
-	f_close(&f_file);	
+	//	f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE);
+	//	f_read(&f_file, (void *)str, bw, &br);
+	//	printf("read data: %s\r\n Read size of Byte: %d", str, br);
+	//f_close(&f_file);	
 	
 	
 	printf("haha\r\n");
