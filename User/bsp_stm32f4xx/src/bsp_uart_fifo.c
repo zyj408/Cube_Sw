@@ -18,6 +18,7 @@
 #include "bsp.h"
 
 
+#define UART_TX_TIMEOUT 1000
 /* 定义每个串口结构体变量 */
 #if UART1_FIFO_EN == 1
 	static UART_T g_tUart1;
@@ -1125,7 +1126,7 @@ void USART6_IRQHandler(void)
 *	返 回 值: 无
 *********************************************************************************************************
 */
-void comWaitFifoFull(COM_PORT_E _ucPort, uint16_t size)
+void comWaitRxFifoFull(COM_PORT_E _ucPort, uint16_t size)
 {
 	UART_T *pUart;
 
@@ -1134,6 +1135,23 @@ void comWaitFifoFull(COM_PORT_E _ucPort, uint16_t size)
 	while(pUart -> usRxCount < size);
 }
 
+void comWaitTxFifoEmpty(COM_PORT_E _ucPort)
+{
+	uint32_t UartTimeOut_ms;
+	UART_T *pUart;
+
+	pUart = ComToUart(_ucPort);
+	
+	UartTimeOut_ms = 0;
+	while((pUart->usTxCount != 0) && (UartTimeOut_ms++ < UART_TX_TIMEOUT))
+	{
+		BSP_OS_TimeDlyMs(1);
+	}
+	if(UartTimeOut_ms > UART_TX_TIMEOUT - 1)
+	{
+		
+	}
+}
 /*
 *********************************************************************************************************
 *	函 数 名: fputc

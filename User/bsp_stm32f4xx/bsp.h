@@ -72,7 +72,7 @@
 #include "bsp_i2c1.h"
 #include "bsp_switch.h"
 
-
+#include "bsp_Fipex.h"
 
 
 void bsp_Init(void);

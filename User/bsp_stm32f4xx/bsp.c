@@ -52,6 +52,7 @@ void bsp_Init(void)
   //bsp_InitLed();
 	bsp_InitSPI1();      /* 初始化板载AD转换芯片 */
   bsp_InitSwitch();
+	bsp_FipexSwitchInit();
 	bsp_PWMInit();
 	bsp_PWMCaptureInit();
 	bsp_InitI2C0();      /* 初始化软件I2C0 */

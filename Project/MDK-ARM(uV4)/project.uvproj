@@ -945,6 +945,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_user\bsp_switch.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_Fipex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_user\bsp_Fipex.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1933,6 +1938,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_user\bsp_switch.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_Fipex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_user\bsp_Fipex.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2920,6 +2930,11 @@
               <FileName>bsp_switch.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_user\bsp_switch.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_Fipex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_user\bsp_Fipex.c</FilePath>
             </File>
           </Files>
         </Group>
