@@ -226,7 +226,7 @@
             <Ro2Chk>0</Ro2Chk>
             <Ro3Chk>0</Ro3Chk>
             <Ir1Chk>1</Ir1Chk>
-            <Ir2Chk>0</Ir2Chk>
+            <Ir2Chk>1</Ir2Chk>
             <Ra1Chk>0</Ra1Chk>
             <Ra2Chk>0</Ra2Chk>
             <Ra3Chk>0</Ra3Chk>
@@ -296,12 +296,12 @@
               <OCR_RVCT4>
                 <Type>1</Type>
                 <StartAddress>0x8000000</StartAddress>
-                <Size>0x80000</Size>
+                <Size>0x4000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
+                <StartAddress>0x8020000</StartAddress>
+                <Size>0x80000</Size>
               </OCR_RVCT5>
               <OCR_RVCT6>
                 <Type>0</Type>
@@ -485,6 +485,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_uart_fifo.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_cpu_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_cpu_flash.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -589,6 +594,11 @@
               <FileName>stm32f4xx_pwr.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_pwr.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_flash.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -944,6 +954,11 @@
               <FileName>bsp_switch.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_user\bsp_switch.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_Fipex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_user\bsp_Fipex.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1473,6 +1488,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_uart_fifo.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_cpu_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_cpu_flash.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1577,6 +1597,11 @@
               <FileName>stm32f4xx_pwr.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_pwr.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_flash.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1932,6 +1957,11 @@
               <FileName>bsp_switch.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_user\bsp_switch.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_Fipex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_user\bsp_Fipex.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2461,6 +2491,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_uart_fifo.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_cpu_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_cpu_flash.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2565,6 +2600,11 @@
               <FileName>stm32f4xx_pwr.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_pwr.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_flash.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2920,6 +2960,11 @@
               <FileName>bsp_switch.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_user\bsp_switch.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_Fipex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_user\bsp_Fipex.c</FilePath>
             </File>
           </Files>
         </Group>

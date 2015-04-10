@@ -304,7 +304,9 @@ void bsp_Init_VAR(void)
   MotorSetOutput = 40000;
   MotorCurOutput = 0;	
 	
-	//CurFlashSetor = ADDR_FLASH_SECTOR_10;
+	CurFlashSetor = ADDR_FLASH_SECTOR_1;
 	ADCS_Init_VAR();
 	EPS_Init_VAR();
+	FipexInfomationInit();
+	FipexSetDefaultInfo();
 }

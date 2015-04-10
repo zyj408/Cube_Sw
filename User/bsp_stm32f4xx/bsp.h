@@ -36,7 +36,7 @@
 
 
 //#include "bsp_spi_flash.h"
-//#include "bsp_cpu_flash.h"
+#include "bsp_cpu_flash.h"
 #include "bsp_sdio_sd.h"
 //#include "bsp_i2c_gpio.h"
 //#include "bsp_eeprom_24xx.h"

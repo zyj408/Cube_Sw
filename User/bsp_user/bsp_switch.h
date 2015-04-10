@@ -36,6 +36,13 @@
 #define RCC_USB_EN_PORT    	  RCC_AHB1Periph_GPIOG
 #define GPIO_USB_EN_PIN		    GPIO_Pin_15
 
+#define GPIO_S0_EN_PORT	      GPIOD			
+#define RCC_S0_EN_PORT    	  RCC_AHB1Periph_GPIOD
+#define GPIO_S0_EN_PIN		    GPIO_Pin_3
+
+#define GPIO_S1_EN_PORT	      GPIOG			
+#define RCC_S1_EN_PORT    	  RCC_AHB1Periph_GPIOG
+#define GPIO_S1_EN_PIN		    GPIO_Pin_8
 
 #if OBC_MTQ_ENABLE
 #define GPIO_MTQ_SLEEP_PORT	  GPIOG			
@@ -65,7 +72,8 @@
 #define SW_SOLAR_PIN()        GPIO_ReadOutputDataBit(GPIO_SOLAR_EN_PORT, GPIO_SOLAR_EN_PIN)
 #define SW_RES_PIN()        	GPIO_ReadOutputDataBit(GPIO_RES_PORT, GPIO_RES_PIN)
 
-
+#define SW_S0_PIN()        	GPIO_ReadOutputDataBit(GPIO_S0_EN_PORT, GPIO_S0_EN_PIN)
+#define SW_S1_PIN()        	GPIO_ReadOutputDataBit(GPIO_S1_EN_PORT, GPIO_S1_EN_PIN)
 
 #define MTQ_POWER_PIN()       GPIO_ReadOutputDataBit(GPIO_MTQ_EN_PORT, GPIO_MTQ_EN_PIN)      
 #define MTQ_SLEEP_PIN()       GPIO_ReadOutputDataBit(GPIO_MTQ_SLEEP_PORT, GPIO_MTQ_SLEEP_PIN)  
@@ -88,6 +96,11 @@
 #define SW_SOLAR_DISABLE      GPIO_ResetBits(GPIO_SOLAR_EN_PORT, GPIO_SOLAR_EN_PIN)
 #define SW_RES_ENABLE         GPIO_SetBits(GPIO_RES_PORT, GPIO_RES_PIN)
 #define SW_RES_DISABLE        GPIO_ResetBits(GPIO_RES_PORT, GPIO_RES_PIN)
+
+#define SW_S0_ENABLE         GPIO_SetBits(GPIO_S0_EN_PORT, GPIO_S0_EN_PIN)
+#define SW_S0_DISABLE        GPIO_ResetBits(GPIO_S0_EN_PORT, GPIO_S0_EN_PIN)
+#define SW_S1_ENABLE         GPIO_SetBits(GPIO_S1_EN_PORT, GPIO_S1_EN_PIN)
+#define SW_S1_DISABLE        GPIO_ResetBits(GPIO_S1_EN_PORT, GPIO_S1_EN_PIN)
 
 #if OBC_MTQ_ENABLE
 #define MTQ_WAKEN             GPIO_SetBits(GPIO_MTQ_SLEEP_PORT, GPIO_MTQ_SLEEP_PIN)

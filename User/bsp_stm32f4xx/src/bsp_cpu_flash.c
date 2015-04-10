@@ -9,7 +9,6 @@
 *		版本号  日期        作者     说明
 *		V1.0    2013-02-01 armfly  正式发布
 *
-*	Copyright (C), 2013-2014, 安富莱电子 www.armfly.com
 *
 *********************************************************************************************************
 */
@@ -223,13 +222,19 @@ uint8_t bsp_WriteCpuFlash(uint32_t _ulFlashAddr, uint8_t *_ucpSrc, uint32_t _ulS
 	/* 需要擦除 */
 	if (ucRet == FLASH_REQ_ERASE)
 	{
-		FLASH_EraseSector(bsp_GetSector(_ulFlashAddr), VoltageRange_3);
+		if(FLASH_EraseSector(bsp_GetSector(_ulFlashAddr), VoltageRange_3) != FLASH_COMPLETE)
+		{
+			return 1; //出错返回
+		}
 	}
 
 	/* 按字节模式编程（为提高效率，可以按字编程，一次写入4字节） */
 	for (i = 0; i < _ulSize; i++)
 	{
-		FLASH_ProgramByte(_ulFlashAddr++, *_ucpSrc++);
+		if(FLASH_ProgramByte(_ulFlashAddr++, *_ucpSrc++) != FLASH_COMPLETE)
+		{
+			return 2;
+		}
 	}
 
   	/* Flash 加锁，禁止写Flash控制寄存器 */
@@ -239,5 +244,3 @@ uint8_t bsp_WriteCpuFlash(uint32_t _ulFlashAddr, uint8_t *_ucpSrc, uint32_t _ulS
 
 	return 0;
 }
-
-/***************************** 安富莱电子 www.armfly.com (END OF FILE) *********************************/

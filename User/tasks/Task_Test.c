@@ -15,7 +15,9 @@ char gpsb_sw = 2;
 char mtq_sw = 2;
 char wheela_sw = 2;
 char wheelb_sw = 2;
-
+char fipex_sw = 2;
+char s0_sw = 2;
+char s1_sw = 2;
 
 void MenuPrint(void)
 {
@@ -25,6 +27,7 @@ void MenuPrint(void)
 	printf("[2] NorFlash Function Test\r\n");
 	printf("[3] EPS System Function Test\r\n");
 	printf("[4] Obc ADSystem Function Test\r\n");
+	printf("[5] Fipex Payload Function Test\r\n");
 }
 void TimeRegular(void)
 {
@@ -100,6 +103,19 @@ void TEST_TASK(void *p_arg)
 				else
 					DebugMode = '0';
 				break;
+				
+			case '5':
+				if(response == '1')
+				{
+					bsp_FipexPowerOn();
+				}
+				else if(response == '2')
+				{
+					bsp_FipexPowerOff();
+				}
+				else
+					DebugMode = '0';
+			break;	
 		}
 			
 			switch(DebugMode)
@@ -174,6 +190,19 @@ void TEST_TASK(void *p_arg)
 						printf(" RES: OFF||");		
 					
 					break;
+					
+				case '5':
+					printf("-------------Fipex Payload Function Test-----------\r\n");
+					printf("Fipex current infomation:\r\n");
+					if(FepixPowerOnFlg == 0)
+						printf("Payload Fipex POWER OFF!\r\n");
+					else if(FepixPowerOnFlg == 1)
+						printf("Payload Fipex POWER ON\r\n");
+					printf("Fuction:\r\n");
+					printf("[1] turn on the Payload Fipex\r\n");
+					printf("[2] turn off the Payload Fipex\r\n");
+					
+				break;
 			}
 			
 		}
@@ -343,6 +372,47 @@ void TEST_TASK(void *p_arg)
 				SW_WHEELB_DISABLE;				
 			}
 		}	
+		if(fipex_sw != 2)
+		{
+			if(fipex_sw == 1)
+			{
+				fipex_sw = 2;
+				bsp_FipexPowerOn();
+			}
+			if(fipex_sw == 0)
+			{
+				fipex_sw = 2;
+				bsp_FipexPowerOff();
+			}
+		}
+		
+		if(s1_sw != 2)
+		{
+			if(s1_sw == 1)
+			{
+				s1_sw = 2;
+				SW_S1_ENABLE;
+			}
+			if(s1_sw == 0)
+			{
+				s1_sw = 2;
+				SW_S1_DISABLE;
+			}
+		}
+		
+		if(s0_sw != 2)
+		{
+			if(s0_sw == 1)
+			{
+				s0_sw = 2;
+				SW_S0_ENABLE;
+			}
+			if(s0_sw == 0)
+			{
+				s0_sw = 2;
+				SW_S0_DISABLE;
+			}
+		}
 	#endif
 
 	BSP_OS_TimeDlyMs(100);
