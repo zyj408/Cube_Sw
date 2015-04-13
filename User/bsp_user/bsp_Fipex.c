@@ -79,7 +79,23 @@ void FipexSetDefaultInfo(void)
 	
 	FipexCmdStore();
 }
-uint8_t FipexInfoGet(uint8_t* cmd, uint8_t size)
+
+/*
+ * Fipex协议包格式
+ * 字符   1  2  3  4  5  6  7  8  9  10  11  12  13  14
+ *       长度
+ */
+
+uint8_t FipexInfoCheck(uint8_t* cmd)
+{
+	int16_t length = (int16_t)cmd[0];
+	
+	
+	
+	
+}
+
+uint8_t FipexInfoGet(uint8_t* cmd)
 {
 	uint8_t i;
 	int16_t length = (int16_t)cmd[0]; //指令长度
@@ -88,19 +104,20 @@ uint8_t FipexInfoGet(uint8_t* cmd, uint8_t size)
 	uint8_t *delay_ptr;
 	
 	
+	
 	Mem_Set((uint8_t *)&FipexOperationPara, 0x00, sizeof(FipexOperationPara));
 /*******************************************************/	
 	for(i=4; i>0; i--)
 	{
 		FipexOperationPara.StartTime = (FipexOperationPara.StartTime | cmd[i]) << 8;
 	}
-	length -= 4;
+//	length -= 4;
 /*******************************************************/
 	for(i=6; i>4; i--)
 	{
 		FipexOperationPara.RepeatTime = (FipexOperationPara.RepeatTime | cmd[i]) << 8;
 	}
-	length -= 2;
+//	length -= 2;
 /*******************************************************/	
 	cmd_cnt = cmd[7];
 	
@@ -137,6 +154,7 @@ uint8_t FipexInfoGet(uint8_t* cmd, uint8_t size)
 	return 0;
 }
 	
+
 void FipexInfomationInit(void)  //从FLASH中读取指令信息
 {
 	#if debug_enable
