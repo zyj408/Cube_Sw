@@ -19,6 +19,7 @@ char fipex_sw = 2;
 char s0_sw = 2;
 char s1_sw = 2;
 
+char pl_on = 2;
 void MenuPrint(void)
 {
 	printf("--------On Broad Computer Debug Mode--------\r\n");
@@ -194,9 +195,9 @@ void TEST_TASK(void *p_arg)
 				case '5':
 					printf("-------------Fipex Payload Function Test-----------\r\n");
 					printf("Fipex current infomation:\r\n");
-					if(FepixPowerOnFlg == 0)
+					if(FipexPowerOnFlg == 0)
 						printf("Payload Fipex POWER OFF!\r\n");
-					else if(FepixPowerOnFlg == 1)
+					else if(FipexPowerOnFlg == 1)
 						printf("Payload Fipex POWER ON\r\n");
 					printf("Fuction:\r\n");
 					printf("[1] turn on the Payload Fipex\r\n");
@@ -413,6 +414,21 @@ void TEST_TASK(void *p_arg)
 				SW_S0_DISABLE;
 			}
 		}
+		
+		if(pl_on != 2)
+		{
+			if(pl_on == 1)
+			{
+				pl_on = 2;
+				FipexScriptStart();
+			}
+			if(pl_on == 0)
+			{
+				pl_on = 2;
+				FipexScriptStop();
+			}
+		}
+		
 	#endif
 
 	BSP_OS_TimeDlyMs(100);

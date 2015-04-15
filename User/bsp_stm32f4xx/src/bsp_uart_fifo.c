@@ -1149,14 +1149,9 @@ void comWaitTxFifoEmpty(COM_PORT_E _ucPort)
 	}
 	if(UartTimeOut_ms > UART_TX_TIMEOUT - 1)
 	{
-		#if debug_enable
-			printf("UART3 Transmit Timeout!\r\n");
-		#endif 
+		printf("Fipex TX Timeout\r\n");
 	}
-	
-		#if debug_enable
-			printf("UART3 Transmit wait Time for %d ms\r\n", UartTimeOut_ms);
-		#endif 
+
 }
 /*
 *********************************************************************************************************

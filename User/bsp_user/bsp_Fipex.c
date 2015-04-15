@@ -2,20 +2,40 @@
 
 struct FipexOperationParaStr FipexOperationPara;  //8条缓冲指令
 
-const uint8_t FipexCmdDeft0[6] = {0x7E, 0x0B, 0x00, 0x0B, 0x3C, 0x00};
+
+const uint8_t FipexCmdDeft0[6] = {0x7E, 0x0F, 0x00, 0x0B, 0x3C, 0x00};
 const uint8_t FipexCmdDeft1[9] = {0x7E, 0x11, 0x03, 0x04, 0x01, 0x00, 0x17, 0xFF, 0xFF};
 const uint8_t FipexCmdDeft2[9] = {0x7E, 0x11, 0x03, 0x05, 0x10, 0x0A, 0x0D, 0xFF, 0xFF};
 const uint8_t FipexCmdDeft3[9] = {0x7E, 0x11, 0x03, 0x02, 0xC8, 0x00, 0xD8, 0xFF, 0xFF};
-const uint8_t FipexCmdDeft4[6] = {0x7E, 0x0C, 0x00, 0x0C, 0x2C, 0x01};
-const uint8_t FipexCmdDeft5[6] = {0x7E, 0x20, 0x00, 0x20, 0xFF, 0xFF};
+const uint8_t FipexCmdDeft4[6] = {0x7E, 0xF0, 0x00, 0x0C, 0x2C, 0x01};
+const uint8_t FipexCmdDeft5[6] = {0x7E, 0xFF, 0x00, 0x20, 0xFF, 0xFF};
 const uint8_t FipexCmdDeft6[6] = {0x7E, 0x21, 0x00, 0x21, 0xFF, 0xFF};
 
-
-uint8_t FepixPowerOnFlg = 0;
-
+enum FipexStatus_Enum FipexStatus;
 
 
 
+uint8_t FipexAckWaitFlg = 0;
+uint8_t FipexPowerOnFlg = 0;
+uint8_t ScriptAct = 0;
+uint8_t CurrentScript = 0;  
+int FipexCurTime = 0;
+int DelayTime = 0;
+
+
+
+
+void FipexScriptStop(void)
+{
+	CurrentScript = 0;  
+	ScriptAct = 0;
+	FipexCurTime = 0;
+	DelayTime = 0;
+}
+void FipexScriptStart(void)
+{
+	FipexStatus = PowerOn;
+}
 
 uint8_t bsp_FipexSendCmd(uint8_t *cmd, uint16_t length)
 {
@@ -46,6 +66,7 @@ uint8_t FipexCmdUpdate(uint8_t *cmd, uint8_t index, uint8_t length)
 	Mem_Set(&FipexOperationPara.FipexCmdInfo[index].FipexCmd[0], 0x00, 32);
 	Mem_Copy(&FipexOperationPara.FipexCmdInfo[index].FipexCmd[0], cmd, length);
 	
+	FipexOperationPara.FipexCmdInfo[index].CmdDelay = 10;
 	return 0;
 }
 
@@ -72,13 +93,24 @@ void FipexSetDefaultInfo(void)
 	FipexCmdUpdate((uint8_t *)FipexCmdDeft3, 3, FipexCmdDeft3[2] + 0x06);
 	FipexCmdUpdate((uint8_t *)FipexCmdDeft4, 4, FipexCmdDeft4[2] + 0x06);
 	FipexCmdUpdate((uint8_t *)FipexCmdDeft5, 5, FipexCmdDeft5[2] + 0x06);
-	FipexCmdUpdate((uint8_t *)FipexCmdDeft6, 6, FipexCmdDeft6[2] + 0x06);
+
 	FipexOperationPara.StartTime = 0x1A56BFC0;
-	FipexOperationPara.RepeatTime = 0x0E10;
-	FipexOperationPara.CmdCnt = 10;
+	FipexOperationPara.RepeatTime = 30;  
+	FipexOperationPara.CmdCnt = 6;
 	
-	FipexCmdStore();
+	//FipexCmdStore();
 }
+
+uint8_t FipexAckHandle(uint8_t rx_data)
+{
+	//FipexOperationPara.FipexCmdInfo[CurrentScript].FipexCmd[1];
+	//rx_data[1];
+	//rx_data[2];
+	//rx_data[3];
+	//rx_data[XOR];
+	
+}
+
 
 /*
  * Fipex协议包格式
@@ -86,69 +118,140 @@ void FipexSetDefaultInfo(void)
  *       长度
  */
 
-uint8_t FipexInfoCheck(uint8_t* cmd)
+
+uint8_t FipexInfoCheck(unsigned char* cmd)
 {
-	int16_t length = (int16_t)cmd[0];
+	unsigned char *ptr_end_temp;
+	unsigned char *ptr_temp;
+	unsigned char checksum_temp;
+	short length = (short)cmd[0];
+	unsigned char cmd_cnt = cmd[7];  //指令数
 	
-	
-	
-	
+	ptr_temp = cmd + 8;
+	ptr_end_temp = ptr_temp + length - 1;
+
+	while(cmd_cnt)  //
+	{
+		if(cmd_cnt == 1)
+		{
+			if(length != 4)
+			{
+				return 1;
+			}
+			
+			if(*(ptr_temp + 1) != 0xFF || *(ptr_temp + 2) != 0x01 || *(ptr_temp + 3) != 0xFE)
+			{
+				if(*(ptr_end_temp) != 0xFE || *(ptr_end_temp - 1) != 0x01 || *(ptr_end_temp - 2) !=0xFF)
+				{
+					return 1;
+				}
+			}
+			else
+			{
+				cmd_cnt--;
+			}
+
+		}
+		else
+		{
+			if(*(ptr_temp + ptr_temp[2] + 6) == 0x7E)
+			{
+				bsp_FipexGetCheckSum(ptr_temp, &checksum_temp);
+
+				if(checksum_temp != *(ptr_temp + ptr_temp[2] + 3))
+					return 1;
+
+				length -= (ptr_temp[2] + 6);
+				if(length < 0)
+				{
+					return 1;
+				}
+		
+				ptr_temp += (ptr_temp[2] + 6);
+				cmd_cnt--;
+			}
+			else
+			{
+				return 1; //同步字指令长度出错
+			}
+		}
+	}
+
+	printf("check successful\r\n");
+	return 0;
 }
+
 
 uint8_t FipexInfoGet(uint8_t* cmd)
 {
-	uint8_t i;
-	int16_t length = (int16_t)cmd[0]; //指令长度
-	uint8_t cmd_cnt = 0;
-	uint8_t *cmd_ptr;
-	uint8_t *delay_ptr;
+	unsigned char i;
+	short length = (short)cmd[0]; //指令长度
+	unsigned char cmd_cnt = 0;
+	unsigned char *cmd_ptr;
+	unsigned char *delay_ptr;
 	
-	
-	
-	Mem_Set((uint8_t *)&FipexOperationPara, 0x00, sizeof(FipexOperationPara));
+/*******************************************************/
+	printf("Command Frame Check!!!\r\n");
+	if(FipexInfoCheck(cmd))
+		return 1;
+
+	//Mem_Set((unsigned char *)&FipexOperationPara, 0x00, sizeof(FipexOperationPara));
+	memset((unsigned char *)&FipexOperationPara, 0x00, sizeof(FipexOperationPara));
 /*******************************************************/	
 	for(i=4; i>0; i--)
 	{
-		FipexOperationPara.StartTime = (FipexOperationPara.StartTime | cmd[i]) << 8;
+		FipexOperationPara.StartTime <<= 8;
+		FipexOperationPara.StartTime |= cmd[i];
 	}
-//	length -= 4;
+	length -= 4;
 /*******************************************************/
 	for(i=6; i>4; i--)
 	{
-		FipexOperationPara.RepeatTime = (FipexOperationPara.RepeatTime | cmd[i]) << 8;
+		FipexOperationPara.RepeatTime <<= 8;
+		FipexOperationPara.RepeatTime |= cmd[i];
 	}
-//	length -= 2;
+	length -= 2;
 /*******************************************************/	
 	cmd_cnt = cmd[7];
-	
+	FipexOperationPara.CmdCnt = cmd_cnt;
 	
 	cmd_ptr = &cmd[8];
 	for(i=0; i<cmd_cnt; i++)
 	{
-		if(*cmd_ptr != 0x7E) //不是同步字
+		switch(*(cmd_ptr+1))
 		{
-			#if debug_enable
-				printf("Sync error!\r\n");
-			#endif		
-			return 1;  //检测同步字错误	
+			case OBC_SU_ON:
+			case OBC_SU_OFF:
+				delay_ptr = (cmd_ptr+cmd_ptr[2]+4);
+				//Mem_Copy(&FipexOperationPara.FipexCmdInfo[i].FipexCmd[0], cmd_ptr, cmd_ptr[2]+4);
+				memcpy(&FipexOperationPara.FipexCmdInfo[i].FipexCmd[0], cmd_ptr, cmd_ptr[2]+4);
+				FipexOperationPara.FipexCmdInfo[i].CmdLength = cmd_ptr[2]+4;
+				FipexOperationPara.FipexCmdInfo[i].CmdDelay = *(delay_ptr + 1);
+				FipexOperationPara.FipexCmdInfo[i].CmdDelay = (FipexOperationPara.FipexCmdInfo[i].CmdDelay << 8) | *(delay_ptr);
+				cmd_ptr = cmd_ptr+cmd_ptr[2]+6;
+				break;
+			case OBC_SU_END:
+				memcpy(&FipexOperationPara.FipexCmdInfo[i].FipexCmd[0], cmd_ptr, 4);
+				FipexOperationPara.FipexCmdInfo[i].CmdLength = 4;
+				cmd_ptr = cmd_ptr+4;
+				break;
+			case SU_PING:
+			case SU_INIT:
+			case SU_ID:
+			case SU_RSP:
+			case SU_SP:
+			case SU_HK:
+			case SU_DP:
+			case SU_STDBY:
+			case SU_SC:
+			case SU_SM:
+			case SU_CAL:
+				memcpy(&FipexOperationPara.FipexCmdInfo[i].FipexCmd[0], cmd_ptr, cmd_ptr[2]+6);
+				FipexOperationPara.FipexCmdInfo[i].CmdLength = cmd_ptr[2]+6;
+				cmd_ptr = cmd_ptr+cmd_ptr[2]+6;
+				break;
 		}
-		delay_ptr = (cmd_ptr+cmd_ptr[2]+4);
-		
-		Mem_Copy(&FipexOperationPara.FipexCmdInfo[i].FipexCmd[0], cmd_ptr, cmd_ptr[2]+4);
-		FipexOperationPara.FipexCmdInfo[i].CmdLength = cmd_ptr[2]+4;
-		FipexOperationPara.FipexCmdInfo[i].CmdDelay = *(delay_ptr + 1);
-		FipexOperationPara.FipexCmdInfo[i].CmdDelay = (FipexOperationPara.FipexCmdInfo[i].CmdDelay << 8) | *(delay_ptr);
-		
-		if(length -  6 - cmd_ptr[2]< 0)
-		{
-			#if debug_enable
-				printf("Size error!\r\n");
-			#endif	
-			return 2; //字符检测错误
 
-		}
-			
-		cmd_ptr = delay_ptr + 2;
 	}
 	
 	return 0;
@@ -166,7 +269,10 @@ void FipexInfomationInit(void)  //从FLASH中读取指令信息
 	#endif 
 	
 	bsp_ReadCpuFlash(CurFlashSetor, (uint8_t *)&FipexOperationPara.FipexCmdInfo[0].FipexCmd[0], sizeof(FipexOperationPara));
-
+	
+	FipexStatus = Stop;  //Fipex状态为初始化状态
+	
+	
 	#if debug_enable
 	printf("Fipex Command infomation:\r\n");
 	
@@ -181,10 +287,6 @@ void FipexInfomationInit(void)  //从FLASH中读取指令信息
 	}
 	#endif 
 }
-
-
-
-
 
 
 void bsp_FipexSwitchInit(void)
@@ -257,7 +359,7 @@ uint8_t bsp_FipexPowerOn(void)
 	}
 	else
 	{
-		FepixPowerOnFlg = 1;  //FEPIX上电标志位置位
+		FipexPowerOnFlg = 1;  //FEPIX上电标志位置位
 		
 		#if debug_enable
 		printf("Fipex power on successfully!\r\n");
@@ -280,6 +382,7 @@ uint8_t bsp_FipexPowerOff(void)
 	
 	FIPEX_5V_DISABLE;//关闭Fipex 5伏电源供电
 	
+	FipexTimeOut_ms = 0;
 	while((FIPEX_5V_PIN() != RESET) && (((FipexTimeOut_ms++) < (300*1000))))//检查5伏供电是否关闭(时间限制200ms)
 	{
 		bsp_DelayUS(1);
@@ -294,6 +397,7 @@ uint8_t bsp_FipexPowerOff(void)
 	}
 	
 	FIPEX_3V3_DISABLE;//关闭Fipex3.3伏供电
+	FipexTimeOut_ms = 0;
 	while((FIPEX_5V_PIN() != RESET) && (((FipexTimeOut_ms++) < (300*1000))))//检查3.3伏供电是否关闭(时间限制200ms)
 	{
 		bsp_DelayUS(1);
@@ -308,7 +412,7 @@ uint8_t bsp_FipexPowerOff(void)
 	}
 	else
 	{
-		FepixPowerOnFlg = 0;  //FEPIX上电标志位置位
+		FipexPowerOnFlg = 0;  //FEPIX上电标志位置位
 		
 		#if debug_enable
 		printf("Fipex power off successfully!\r\n");
@@ -326,7 +430,7 @@ uint8_t bsp_FipexGetCheckSum(unsigned char *cmd, unsigned char* checksum)
 	if (*cmd == 0x7E)  //首字母是否等于0x7E
 	{
 		length = cmd[2];  //cmd[1]到cmd[length+3]进行校验
-		length += 3;
+		length += 2;
 		while (length)
 		{
 			checksum_temp ^= cmd[length];
@@ -339,5 +443,4 @@ uint8_t bsp_FipexGetCheckSum(unsigned char *cmd, unsigned char* checksum)
 	{
 		return 1;  //帧头不是0x7E
 	}
-	
 }
