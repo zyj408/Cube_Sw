@@ -35,6 +35,27 @@
 #define SU_SM					0x0C
 #define SU_CAL					0x33
 
+#define IS_OBC_SU_CMD(CMD)          (((CMD) == OBC_SU_ON)|| \
+                                    ((CMD) == OBC_SU_OFF) || \
+                                    ((CMD) == OBC_SU_END))
+
+#define IS_FIPEX_CMD(CMD)           (((CMD) == SU_PING)	|| \
+                                    ((CMD) == SU_INIT)	|| \
+																		((CMD) == SU_ID)	|| \
+																		((CMD) == SU_RSP)	|| \
+																		((CMD) == SU_SP)	|| \
+																		((CMD) == SU_HK)	|| \
+																		((CMD) == SU_DP)	|| \
+																		((CMD) == SU_STDBY)	|| \
+																		((CMD) == SU_SC)	|| \
+																		((CMD) == SU_SM)	|| \
+																		((CMD) == SU_CAL))
+
+
+
+
+
+
 
 enum FipexStatus_Enum
 {

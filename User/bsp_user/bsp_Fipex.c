@@ -154,25 +154,31 @@ uint8_t FipexInfoCheck(unsigned char* cmd)
 		}
 		else
 		{
-			if(*(ptr_temp + ptr_temp[2] + 6) == 0x7E)
+			if(*(ptr_temp + ptr_temp[2] + 6) == 0x7E)	//指针从sr开始下移，依次经过cmd-id，len，xor，delay0，到了下一个sr，即+6。若len不为0，还要加data长度，即ptr_temp[2]
 			{
-				bsp_FipexGetCheckSum(ptr_temp, &checksum_temp);
+				if(IS_OBC_SU_CMD(ptr_temp[1]) || IS_FIPEX_CMD(ptr_temp[1]))
+				{
+					bsp_FipexGetCheckSum(ptr_temp, &checksum_temp);
+					if(checksum_temp != *(ptr_temp + ptr_temp[2] + 3))
+						return 1;
 
-				if(checksum_temp != *(ptr_temp + ptr_temp[2] + 3))
-					return 1;
-
-				length -= (ptr_temp[2] + 6);
-				if(length < 0)
+					length -= (ptr_temp[2] + 6);
+					if(length < 0)
+					{
+						return 1;
+					}
+		
+					ptr_temp += (ptr_temp[2] + 6);
+					cmd_cnt--;
+				}
+				else
 				{
 					return 1;
 				}
-		
-				ptr_temp += (ptr_temp[2] + 6);
-				cmd_cnt--;
 			}
 			else
 			{
-				return 1; //同步字指令长度出错
+				return 1;
 			}
 		}
 	}
