@@ -108,7 +108,7 @@ uint8_t FipexAckHandle(uint8_t rx_data)
 	//rx_data[2];
 	//rx_data[3];
 	//rx_data[XOR];
-	
+	return 0;
 }
 
 
@@ -139,15 +139,17 @@ uint8_t FipexInfoCheck(unsigned char* cmd)
 				return 1;
 			}
 			
-			if(*(ptr_temp + 1) != 0xFF || *(ptr_temp + 2) != 0x01 || *(ptr_temp + 3) != 0xFE)
+			if(*(ptr_temp + 1) != 0xFF || *(ptr_temp + 2) != 0x01 || *(ptr_temp + 3) != 0xFE)  //ptr_temp 通过累加得出的
 			{
-				if(*(ptr_end_temp) != 0xFE || *(ptr_end_temp - 1) != 0x01 || *(ptr_end_temp - 2) !=0xFF)
+				return 1;
+			}
+			else  //正确
+			{
+				if(*(ptr_end_temp) != 0xFE || *(ptr_end_temp - 1) != 0x01 || *(ptr_end_temp - 2) !=0xFF) //ptr_end_temp 通过length计算得出
 				{
 					return 1;
 				}
-			}
-			else
-			{
+				
 				cmd_cnt--;
 			}
 
@@ -201,8 +203,7 @@ uint8_t FipexInfoGet(uint8_t* cmd)
 	if(FipexInfoCheck(cmd))
 		return 1;
 
-	//Mem_Set((unsigned char *)&FipexOperationPara, 0x00, sizeof(FipexOperationPara));
-	memset((unsigned char *)&FipexOperationPara, 0x00, sizeof(FipexOperationPara));
+	Mem_Set((unsigned char *)&FipexOperationPara, 0x00, sizeof(FipexOperationPara));
 /*******************************************************/	
 	for(i=4; i>0; i--)
 	{
@@ -229,8 +230,8 @@ uint8_t FipexInfoGet(uint8_t* cmd)
 			case OBC_SU_ON:
 			case OBC_SU_OFF:
 				delay_ptr = (cmd_ptr+cmd_ptr[2]+4);
-				//Mem_Copy(&FipexOperationPara.FipexCmdInfo[i].FipexCmd[0], cmd_ptr, cmd_ptr[2]+4);
-				memcpy(&FipexOperationPara.FipexCmdInfo[i].FipexCmd[0], cmd_ptr, cmd_ptr[2]+4);
+				Mem_Copy(&FipexOperationPara.FipexCmdInfo[i].FipexCmd[0], cmd_ptr, cmd_ptr[2]+4);
+
 				FipexOperationPara.FipexCmdInfo[i].CmdLength = cmd_ptr[2]+4;
 				FipexOperationPara.FipexCmdInfo[i].CmdDelay = *(delay_ptr + 1);
 				FipexOperationPara.FipexCmdInfo[i].CmdDelay = (FipexOperationPara.FipexCmdInfo[i].CmdDelay << 8) | *(delay_ptr);
