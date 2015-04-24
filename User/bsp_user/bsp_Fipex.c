@@ -4,12 +4,12 @@ struct FipexOperationParaStr FipexOperationPara;  //8条缓冲指令
 
 
 const uint8_t FipexCmdDeft0[6] = {0x7E, 0x0F, 0x00, 0x0B, 0x3C, 0x00};
-const uint8_t FipexCmdDeft1[9] = {0x7E, 0x11, 0x03, 0x04, 0x01, 0x00, 0x17, 0xFF, 0xFF};
-const uint8_t FipexCmdDeft2[9] = {0x7E, 0x11, 0x03, 0x05, 0x10, 0x0A, 0x0D, 0xFF, 0xFF};
-const uint8_t FipexCmdDeft3[9] = {0x7E, 0x11, 0x03, 0x02, 0xC8, 0x00, 0xD8, 0xFF, 0xFF};
+const uint8_t FipexCmdDeft1[9] = {0x7E, 0x11, 0x03, 0x02, 0x0A, 0x00, 0x1A, 0x01, 0x00};
+const uint8_t FipexCmdDeft2[9] = {0x7E, 0x0C, 0x00, 0x0C, 0xFF, 0xFF};
+const uint8_t FipexCmdDeft3[9] = {0x7E, 0xF0, 0x00, 0x0C, 0x2C, 0x01};
 const uint8_t FipexCmdDeft4[6] = {0x7E, 0xF0, 0x00, 0x0C, 0x2C, 0x01};
 const uint8_t FipexCmdDeft5[6] = {0x7E, 0xFF, 0x00, 0x20, 0xFF, 0xFF};
-const uint8_t FipexCmdDeft6[6] = {0x7E, 0x21, 0x00, 0x21, 0xFF, 0xFF};
+//const uint8_t FipexCmdDeft6[6] = {0x7E, 0x21, 0x00, 0x21, 0xFF, 0xFF};
 
 enum FipexStatus_Enum FipexStatus;
 
@@ -101,15 +101,137 @@ void FipexSetDefaultInfo(void)
 	//FipexCmdStore();
 }
 
-uint8_t FipexAckHandle(uint8_t rx_data)
+static unsigned long FipexFileSize = 0;
+void FipexScienceDataStore(uint8_t *rx_data)
 {
-	//FipexOperationPara.FipexCmdInfo[CurrentScript].FipexCmd[1];
-	//rx_data[1];
-	//rx_data[2];
-	//rx_data[3];
-	//rx_data[XOR];
+		uint32_t bw;
+		uint8_t ret;
+		uint8_t i;
+
+	uint8_t length = rx_data[2];
+	uint8_t *ptr_obc;
+	//CurTime
+	
+	ptr_obc = rx_data + length + 5;
+	
+	*ptr_obc++ = CurDate.RTC_Date;
+	*ptr_obc++ = CurTime.RTC_Hours;
+	*ptr_obc++ = CurTime.RTC_Minutes;
+	*ptr_obc++ = CurTime.RTC_Seconds;
+
+	for(i=0; i<20; i++)
+		*ptr_obc++ = 0xFF;
+	
+	ret = f_open(&f_file, "0:/fipex.bin", FA_READ | FA_WRITE | FA_CREATE_ALWAYS); // NOTE:建立文件名最好全英文
+	if (ret != 0)
+	{
+		printf("0:/fipex.bin open error\r\n");
+		return;
+	}
+	
+	printf("0:/fipex.fsize: %ld\r\n", FipexFileSize);
+	
+	ret = f_lseek(&f_file, FipexFileSize);
+	if (ret != 0)
+	{
+		printf("0:/fipex.bin lseek error\r\n");
+		f_close(&f_file);
+		return;
+	}
+	
+	length = rx_data[2] + 4 + 24;
+	f_write(&f_file, (rx_data + 1), length, &bw);
+	if(length != bw)
+	{
+		printf("0:/fipex.bin write error\r\n");
+		f_close(&f_file);
+		return;
+	}
+	
+	ret = f_close(&f_file);
+	if(ret == 0)
+		printf("0:/fipex.bin store ok\r\n");
+	
+	FipexFileSize += length;
+}
+
+
+uint8_t NACK_flag = 0;
+extern uint8_t FipexRspSendCnt;
+uint8_t FipexAckHandle(uint8_t *rx_data)
+{
+	uint8_t CheckSumTemp;
+	
+	if(rx_data[0] != 0x7E)
+	{
+		if(FipexRspSendCnt == 0)
+		{
+			FipexRspSendCnt = 1;
+			return 1;  //请求发送SU_RSP
+		}
+		else
+		{
+			FipexRspSendCnt = 0;
+			return 3;
+		}
+		
+	}
+	
+	bsp_FipexGetCheckSum(rx_data, &CheckSumTemp, 1);  //获取校验码
+	if(CheckSumTemp != *(rx_data + rx_data[2] + 4))
+	{
+		if(FipexRspSendCnt == 0)
+		{
+			FipexRspSendCnt = 1;
+			return 1;  //请求发送SU_RSP
+		}
+		else
+		{
+			FipexRspSendCnt = 0;
+			return 3;
+		}
+		
+	}
+	
+	/****************Response Handling****************/
+
+	switch(rx_data[1]) 
+	{
+		case	SU_R_ACK:
+			break;
+		case SU_R_ID:
+			break;
+		case SU_R_NACK:
+			if((rx_data[4] == SyncError) || (rx_data[4] == FCSError)) 
+			{
+					/* was 2nd NACK? */
+					if(NACK_flag == 1)
+					{
+						/* ERROR */
+						NACK_flag = 0;
+						return 3;
+					} 
+					else //NACK_flag = 0;
+					{
+						NACK_flag++;
+						/* resend CMD */
+						return 2;
+					}
+			} 
+			else 
+			{
+				/* ERROR */
+				return 3;
+			}
+		default:
+			/* Add TIME, ATTITUDE, POSITION, and store */
+			FipexScienceDataStore(rx_data);
+		return 4;
+	}
+	
 	return 0;
 }
+
 
 
 /*
@@ -160,7 +282,7 @@ uint8_t FipexInfoCheck(unsigned char* cmd)
 			{
 				if(IS_OBC_SU_CMD(ptr_temp[1]) || IS_FIPEX_CMD(ptr_temp[1]))
 				{
-					bsp_FipexGetCheckSum(ptr_temp, &checksum_temp);
+					bsp_FipexGetCheckSum(ptr_temp, &checksum_temp, 0);
 					if(checksum_temp != *(ptr_temp + ptr_temp[2] + 3))
 						return 1;
 
@@ -185,7 +307,7 @@ uint8_t FipexInfoCheck(unsigned char* cmd)
 		}
 	}
 
-	printf("check successful\r\n");
+	//printf("check successful\r\n");
 	return 0;
 }
 
@@ -267,9 +389,7 @@ uint8_t FipexInfoGet(uint8_t* cmd)
 
 void FipexInfomationInit(void)  //从FLASH中读取指令信息
 {
-	#if debug_enable
-		char i, j;
-	#endif
+
 	
 	#if debug_enable
 	printf("Read Fipex Command from CPU Flash\r\n");
@@ -279,20 +399,6 @@ void FipexInfomationInit(void)  //从FLASH中读取指令信息
 	
 	FipexStatus = Stop;  //Fipex状态为初始化状态
 	
-	
-	#if debug_enable
-	printf("Fipex Command infomation:\r\n");
-	
-	for(i=0; i<8; i++)
-	{
-		printf("Cmd: ");
-		for(j=0; j<32; j++)
-		{
-			printf("%x ", FipexOperationPara.FipexCmdInfo[i].FipexCmd[j]);
-		}
-		printf("||Command Delay: %d\r\n", FipexOperationPara.FipexCmdInfo[i].CmdDelay);
-	}
-	#endif 
 }
 
 
@@ -369,7 +475,7 @@ uint8_t bsp_FipexPowerOn(void)
 		FipexPowerOnFlg = 1;  //FEPIX上电标志位置位
 		
 		#if debug_enable
-		printf("Fipex power on successfully!\r\n");
+		//printf("Fipex power on successfully!\r\n");
 		#endif
 	}
 	BSP_OS_TimeDlyMs(1000);	//等待1000ms
@@ -422,14 +528,14 @@ uint8_t bsp_FipexPowerOff(void)
 		FipexPowerOnFlg = 0;  //FEPIX上电标志位置位
 		
 		#if debug_enable
-		printf("Fipex power off successfully!\r\n");
+		//printf("Fipex power off successfully!\r\n");
 		#endif
 	}
 	
 	return 0;
 }
 
-uint8_t bsp_FipexGetCheckSum(unsigned char *cmd, unsigned char* checksum)
+uint8_t bsp_FipexGetCheckSum(unsigned char *cmd, unsigned char* checksum, unsigned char trans_flag)  //
 {
 	unsigned char checksum_temp = 0;
 	unsigned char length = 0;
@@ -438,6 +544,10 @@ uint8_t bsp_FipexGetCheckSum(unsigned char *cmd, unsigned char* checksum)
 	{
 		length = cmd[2];  //cmd[1]到cmd[length+3]进行校验
 		length += 2;
+		
+		if(trans_flag)
+			length++;
+		
 		while (length)
 		{
 			checksum_temp ^= cmd[length];

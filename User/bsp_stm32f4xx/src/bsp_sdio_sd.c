@@ -3017,8 +3017,6 @@ void SDIO_Interrupts_Config(void)
 
 void bsp_FileSystem(void)
 {
-	UINT br, bw;
-	char str[100] = {0};
 	f_result = f_mount(FS_SD, &f_fs);
 	if(f_result == FR_OK)
 	{
@@ -3034,7 +3032,4 @@ void bsp_FileSystem(void)
 	//	f_read(&f_file, (void *)str, bw, &br);
 	//	printf("read data: %s\r\n Read size of Byte: %d", str, br);
 	//f_close(&f_file);	
-	
-	
-	printf("haha\r\n");
 }

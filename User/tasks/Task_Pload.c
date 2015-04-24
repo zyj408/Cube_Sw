@@ -6,7 +6,12 @@ uint8_t FipexRxBuf[FIPEX_RX_SIZE] = {0};
 uint8_t FipexRxPtr = 0;
 uint8_t FipexRxSyncFlg = 0;
 uint8_t FipexRxLength = 0;
+uint8_t FipexRspSendCnt = 0;
+uint8_t FipexErrorFlg = 0;
+uint8_t DataResult;
 
+
+const uint8_t FipexRspFrame[4] = {0x7E, 0x11, 0x00, 0x11};
 
 void PLOAD_SAM_TASK(void *p_arg)
 {
@@ -14,8 +19,6 @@ void PLOAD_SAM_TASK(void *p_arg)
 	uint8_t FipexAckTimeout;
 	(void)p_arg;
 
-	
-	
 	while(1)
 	{
 		switch(FipexStatus)
@@ -26,7 +29,7 @@ void PLOAD_SAM_TASK(void *p_arg)
 				FipexCurTime = 0;
 				CurrentScript = 0;
 				ScriptAct = 1;
-				DelayTime = 0;  //开始延迟为1ms
+				DelayTime = 1;  //开始延迟为1ms
 				FipexStatus = ScriptRunning;
 			case ScriptRunning:
 				if(ScriptAct == 1) //脚本动作
@@ -66,26 +69,23 @@ void PLOAD_SAM_TASK(void *p_arg)
 						
 						case SU_PING:
 						case SU_INIT:
-						case SU_ID:
-						case SU_RSP:
-						case SU_SP:
-						case SU_HK:
-						case SU_DP:
+						case SU_SP:	
 						case SU_STDBY:
 						case SU_SC:
 						case SU_SM:
+							FipexAckWaitFlg = 1; //清零Fipex脚本接收标志位
+						case SU_ID:
+						case SU_RSP:
+						case SU_HK:
+						case SU_DP:
 						case SU_CAL:
-							FipexRxPtr = 0; //串口2级接收区指针清零
 							comClearRxFifo(COM3);  //清空串口接收FIFO
 							bsp_FipexSendCmd(&FipexOperationPara.FipexCmdInfo[CurrentScript].FipexCmd[0], FipexOperationPara.FipexCmdInfo[CurrentScript].CmdLength);
-							
-							FipexAckWaitFlg = 1; //清零Fipex脚本接收标志位
-							FipexRxSyncFlg = 0; //COM3接收同步字清零
 							DelayTime = 1;
 							break;
 					}
 				}
-			break;
+				break;
 			
 				
 			case ScriptSleep:	
@@ -93,16 +93,19 @@ void PLOAD_SAM_TASK(void *p_arg)
 			default:
 			break;
 		}
-	
-		if(FipexAckWaitFlg)  //未收到SU载荷回传的数据
+/*****************************************************************/
+		if(FipexAckWaitFlg)  //需要SU回传ACK
 		{
+update:			
 			FipexAckTimeout = 0;
 			FipexRxLength = 0;
-			while(FipexAckTimeout < 10)  //接收串口数据（超时设置为10ms）
+			FipexRxSyncFlg = 0;
+			while(FipexAckTimeout < 50)  //接收串口数据（超时设置为5ms）
 			{
 				if(comGetChar(COM3, &Fipex_data))  //串口获取一个数据
 				{
 					FipexAckTimeout = 0; //计时清零
+					
 					if(!FipexRxSyncFlg)  //未同步
 					{
 						if(Fipex_data == 0x7E)
@@ -115,63 +118,162 @@ void PLOAD_SAM_TASK(void *p_arg)
 					else  //同步情况下
 					{
 						FipexRxBuf[FipexRxPtr++] = Fipex_data; 
-						if(FipexRxPtr == 3) //检测数据长度
-						{
-							FipexRxLength = FipexRxBuf[2]; //将第2个字符串的数据传入FipexRxLength
-						}
 						
-					}
+						if(FipexRxPtr == 205)  //收到检测信号
+						{
+							FipexRxSyncFlg = 0;
+							DataResult = FipexAckHandle(FipexRxBuf);
+							
+							if(DataResult == 1) //请求重新发送
+							{
+								FipexRxSyncFlg = 0; //同步字符
+								bsp_FipexSendCmd((uint8_t*)FipexRspFrame, sizeof(FipexRspFrame)); //发送SU_RSP帧
+								comClearRxFifo(COM3);  //清空串口接收FIFO
+								FipexAckTimeout = 0; //计时清零
+								
+								#if debug_enable
+								printf("Fipex: OBC request for repeat!\r\n");
+								#endif 
+											
+								continue;
+							}
+							else if(DataResult == 2) //发送CMD
+							{
+								FipexRxSyncFlg = 0; //同步字
+								bsp_FipexSendCmd(&FipexOperationPara.FipexCmdInfo[CurrentScript].FipexCmd[0], FipexOperationPara.FipexCmdInfo[CurrentScript].CmdLength);
+								comClearRxFifo(COM3);  //清空串口接收FIFO
+								FipexAckTimeout = 0; //计时清零
+								
+								#if debug_enable
+								printf("Fipex: Fipex request for CMD!\r\n");
+								#endif 
+								
+								continue;
+							}
+							
+							else if(DataResult == 3) //错误
+							{
+								FipexAckWaitFlg = 0;  //关闭Ack接收标志位
+								FipexErrorFlg = 1;
+								goto error;
+							}
+							
+							else if(DataResult == 4) //接收到数据帧
+							{
+								goto update;
+							}
+							
+							else //解析正确
+							{
+								FipexAckWaitFlg = 0;
+								goto next;
+							}
+						} //if 一帧接收完成
+					} //else 同步情况下
+				}
+	
+					FipexAckTimeout++;
+					//bsp_DelayUS(1000);
+					BSP_OS_TimeDlyMs(1);
+			}
+			
+			/* 跳出Fipex接收循环 */
+			if(FipexAckTimeout == 50)  // 发生超时
+			{
+				#if debug_enable
+					printf("Fipex: Fipex ACK Timeout!\r\n");
+				#endif 
+				
+				if(FipexRspSendCnt == 0)
+				{
+					FipexRxSyncFlg = 0; //同步字符
+					bsp_FipexSendCmd((uint8_t *)FipexRspFrame, sizeof(FipexRspFrame)); //发送SU_RSP帧
+					comClearRxFifo(COM3);  //清空串口接收FIFO
+					FipexRspSendCnt = 1; //SU_RSP发送	
 				}
 				else
 				{
-					FipexAckTimeout++;
+					FipexAckWaitFlg = 0;  //关闭Ack接收标志位
+					FipexErrorFlg = 1;
+					goto error;
+					/* 错误处理 */
 				}
-				
-				BSP_OS_TimeDlyMs(1);
-			}
-			
-			if(FipexAckTimeout == 10)
-			{
-				//错误
-			}
-			else
-			{
-				FipexAckHandle(FipexRxBuf);
 			}
 
-		}
+			
+
+		}//if(FipexAckWaitFlg)
 		
-		else  //获取到SU载荷回传的数据
+		else
 		{
-			if(FipexCurTime++ > DelayTime) //Fipex时间到达延迟时间
+			if(comGetChar(COM3, &Fipex_data))
 			{
-				switch(FipexStatus)
-				{
-					case Stop:
-					case PowerOn:
-						break;
-					case ScriptRunning:
-						if(CurrentScript == FipexOperationPara.CmdCnt - 1)  //脚本操作到达最后，进入脚本睡眠阶段
+				FipexAckTimeout = 0; //计时清零
+					
+					if(!FipexRxSyncFlg)  //未同步
+					{
+						if(Fipex_data == 0x7E)
 						{
-							FipexCurTime = 0;
-							DelayTime = FipexOperationPara.RepeatTime * 1000;
-							FipexStatus = ScriptSleep; //状态转换为脚本睡眠操作
+							FipexRxSyncFlg = 1;  
+							FipexRxPtr = 0;   //将同步字放入帧头
+							FipexRxBuf[FipexRxPtr++] = Fipex_data; 
 						}
-						else  //脚本操作切换
-						{
-							FipexCurTime = 0;
-							CurrentScript++;
-							ScriptAct = 1;  //脚本动作标志位置位
-						}
-						break;
+					}
+					else  //同步情况下
+					{
+						FipexRxBuf[FipexRxPtr++] = Fipex_data; 
 						
-					case ScriptSleep:
-						FipexStatus = PowerOn;
-						break;
-				}
-				
+						if(FipexRxPtr == 205)  //收到检测信号
+						{
+							FipexRxSyncFlg = 0;
+							DataResult = FipexAckHandle(FipexRxBuf);
+						}
+					}
 			}
 		}
+		
+error:  if(FipexErrorFlg)
+				{
+					FipexAckWaitFlg = 0;
+					FipexErrorFlg = 0;
+					
+					#if debug_enable
+					printf("Fipex: Fipex Error!\r\n");
+					#endif 
+				}	
+				
+next:		if(FipexCurTime++ > DelayTime) //Fipex时间到达延迟时间 //延时计算
+				{
+					switch(FipexStatus)
+					{
+						case Stop:
+						case PowerOn:  
+							break;
+						case ScriptRunning:
+							if(CurrentScript == FipexOperationPara.CmdCnt - 1)  //脚本操作到达最后，进入脚本睡眠阶段
+							{
+								FipexCurTime = 0;
+								DelayTime = FipexOperationPara.RepeatTime * 1000;
+								FipexStatus = ScriptSleep; //状态转换为脚本睡眠操作
+							}
+							else  //脚本操作切换
+							{
+								FipexCurTime = 0;
+								CurrentScript++;
+								ScriptAct = 1;  //脚本动作标志位置位
+							}
+							break;
+							
+						case ScriptSleep:
+							FipexStatus = PowerOn;
+						
+						#if debug_enable
+							//printf("Fipex: OBC for next script loop!\r\n");
+						#endif 
+						
+							break;
+					}
+			}
 		BSP_OS_TimeDlyMs(1);
 	}
 }

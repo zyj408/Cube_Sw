@@ -23,7 +23,7 @@ void GPS_REV_TASK(void *p_arg)
 			{
 				GpsRevBuf[GpsRevCnt++] = data_temp;
 			}
-			BSP_OS_TimeDlyMs(100);
+			BSP_OS_TimeDlyMs(10);
 		}
 		USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
 		GPS_Analysis(&GpsCurInfo, GpsRevBuf);

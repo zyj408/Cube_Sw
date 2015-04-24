@@ -35,6 +35,26 @@
 #define SU_SM					0x0C
 #define SU_CAL					0x33
 
+
+
+/* SU responses */
+#define SU_R_ACK				0x02		/* Acknowledge response, DATA LEN: 0 */
+#define SU_R_NACK				0x03		/* Negative acknowledge response, DATA LEN: 1 */
+#define SU_R_ID					0x04		/* Identification message, DATA LEN: 1 */
+#define SU_R_HK					0x2000	/* Housekeeping data packet, DATA LEN: 46 */
+#define SU_R_SDP				0x30		/* Science Data Package, DATA LEN: variable */
+#define	SU_R_CAL				0x33		/* All calibration values, DATA LEN: 40 */
+
+/* SU_R_NACK: 'EFLAG' */
+#define	SyncError				0x01		/* Packet reception timeout */
+#define FCSError				0x02		/* Frame Check Sum (XOR) wrong */
+#define wPID						0x03		/* Parameter ID unknown */
+#define	POOR						0x04		/* Parameter out of range */
+#define wMode						0x05		/* Shall be used if a commanded state change is not allowed */
+#define	wCMD						0x06		/* Wrong command */
+#define wLEN						0x07		/* LEN wrong */
+
+
 #define IS_OBC_SU_CMD(CMD)          (((CMD) == OBC_SU_ON)|| \
                                     ((CMD) == OBC_SU_OFF) || \
                                     ((CMD) == OBC_SU_END))
@@ -99,10 +119,10 @@ void FipexInfomationInit(void);
 void FipexSetDefaultInfo(void);
 void FipexScriptStop(void);
 uint8_t bsp_FipexSendCmd(uint8_t *cmd, uint16_t length);
-uint8_t bsp_FipexGetCheckSum(unsigned char *cmd, unsigned char* checksum);
+uint8_t bsp_FipexGetCheckSum(unsigned char *cmd, unsigned char* checksum, unsigned char trans_flag);
 void FipexScriptStart(void);
-
-
+uint8_t FipexAckHandle(uint8_t *rx_data);
+void FipexScienceDataStore(uint8_t * rx_data);
 
 
 #endif
