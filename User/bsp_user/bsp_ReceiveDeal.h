@@ -11,7 +11,7 @@ enum INS_STATUS
 };
 
 CPU_INT08U InsDecode(uint8_t *InsBuf);
-CPU_INT16U GetCheckSum(CPU_INT16U *Ptr, uint8_t BufSize);
+void InsGetCheckSum(uint8_t *Ptr, uint8_t buffsize, uint8_t *checksum);
 void GndTsRxHandle(void);
 #endif
 

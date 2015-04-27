@@ -345,8 +345,8 @@ extern volatile CPU_INT16U FalPld;
 #define INS_GPS_A_OFF          0x13		 //GPSA关
 #define INS_GPS_B_ON           0x14		 //GPSB开
 #define INS_GPS_B_OFF          0x15		 //GPSB关
-//#define INS_GPS_B_ON           0x16		 //保留开关1开
-//#define INS_GPS_B_OFF          0x17		 //保留开关1关
+#define INS_RSV_ON             0x16		 //保留开关1开
+#define INS_RSV_OFF            0x17		 //保留开关1关
 #define INS_MW_A_ON            0x18		 //动量轮A开
 #define INS_MW_A_OFF           0x19		 //动量轮A关
 #define INS_MW_B_ON            0x1A		 //动量轮B开
@@ -355,38 +355,44 @@ extern volatile CPU_INT16U FalPld;
 #define INS_SLBRD_OFF          0x1D		 //帆板关
 #define INS_USB_ON             0x1E		 //USB开
 #define INS_USB_OFF            0x1F		 //USB关
-
+#define INS_S1_ON              0x20		 //磁棒开
+#define INS_S1_OFF             0x21		 //磁棒关
+#define INS_S2_ON              0x22		 //GPSA开
+#define INS_S2_OFF             0x23		 //GPSA关
+#define INS_S3_ON              0x24		 //GPSB开
+#define INS_S3_OFF             0x25		 //GPSB关
+#define INS_S4_ON              0x26		 //保留开关1开
+#define INS_S4_OFF             0x27		 //保留开关1关
 
 /* 姿控系统指令 */
-#define INS_DET                0x41    //重新阻尼
-#define INS_STA                0x42		 //永久阻尼使能
-#define INS_DUMP_FOEV_DIS      0x43    //永久阻尼禁止
-#define INS_SW_MAG_A           0x44    //切换至磁强计A
-#define INS_SW_MAG_B           0x45    //切换至磁强计B
+#define INS_DET                0x31    //重新阻尼
+#define INS_STA                0x32		 //永久阻尼使能
+#define INS_DUMP_FOEV_DIS      0x33    //永久阻尼禁止
+#define INS_SW_MAG_A           0x34    //切换至磁强计A
+#define INS_SW_MAG_B           0x35    //切换至磁强计B
 /* 通信系统指令 */
-#define INS_SW_1200            0x51    //BPSK1200切换
-#define INS_SW_9600            0x52		 //BPSK9600开
-#define INS_CW_ON              0x53    //CW开
-#define INS_COM_TRAN_OFF       0x54    //通信机发射机关机
+#define INS_SW_1200            0x41    //BPSK1200切换
+#define INS_SW_9600            0x42		 //BPSK9600开
+#define INS_CW_ON              0x43    //CW开
+#define INS_COM_TRAN_OFF       0x44    //通信机发射机关机
 
 
 //******数据注入指令*****//
 /* 姿控系统指令 */
-#define INS_CTL_P_PRA          0x71    //三轴稳定控制律注入
-#define INS_CTL_D_PRA          0x72    //三轴稳定控制律注入
-#define INS_ZJD_CTL            0x73    //章进动控制系数
+#define INS_CTL_P_PRA          0x51    //三轴稳定控制律注入
+#define INS_CTL_D_PRA          0x52    //三轴稳定控制律注入
+#define INS_ZJD_CTL            0x53    //章进动控制系数
 //**************************
-#define INS_DMP_FLAG           0x74    //阻尼标志位
-#define INS_FLT_FLAG           0x75    //测量标志位
-#define INS_CTL_FLAG           0x76    //控制标志位
-#define INS_CNT_DMP_FLAG       0x77    //阻尼计数器
-#define INS_CNT_FLT_FLAG       0x78    //测量计数器
-#define INS_CNT_CTL_FLAG       0x79    //控制计数器
+#define INS_DMP_FLAG           0x54    //阻尼标志位
+#define INS_FLT_FLAG           0x55    //测量标志位
+#define INS_CTL_FLAG           0x56    //控制标志位
+#define INS_CNT_DMP_FLAG       0x57    //阻尼计数器
+#define INS_CNT_FLT_FLAG       0x58    //测量计数器
+#define INS_CNT_CTL_FLAG       0x59    //控制计数器
 /**************************/
-#define INS_EQUP_INPUT         0x81    //器件健康状态变更指令
-#define INS_SD_ADRS            0x82    //星上SD卡地址变更
-#define INS_TEL_ADRS           0x83    //遥测存储指针变更
-#define INS_GPS_ADRS           0x84    //GPS存储指针变更
-#define INS_TIME_IN            0x91    //时间注入
-/*********************/
+#define INS_EQUP_INPUT         0x61    //器件健康状态变更指令
+#define INS_TEL_ADRS           0x62    //遥测存储指针变更
+#define INS_GPS_ADRS           0x63    //GPS存储指针变更
+#define INS_TIME_IN            0x64    //时间注入
+
 #endif

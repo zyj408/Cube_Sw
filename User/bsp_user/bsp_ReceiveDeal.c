@@ -3,7 +3,7 @@
 
 enum INS_STATUS InsState=INS_IDLE;  /* 地面测试状态初始化 */
 
-
+uint16_t InsRxCmdCnt = 0;
 uint8_t InsRxIndex;
 uint8_t InsRxLength;
 uint8_t InsRcvErr=0;
@@ -101,36 +101,49 @@ void ComOT_CallBack (OS_TMR *p_tmr, void *p_arg)
 	}
 }
 
-CPU_INT16U GetCheckSum(CPU_INT16U *Ptr, uint8_t BufSize)
+void InsGetCheckSum(uint8_t *Ptr, uint8_t buffsize, uint8_t *checksum)
 {
-	CPU_INT32U CheckSumTemp;
-	CPU_INT16U index;
-	
-	CheckSumTemp = 0x00000000;
-	
-	for(index=0; index<BufSize; index++)
-		CheckSumTemp+=*(Ptr+index);
-	
-	return (CPU_INT16U)CheckSumTemp;
+	uint8_t checksumtemp;
+	while(buffsize)
+	{
+		checksumtemp ^= Ptr[buffsize];
+		buffsize--;
+	}
+	*checksum = checksumtemp;
 }
 
 
-void InsSendAck(uint8_t cmd)
+void InsSendAck(void)
 {
-	//uint8_t ins_temp[10] = {0xA5, 0x5A, 0xFF, }
-	//UartSend(USART1,OBC_ACK);
+	uint8_t ins_data_temp[10] = {0};
+	uint8_t ins_checksum;
+	
+	ins_data_temp[0] = 0xA5;
+  ins_data_temp[1] = 0x5A;
+	ins_data_temp[2] = 0x30; //Ack指令码
+	ins_data_temp[3] = 0x02; //长度
+  ins_data_temp[4] = (uint8_t)(InsRxCmdCnt & 0x00FF);  //数据域
+	ins_data_temp[5] = (uint8_t)((InsRxCmdCnt >> 8) & 0x00FF); //数据域
+
+	InsGetCheckSum(&ins_data_temp[4], ins_data_temp[3], &ins_checksum);
+	ins_data_temp[6] = ins_checksum;
+	comSendBuf(COM6, ins_data_temp, 7);
 }
 
 CPU_INT08U InsDecode(uint8_t *InsBuf)
 {
+	/* 添加校验 */
+	
+	
 	switch(*InsBuf)
 	{
 		/* 测试指令 */
-		case INS_CONN_TST:
+		case INS_CONN_TST:  //通信测试指令
 			GT_ConnStat = 1; //上位机连接
-			InsSendAck(INS_CONN_TST);
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
 			break;
-		case INS_COMM_SWITCH_CLR:
+		case INS_COMM_SWITCH_CLR:  //通信体制16小时重置指令
 		{
 			
 			//UartSend(USART1,OBC_ACK);
@@ -174,7 +187,7 @@ void GndTsRxHandle(void)
 {
 	uint8_t response;
 	
-	if(comGetChar(COM1, &response)) //获取一个字符
+	if(comGetChar(COM6, &response)) //获取一个字符
 	{
 		TestRcv(response);
 	}

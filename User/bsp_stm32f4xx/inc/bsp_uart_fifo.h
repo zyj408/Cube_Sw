@@ -20,19 +20,19 @@
 
 /* 定义使能的串口, 0 表示不使能（不增加代码大小）， 1表示使能 */
 #ifdef STM32_X3	
-	#define	UART1_FIFO_EN	1
+	#define	UART1_FIFO_EN	0
 	#define	UART2_FIFO_EN	0
 	#define	UART3_FIFO_EN	0
 	#define	UART4_FIFO_EN	0
 	#define	UART5_FIFO_EN	0
 	#define	UART6_FIFO_EN	0
 #else
-	#define	UART1_FIFO_EN	1
-	#define	UART2_FIFO_EN	1
-	#define	UART3_FIFO_EN	1
+	#define	UART1_FIFO_EN	1    //地面测试串口
+	#define	UART2_FIFO_EN	1    //GPSA测试串口
+	#define	UART3_FIFO_EN	1    //载荷接收串口
 	#define	UART4_FIFO_EN	0
 	#define	UART5_FIFO_EN	0
-	#define	UART6_FIFO_EN	0
+	#define	UART6_FIFO_EN	1    //USB应答机测试串口
 
 	/* RS485芯片发送使能GPIO, PB2 */
 	#define RCC_RS485_TXEN 	RCC_AHB1Periph_GPIOB
@@ -87,8 +87,8 @@ typedef enum
 
 #if UART6_FIFO_EN == 1
 	#define UART6_BAUD			115200
-	#define UART6_TX_BUF_SIZE	1*1024
-	#define UART6_RX_BUF_SIZE	1*1024
+	#define UART6_TX_BUF_SIZE	1*256
+	#define UART6_RX_BUF_SIZE	1*256
 #endif
 
 /* 串口设备结构体 */
