@@ -4,7 +4,7 @@
 /*******************************************************/
 /* 将格里历时间转换成儒略日历 */
 /*由于太阳计算模型是时间的函数，而数据综合系统提供的是通用的格里历时间，转换成方便计算的儒略历*/
-void timeFormTrans(double *tTime,int *year,int *month,int *day,int *hour,int *minute,double *second)
+void timeFormTrans(double *tTime,int *year,int *month,int *day,int *hour,int *minute,int *second)
 {
     double fstItem,secItem,thiItem,tmpx,tmpy;  /* 计算使用的临时变量*/
     tmpy = ((*month) - 14)/12.0;
@@ -255,7 +255,6 @@ void geoInfoGet(double GeoCord[2],double PosInWGS[3])
 /*按照经度间隔3度，纬度间隔2度划分网格，两极点处收缩为单点*/
 void ChkMagLst(double MagInFix[3],const double magTable[10682][3],double GeoCord[2])
 {
-	#if 0
     int cx,cy,cx_right,cy_right,k;
     double cxw,cyw,tmpx,tmpy,left,right,tmp;
     
@@ -292,7 +291,6 @@ void ChkMagLst(double MagInFix[3],const double magTable[10682][3],double GeoCord
        	        MagInFix[k] = tmp;
            }
     return;
-					 #endif
 }
 
 
@@ -442,3 +440,177 @@ void pitFltTimUpd(double PFSt[2],double PPF[2][2],double TqNomTmp[3])
     return;
 }
 
+
+/* 惯性系下轨道位置速度得到开普勒六根数 */
+void Get_KplInfo(double Kepler[6],double orbInfo[6])
+{
+	  double rVector[3],r,vVector[3],v;
+	  double x,y,z,xdot,ydot,zdot,hVector[3];
+	  double esinE,ecosE,E;
+	  double orb_a,orb_e,orb_i,orb_o,orb_o2,orb_u,orb_u2,orb_w,orb_M;
+	  double normal_Vector[3],NVector[3],n,MVector[3],m;
+	  double half_xE,half_f,f;
+	  int i,j,k;
+
+	  for (i=0;i<3;i++)
+	  {
+	    rVector[i] = orbInfo[i];
+			x = rVector[0]; y = rVector[1]; z = rVector[2];
+			vVector[i] = orbInfo[i+3];
+			xdot = vVector[0];ydot = vVector[1];zdot = vVector[2];
+	  }
+		r = norm(rVector,3);
+		v = norm(vVector,3);
+		VecCross(hVector,rVector,vVector);
+		//h = norm(hVector,3);
+		
+		orb_a = GM*r/(2*GM-r*v*v);
+		
+		esinE = sqrt(1/(GM*orb_a))*(x*xdot+y*ydot+z*zdot);
+    ecosE = 1-r/orb_a;
+		
+		E = atan(esinE/ecosE)*180/PI;
+		if ((esinE > 0) && (ecosE < 0))
+		{
+			E = E+180;
+		}
+		else if ((esinE < 0) && (ecosE > 0))
+		{
+			E = E+360;
+		}
+		else if ((esinE < 0) && (ecosE < 0))
+		{
+			E = E+180;
+		}
+		
+		orb_e = (1-r/orb_a)/cos(E*PI/180);
+		orb_i = acos((x*ydot-y*xdot)/(sqrt(GM*orb_a*(1-orb_e*orb_e))))*180/PI;
+		
+		normal_Vector[0] = 0;normal_Vector[1] = 0;normal_Vector[2] = 1;
+		VecCross(NVector,normal_Vector,hVector);
+		n = norm(NVector,3);
+		for (j=0;j<3;j++)
+		{
+			NVector[j] = NVector[j]/n;
+		}
+		orb_o=acos(NVector[0])*180/PI;
+		orb_o2=acos(NVector[1])*180/PI;
+		if ((orb_o2 >= 0) && (orb_o2 <= 90))
+		{
+			orb_o = orb_o;
+		}
+		else if ((orb_o2 > 90) && (orb_o2 <= 180))
+		{
+			orb_o = 360-orb_o;
+		}
+		
+		VecCross(MVector,hVector,NVector);
+		m = norm(MVector,3);
+		for (k=0;k<3;k++)
+		{
+			MVector[k] = MVector[k]/m;
+		}
+		orb_u=acos((rVector[0]*NVector[0]+rVector[1]*NVector[1]+rVector[2]*NVector[2])/r)*180/PI;
+		orb_u2=acos((rVector[0]*MVector[0]+rVector[1]*MVector[1]+rVector[2]*MVector[2])/r)*180/PI;
+		if ((orb_u2 >= 0) && (orb_u2 <= 90))
+		{
+			orb_u = orb_u;
+		}
+		else if ((orb_u2 > 90) && (orb_u2 <= 180))
+		{
+			orb_u = 360-orb_u;
+		}
+		
+		half_xE=E*PI/(2*180);
+		half_f=atan(sqrt((1+orb_e)/(1-orb_e))*tan(half_xE));
+		if ((half_xE > PI/2) && (half_xE < PI))
+			half_f=half_f+PI;
+    f=2*half_f*180/PI;
+		orb_w=orb_u-f;
+		if (orb_w < 0)
+			orb_w = orb_w +360;
+		orb_M=(E*PI/180-orb_e*sin(E*PI/180))*180/PI;
+
+		
+		Kepler[0] = orb_a;
+		Kepler[1] = orb_e;
+		Kepler[2] = orb_i;
+		Kepler[3] = orb_o;
+		Kepler[4] = orb_w;
+		Kepler[5] = orb_M;
+		
+    return;	
+}
+
+
+
+/* 由GPS轨道迭代出两行根数 */
+void GetTLEFromGPS(elsetrec *satrecFromGPS,double orbInfoGPS[6],double *tTime)
+{
+	  double MeanKepler[6];
+	  double loops,RMS,PosNorm[3],endwhile;
+	  double PosInTEME[3],VelInTEME[3];
+	  double error[6],JToTEME[3][3],TEMEToJ[3][3];
+	  double PosInJ[3],VelInJ[3],meanorbInfo[6];
+	  int i,j,k,m;
+	
+	  cordMtxJToTEMEGet(JToTEME,tTime);
+	  mtxInv((double *)TEMEToJ,(double *)JToTEME,3);
+	
+	  for (m=0;m<6;m++)
+	  {
+			meanorbInfo[m] = orbInfoGPS[m];
+		}
+	  Get_KplInfo(MeanKepler,meanorbInfo);
+	  satrecFromGPS->bstar = 0.0002;
+	  satrecFromGPS->inclo = MeanKepler[2]*PI/180;
+	  satrecFromGPS->nodeo = MeanKepler[3]*PI/180;
+	  satrecFromGPS->ecco = MeanKepler[1];
+	  satrecFromGPS->argpo = MeanKepler[4]*PI/180;
+	  satrecFromGPS->mo = MeanKepler[5]*PI/180;
+	  satrecFromGPS->no = 60*sqrt(GM/(MeanKepler[0]*MeanKepler[0]*MeanKepler[0]));
+	
+	  loops = 0;
+	  RMS = 10000;
+	  endwhile = 1;
+	
+	  while (endwhile !=0)
+		{
+			loops = loops+1;
+			sgp4init(satrecFromGPS);
+			sgp4(PosInTEME,VelInTEME,satrecFromGPS,0);
+			mtxMtp((double *)PosInJ,(double *)TEMEToJ,3,3,(double *)PosInTEME,3,1); 
+			mtxMtp((double *)VelInJ,(double *)TEMEToJ,3,3,(double *)VelInTEME,3,1); 
+			for (i=0;i<3;i++)
+			{
+				error[i] = orbInfoGPS[i]-PosInJ[i];
+				PosNorm[i] = error[i];
+			}
+			for (j=0;j<3;j++)
+			{
+				error[j+3] = orbInfoGPS[j+3]-VelInJ[j];
+			}
+			RMS = sqrt(norm(PosNorm,3)/3);
+			
+			if ((RMS >= 0.01) && (loops <= 20))
+			{
+				for (k=0;k<6;k++)
+			  {
+					meanorbInfo[k] = meanorbInfo[k]+error[k];
+				}
+				Get_KplInfo(MeanKepler,meanorbInfo);
+				satrecFromGPS->bstar = 0.0002;
+				satrecFromGPS->inclo = MeanKepler[2]*PI/180;
+				satrecFromGPS->nodeo = MeanKepler[3]*PI/180;
+				satrecFromGPS->ecco = MeanKepler[1];
+				satrecFromGPS->argpo = MeanKepler[4]*PI/180;
+				satrecFromGPS->mo = MeanKepler[5]*PI/180;
+				satrecFromGPS->no = 60*sqrt(GM/(MeanKepler[0]*MeanKepler[0]*MeanKepler[0]));
+			}
+			else
+			{
+				endwhile = 0;
+			}
+		}
+    return;	
+}

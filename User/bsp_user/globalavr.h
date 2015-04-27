@@ -29,7 +29,7 @@ void VarBak(void);
 #define OBC_EXPAND6        15               /* 星务板AD扩展6 */
 
 /* 串口接收缓冲区大小 */ 
-#define BUFFER_SIZE                13               /* 指令接收缓冲区大小 */
+#define BUFFER_SIZE                256              /* 指令接收缓冲区大小 */
 #define GPS_MAX_REV_SIZE           800              /* GPS接收缓冲区大小 */
 
 /* 遥测存储 */
@@ -46,7 +46,6 @@ void VarBak(void);
 														
 /* FLASH温度存储首地址 */ 
 #define WRITE_READ_ADDR            0x8000
-#define GT_RCV_SIZE                30
 
 /* 外部FLASH段偏移地址 */
 #define NOR_FLASH_SA0              0x00000000
@@ -157,7 +156,7 @@ struct OBCTaskStatus
 
 /* 声明外部软件超时定时器 */
 extern OS_TMR  GPS_OT_TIMER;
-extern OS_TMR  TEST_OT_TIMER;
+extern OS_TMR  COM_OT_TIMER;;
 
 /* GPS存储信号灯 */
 extern OS_SEM   SEM_GPS_STO;	
@@ -170,10 +169,10 @@ extern volatile CPU_INT16U GpsRevCnt;
 extern NMEA_MSG GpsCurInfo;            
 /* 外部变量声明 */
 /* 星上指令接收状态量 */
-extern CPU_INT08U IntBuf[BUFFER_SIZE];            /* 指令接收缓冲变量 */
+extern CPU_INT08U InsBuf[BUFFER_SIZE];            /* 指令接收缓冲变量 */
 extern CPU_INT16U InsCnt;                         /* 指令接收计数值 */
 extern CPU_INT08U InsBuf_p;                       /* 指令全局指针 */								
-extern CPU_INT08U ID_CommandBuf[GT_RCV_SIZE];
+extern CPU_INT08U ID_CommandBuf[BUFFER_SIZE];
 extern CPU_INT08U ID_CommandCnt;				
 
 /* 星务板数模转换状态量 */																		
@@ -332,33 +331,32 @@ extern volatile CPU_INT16U FalPld;
 /* 入站指令 */
 #define INS_CONN_TST           0x01    //通信链路测试
 #define INS_COMM_SWITCH_CLR    0x02    //星载计算机12小时重置
-/* 下行数据指令 */
-#define INS_DOWN_TEL           0x11    //下行星上状态遥测数据
-#define INS_DOWN_PLD           0x12    //下行QB50载荷数据
-#define INS_DOWN_CMD           0x13    //下行星上指令数据
+#define INS_DOWN_TEL           0x03    //下行星上状态遥测数据
+#define INS_DOWN_PLD           0x04    //下行QB50载荷数据
+#define INS_DOWN_CMD           0x05    //下行星上指令数据
+#define INS_SD_CLR             0x06    //SD卡清空
+#define INS_FLASH_RST          0x07    //FLASH指针还原
+#define INS_OBC_RST            0x08    //星务计算机重启
+
 /* 供电开关指令 */
-#define INS_MAG_ON             0x21    //磁强计开
-#define INS_MAG_OFF            0x22		 //磁强计关
-#define INS_GPS_A_ON           0x23		 //GPSA开
-#define INS_GPS_A_OFF          0x24		 //GPSA关
-#define INS_GPS_B_ON           0x25		 //GPSB开
-#define INS_GPS_B_OFF          0x26		 //GPSB关
-#define INS_RSV_ON             0x27		 //应答机接收机开
-#define INS_RSV_OFF            0x28		 //应答机接收机关
-#define INS_TRAN_ON            0x29		 //应答机发射机开
-#define INS_TRAN_OFF           0x2A		 //应答机发射机关
-#define INS_GAMA_ON            0x2B		 //gamalink开
-#define INS_GAMA_OFF           0x2C		 //gamalink关
-#define INS_ANT_ON             0x2D		 //天线展开
-#define INS_SLBRD_ON           0x2E		 //帆板展开
-#define INS_MTQ_ON             0x2F		 //磁棒开
-#define INS_MTQ_OFF            0x31		 //磁棒关
-#define INS_MW_A_ON            0x32		 //动量轮A开
-#define INS_MW_A_OFF           0x33		 //动量轮A关
-#define INS_MW_B_ON            0x34		 //动量轮B开
-#define INS_MW_B_OFF           0x35		 //动量轮B关
-#define INS_PLD_A_ON           0x36    //负载A开
-#define INS_PLD_A_OFF          0x37		 //负载A关
+#define INS_MTQ_ON             0x10		 //磁棒开
+#define INS_MTQ_OFF            0x11		 //磁棒关
+#define INS_GPS_A_ON           0x12		 //GPSA开
+#define INS_GPS_A_OFF          0x13		 //GPSA关
+#define INS_GPS_B_ON           0x14		 //GPSB开
+#define INS_GPS_B_OFF          0x15		 //GPSB关
+//#define INS_GPS_B_ON           0x16		 //保留开关1开
+//#define INS_GPS_B_OFF          0x17		 //保留开关1关
+#define INS_MW_A_ON            0x18		 //动量轮A开
+#define INS_MW_A_OFF           0x19		 //动量轮A关
+#define INS_MW_B_ON            0x1A		 //动量轮B开
+#define INS_MW_B_OFF           0x1B		 //动量轮B关
+#define INS_SLBRD_ON           0x1C		 //帆板开
+#define INS_SLBRD_OFF          0x1D		 //帆板关
+#define INS_USB_ON             0x1E		 //USB开
+#define INS_USB_OFF            0x1F		 //USB关
+
+
 /* 姿控系统指令 */
 #define INS_DET                0x41    //重新阻尼
 #define INS_STA                0x42		 //永久阻尼使能
@@ -370,10 +368,7 @@ extern volatile CPU_INT16U FalPld;
 #define INS_SW_9600            0x52		 //BPSK9600开
 #define INS_CW_ON              0x53    //CW开
 #define INS_COM_TRAN_OFF       0x54    //通信机发射机关机
-/* 数据综合指令 */
-#define INS_SD_CLR             0x61    //SD卡清空
-#define INS_FLASH_RST          0x62    //FLASH指针还原
-#define INS_OBC_RST            0x63    //星务计算机重启
+
 
 //******数据注入指令*****//
 /* 姿控系统指令 */

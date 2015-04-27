@@ -1,102 +1,100 @@
 #include <includes.h>
 #include "globalavr.h"
 
-enum TEST_STATUS 
-{
-	TEST_IDLE,
-	TEST_SNYC,
-	TEST_RCV,
-};
+enum INS_STATUS InsState=INS_IDLE;  /* 地面测试状态初始化 */
 
 
-enum TEST_STATUS GT_TestState=TEST_IDLE;  /* 地面测试状态初始化 */
-uint8_t GT_TestIndex;
-uint8_t GT_RcvBuff[GT_RCV_SIZE];
-uint8_t GT_RcvEndFlag=0;            /* 地面测试结束标志位 */
-uint8_t GT_RcvErr=0;
+uint8_t InsRxIndex;
+uint8_t InsRxLength;
+uint8_t InsRcvErr=0;
 uint8_t GT_ConnStat=0;  /* 没有上位机链接 */
+
 CPU_INT08U TestRcv(unsigned char rev_data)
 {
 	OS_ERR err;
 	
-	switch(GT_TestState)
+	switch(InsState)
 	{
-			case TEST_IDLE:
-			{
+			case INS_IDLE:  //空闲状态
 				if(rev_data == 0XA5)
 				{
-					GT_TestIndex = 0;
-					GT_TestState = TEST_SNYC;
-					OSTmrStart((OS_TMR *) &TEST_OT_TIMER, (OS_ERR *) &err);   
+					InsRxIndex = 0;
+					InsRxLength = 0;
+					InsState = INS_SNYC;
+					OSTmrStart((OS_TMR *) &COM_OT_TIMER, (OS_ERR *) &err);   
 				}
 				else
 				{
-					GT_TestIndex = 0;
-					OSTmrStop((OS_TMR *) &TEST_OT_TIMER, OS_OPT_TMR_NONE, (OS_TMR_CALLBACK_PTR)NULL, (OS_ERR *) &err); 
+					InsRxIndex = 0;
+					InsRxLength = 0;
+					OSTmrStop((OS_TMR *) &COM_OT_TIMER, OS_OPT_TMR_NONE, (OS_TMR_CALLBACK_PTR)NULL, (OS_ERR *) &err); 
 				}
-			}break;
-			case TEST_SNYC:
-			{
+			break;
+				
+			case INS_SNYC:  //同步状态
 				if(rev_data == 0X5A)
-				GT_TestState = TEST_RCV;
-				GT_TestIndex = 0;  /* 接收数据索引清零 */
-				OSTmrStart((OS_TMR *) &TEST_OT_TIMER, (OS_ERR *) &err);   
-			}break;
-			case TEST_RCV:
-			{
-				GT_RcvBuff[GT_TestIndex++] = rev_data;  /* 将接收的数据拷贝至GT_RcvBuff */
-				if(GT_RcvEndFlag == 0) 
 				{
-					if(rev_data == 0x5A)
-					{
-						GT_RcvEndFlag = 1;
-					}
-				} else if(GT_RcvEndFlag == 1)
+					InsState = INS_RCV;
+					InsRxIndex = 0;  /* 接收数据索引清零 */
+					InsRxLength = 0;
+					OSTmrStart((OS_TMR *) &COM_OT_TIMER, (OS_ERR *) &err);
+				}					
+			break;
+				
+			case INS_RCV:  //接收状态
+				InsBuf[InsRxIndex] = rev_data;  //0:指令 1:长度 2:数据 3:XOR
+				
+				if(InsRxIndex == 1)  //获取数据域长度
 				{
-					if(rev_data == 0xA5)
-					{
-						//Mem_Copy(GT_RcvBuff, ID_CommandBuf, GT_TestIndex);
-						//ID_CommandCnt++;
-						
-						InsDecode(GT_RcvBuff, GT_TestIndex);
-						
-						GT_TestIndex = 0; 
-						GT_TestState = TEST_IDLE;
-					}else
-					{
-						GT_RcvEndFlag = 0;
-						OSTmrStop((OS_TMR *) &TEST_OT_TIMER, OS_OPT_TMR_NONE, (OS_TMR_CALLBACK_PTR)NULL, (OS_ERR *) &err); 
-					}
+					InsRxLength = rev_data;
 				}
-				OSTmrStart((OS_TMR *) &TEST_OT_TIMER, (OS_ERR *) &err);   
-			}break;
+				
+				if((InsRxLength + 2) == InsRxIndex)
+				{
+				
+					//Mem_Copy(InsBuf, ID_CommandBuf[ID_CommandCnt], InsRxIndex);
+					//ID_CommandCnt++;
+				
+					
+					InsDecode(InsBuf);
+					
+					InsState = INS_IDLE;
+					OSTmrStop((OS_TMR *) &COM_OT_TIMER, OS_OPT_TMR_NONE, (OS_TMR_CALLBACK_PTR)NULL, (OS_ERR *) &err); 
+				}
+				else
+				{
+					OSTmrStart((OS_TMR *) &COM_OT_TIMER, (OS_ERR *) &err);   
+				}
+				
+				InsRxIndex++;
+			break;
+				
 			default:
-			{
-				GT_RcvErr |= 0x80;
-			}break;
+				InsRcvErr |= 0x80;
+			break;
 	}
 	return 0;
 }
 
 
 
-void TestOT_CallBack (OS_TMR *p_tmr, void *p_arg)
+void ComOT_CallBack (OS_TMR *p_tmr, void *p_arg)
 {
-	GT_TestIndex = 0; 
-	GT_TestState = TEST_IDLE;
-	switch(GT_TestState)
+	InsRxIndex = 0; 
+	InsState = INS_IDLE;
+	switch(InsState)
 	{
-			case TEST_IDLE:
+			case INS_IDLE:
 			{
-				GT_RcvErr |= 0x40;
+				InsRcvErr |= 0x40;
 			}break;
-			case TEST_SNYC:
+			case INS_SNYC:
 			{
-				GT_RcvErr |= 0x20;
+				InsRcvErr |= 0x20;
 			}break;
-			case TEST_RCV:
+			case INS_RCV:
 			{
-				GT_RcvErr |= 0x10;
+				InsRcvErr |= 0x10;
 			}break;
 			default:
 				break;
@@ -117,30 +115,25 @@ CPU_INT16U GetCheckSum(CPU_INT16U *Ptr, uint8_t BufSize)
 }
 
 
-CPU_INT08U InsDecode(uint8_t *InsBuf, uint8_t BufSize)
+void InsSendAck(uint8_t cmd)
 {
+	//uint8_t ins_temp[10] = {0xA5, 0x5A, 0xFF, }
+	//UartSend(USART1,OBC_ACK);
+}
 
-	
+CPU_INT08U InsDecode(uint8_t *InsBuf)
+{
 	switch(*InsBuf)
 	{
-		case 0x00: /* 建立链接 */
-		{
-			if(GT_ConnStat == 0)
-				GT_ConnStat = 1;
-			
-		}
-		break;
-		
-		#if 0
 		/* 测试指令 */
 		case INS_CONN_TST:
-		{
-			//UartSend(USART1,INS_CONN_TST);
+			GT_ConnStat = 1; //上位机连接
+			InsSendAck(INS_CONN_TST);
 			break;
-		}
 		case INS_COMM_SWITCH_CLR:
 		{
-			//UartSend(USART1,INS_COMM_SWITCH_CLR);
+			
+			//UartSend(USART1,OBC_ACK);
 			break;
 		}
 		/* 下行数据指令 */	
@@ -160,16 +153,6 @@ CPU_INT08U InsDecode(uint8_t *InsBuf, uint8_t BufSize)
 			break;
 		}					
 		/* 开关指令 */
-		case INS_MAG_ON:
-		{
-			//UartSend(USART1,INS_MAG_ON);
-			break;
-		}
-		case INS_MAG_OFF:
-		{
-			//UartSend(USART1,INS_MAG_OFF);
-			break;
-		}			
 		case INS_GPS_A_ON:
 		{
 			//UartSend(USART1,INS_GPS_A_ON);
@@ -181,7 +164,6 @@ CPU_INT08U InsDecode(uint8_t *InsBuf, uint8_t BufSize)
 			//UartSend(USART1,0xFF);
 			break;
 		}
-		#endif
 	}
 	
 	return 0;

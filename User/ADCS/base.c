@@ -1,58 +1,16 @@
 #include <includes.h>
 
-/***************************************/
-/* GPS量测更新任务
-接收GPS数据接收模块发出的信号灯进行工作
-根据GPS结合轨道动力学模型，利用信息融合算法估计卫星的位置和速度*/
-void AppTaskOrbDet(void)                           /* 优先级：114  本任务接收GPS数据接收模块发出的信号灯进行工作，根据GPS结合动力学模型，利用信息融合算法估计卫星的位置和速度*/
-{  
-	 OS_ERR err;
-	 int i;
-   double PosInWGS[3],VelInWGS[3];
-   while(1)
-   {
-      BSP_OS_SemWait(&SEM_ORB_DET, 0);
-	    adcs_timer = OSTimeGet (&err);
-			TinSat=adcs_time0 + ((double)adcs_timer) * 1.0 / 1000.0 / 86400.0;
-		  for (i=0;i<3;i++)
-			{
-					PosInWGS[i] = WGS84PV[i];
-					VelInWGS[i] = WGS84PV[i+3];
-			}
-			posVelInJ_GPSGet(orbInfoGPS,PosInWGS,VelInWGS,&TinSat);
-   }
-}
-
-/***************************************/
-/* SGP4轨道计算任务 */
-void AppTaskCalcuOrb(void)                           /*开普勒轨道计算，利用轨道力学模型计算卫星当前的位置和速度*/
-{
-	 OS_ERR err;
-   double tTime,dt,PosInTEME[3],VelInTEME[3];
-	 int temp = 1440;
-	 while (1)
-	 {
-			 BSP_OS_SemWait(&SEM_ORB_CALCU, 0);
-		 
-	     adcs_timer = OSTimeGet (&err);
-			 TinSat=adcs_time0+adcs_timer*1.0/1000.0/86400.0;
-			 dt = (TinSat - satrec.jdsatepoch) * temp;
-		 
-       if (CntSGP4 == 0)
-					sgp4init(&satrec);
-       CntSGP4++;
-	     sgp4(PosInTEME,VelInTEME,&satrec,&dt);
-	     posVelInJ_SGP4Get(orbInfo,PosInTEME,VelInTEME,&tTime);
-   }
-}
-
-
 
 /***************************************/
 /* 姿态信息采集任务---每2s执行一次 */
 void AppTaskSenGet(void)
 {
-
+   OS_ERR err;
+	 int i;
+   double PosInWGS[3],VelInWGS[3];
+	 double tTime,dt,PosInTEME[3],VelInTEME[3];
+	 int temp = 1440;
+	
    while(1)
    {
 		 	/*读磁强计读数*/
@@ -69,12 +27,14 @@ void AppTaskSenGet(void)
             cntPitcomFlag = 0 ;
             cntAttStaFlag = 0;
       }
-      if(AdcsGpsUse == VALID)   
-				 AdcsOrbFlg = VALID;
+			
+			adcs_timer = OSTimeGet (&err);
+			TinSat = TinSat0 + ((double)adcs_timer) * 1.0 / 1000.0 / 86400.0;
+			
 			if(upXwAdcsTLEFlag == VALID)                         /*原ORBFlag 轨道上注有效标志位 现7分钟释放一次,upXwAdcsTLEFlag为轨道上注有效标志*/ 
 			{ 
-				 AdcsOrbFlg = VALID;
 				 upXwAdcsTLEFlag = INVALID;                        /*标志位复位*/         
+				 upAdcsTLEFlag = VALID;
 				 satrec.bstar = upXwAdcsTLEBstar;
 				 satrec.ecco = upXwAdcsTLEEcco;
 				 satrec.inclo = upXwAdcsTLEInclo;
@@ -85,7 +45,59 @@ void AppTaskSenGet(void)
 				 satrec.nodeo = upXwAdcsTLENodeo;
 				 CntSGP4 = 0;
 			}
+			
+			/*  在姿态捕获模式开启之前是不需要进行轨道采集和递推的，可能会占用系统资源并且可靠性降低   */
+      if(AdcsGpsUse == VALID) 
+			{				
+				 AdcsOrbFlg = VALID;
+			   AdcsGpsUse = INVALID;
+		     for (i=0;i<3;i++)
+			   {
+					   PosInWGS[i] = WGS84PV[i];
+					   VelInWGS[i] = WGS84PV[i+3];
+			   }
+			   posVelInJ_GPSGet(orbInfoGPS,PosInWGS,VelInWGS,&TinSat);
+				 AdcsOrbGPSFlag = VALID;
+				 CntNoGPS = 0;
+			}
+			else if(upAdcsTLEFlag == VALID)
+			{
+				 AdcsOrbFlg = VALID;
+				 dt = (TinSat - satrec.jdsatepoch) * temp;
+         if (CntSGP4 == 0)
+				 {
+					  sgp4init(&satrec);
+         }
+				 CntSGP4++;
+	       sgp4(PosInTEME,VelInTEME,&satrec,&dt);
+	       posVelInJ_SGP4Get(orbInfo,PosInTEME,VelInTEME,&TinSat);
+			}
+			else if(AdcsOrbGPSFlag == VALID)
+			{
+				 if (CntNoGPS == 0)
+				 {
+					  GetTLEFromGPS(&satrecFromGPS,orbInfoGPS,&TinSat);
+					  sgp4init(&satrecFromGPS);
+				 }
+				 dt = CntNoGPS * tInterval;
+				 if (dt < 43200)
+				 {
+					  AdcsOrbFlg = VALID;
+				    sgp4(PosInTEME,VelInTEME,&satrecFromGPS,&dt);
+	          posVelInJ_SGP4Get(orbInfo,PosInTEME,VelInTEME,&tTime);
+				    CntNoGPS++;
+				 }
+				 else
+				 {
+					 AdcsOrbGPSFlag = INVALID;
+				 }
+			}
+			else
+			{
+				 AdcsOrbFlg = INVALID;
+			}
 
+     
       /******************************************************************************/
       /*上行参数由数据综合系统获得后给姿控系统参数进行赋值*/
       if(upXwAdcsConPFlag == VALID)                                      /*三轴稳定控制律P系数上注标志位，数据综合置位姿控清零*/
@@ -97,11 +109,6 @@ void AppTaskSenGet(void)
         {
           upAdcsConD = upXwAdcsConD;
            upXwAdcsConDFlag = INVALID;
-        }
-      if(upXwAdcsWhlVFlag == VALID)                                      /*动量轮角动量控制电压，数据综合置位姿控清零*/
-        {
-          upAdcsWhlV = upXwAdcsWhlV;
-          upXwAdcsWhlVFlag = INVALID;
         }
       if(upXwAdcsConZFlag == VALID)                                      /*章进动控制律Z系数，数据综合置位姿控清零*/
         {
@@ -126,8 +133,9 @@ void AppTaskSenGet(void)
 
       /*****************************************************************************************/
 
-      if(AdcsOrbFlg == VALID)              /*姿控信息采集任务时刻关注上行轨道标志位、阻尼标志位和俯仰滤波标志位，一旦检测到有效即发出信号灯执行相应任务*/
-				 BSP_OS_SemPost(&SEM_ORB_CALCU);
+      if(AdcsOrbFlg == INVALID)              /*姿控信息采集任务时刻关注上行轨道标志位、阻尼标志位和俯仰滤波标志位，一旦检测到有效即发出信号灯执行相应任务*/
+				 pitFltComFlg = INVALID;
+			   magDotDmpFlg = VALID;
       if(magDotDmpFlg == VALID)	
 				 BSP_OS_SemPost(&SEM_MAG_DOT_DMP);
       if(pitFltComFlg == VALID)
@@ -149,7 +157,7 @@ void AppTaskMagDotDmp(void)
 {
    double magTmp[3],magInc[3];
    double tmp1,tmp2,tmp3;
-   double Vout[3],Voutmw;
+   double Vout[3];
    int i,t0 = 2999;
    tmp1 =1/2.2565; tmp2 =1/2.2061; tmp3 =1/2.1068;
    while(1)
@@ -183,18 +191,15 @@ void AppTaskMagDotDmp(void)
       Vout[2] = MTQOut[2]*tmp3;
       /* printf("mtq: %f %f %f\n",Vout[0],Vout[1],Vout[2]); */
       
-			Voutmw=upAdcsWhlV;                                            /*动量轮输入电压为上注电压值*/
-     	downAdcsWhlV = Voutmw;                                        /*下行动量轮电压值*/
      	mtxCpy(downAdcsMtqV,Vout,1,3);                                /*下行磁力矩器电压值*/
 		  mtxCpy(downAdcsMagnetometer,magnetometer,1,3);                /*下行磁强计测量值*/
 
-//			daTran2(0, &Voutmw);                                          /*向DA通道0输出动量轮电压值*/
 //			daTran2(1,&Vout[0]); daTran2(2,&Vout[1]);daTran2(3,&Vout[2]); /*向DA通道1、2、3分别输出三轴磁力矩器电压值*/
       
       if(pitFltComFlg == INVALID)
       {
          cntDmpFlag++;
-         if((AdcsOrbFlg == VALID) && (cntDmpFlag > t0)&&(upXwAdcsDmpForever == INVALID)) /*t0>2999 阻尼时间*/ 
+         if((AdcsOrbFlg == VALID) && (cntDmpFlag > t0)) /*t0>2999 阻尼时间*/ 
          {
 						 pitFltComFlg = VALID;
       	 }
@@ -204,14 +209,14 @@ void AppTaskMagDotDmp(void)
 
 
 /***************************************/
-/* 俯仰滤波状态更新任务 */
+/* 俯仰滤波任务 */
 void AppTaskPitFltCom(void)
 {
    double JToWGS[3][3],PosInWGS[3],GeoCord[2];
    double MagInFix[3],MagInJ[3],MtxJtoO[3][3],MagInO[3];
    double PitM,RadToDeg;
    int i;
-	 #if 0
+	 
 	 OS_ERR err;
    RadToDeg = 180.0/PI;
    while(1)
@@ -219,7 +224,7 @@ void AppTaskPitFltCom(void)
 	  	BSP_OS_SemWait(&SEM_PIT_FLT_COM, 0);
 
 	    adcs_timer = OSTimeGet (&err);
-			TinSat=adcs_time0+adcs_timer*1.0/1000.0/86400.0;
+			TinSat=TinSat0+adcs_timer*1.0/1000.0/86400.0;
 
      if(AdcsGpsUse == VALID)                                              /*GPS正常工作*/
      {
@@ -232,7 +237,7 @@ void AppTaskPitFltCom(void)
       cordMtxJToWGSGet(JToWGS,&TinSat);
       posInWGSGet(PosInWGS,JToWGS,orbInfo);
       geoInfoGet(GeoCord,PosInWGS);
-      ChkMagLst(MagInFix,magTable,GeoCord);
+      //ChkMagLst(MagInFix,magTable,GeoCord);
       
       MagJGet(MagInJ,JToWGS,MagInFix);
       MtxJtoOGet(MtxJtoO,orbInfo);
@@ -271,28 +276,6 @@ void AppTaskPitFltCom(void)
          }
       if(attStaFlg == VALID)
 				 BSP_OS_SemPost(&SEM_ATT_STA_CTL);
-			BSP_OS_SemPost(&SEM_PIT_FLT_PRO);
-   }   
-	 #endif
-}
-
-
-/***************************************/
-/* 俯仰滤波状态预测任务 */
-void AppTaskPitFltPro(void)
-{
-   int i;
-   double TqNom[3];
-   while(1)
-   {
-	  	BSP_OS_SemWait(&SEM_PIT_FLT_PRO, 0);
-
-      for(i=0;i<3;i=i+1)
-      {
-          TqNom[i] = mtqTq[i];
-					mtqTq[i] = 0.0;
-      }
-       pitFltTimUpd(PFSt,PPF,TqNom);
    }   
 }
 
@@ -303,8 +286,9 @@ void AppTaskAttStaCtl(void)
 {
    double magTmp[3],magInc[3],theta,dtheta,Tq,MagInB[3],tmpx = 1e-9;
    double tmp1,tmp2,tmp3,tmp,err[3];
-   double Vout[3],Voutmw;
-   int i;   
+   double Vout[3];
+	 double TqNom[3];
+   int i,j;   
    tmp1 =1/2.2565; tmp2 =1/2.2061; tmp3 =1/2.1068;
    	
    while(1)
@@ -349,14 +333,17 @@ void AppTaskAttStaCtl(void)
        Vout[2] = MTQOut[2]*tmp3;
       
       /* printf("mtq: %f %f %f\n",Vout[0],Vout[1],Vout[2]); */
-
-      Voutmw = upAdcsWhlV;                                          /*动量轮输入电压为上注电压值*/
-      downAdcsWhlV = Voutmw;                                        /*下行动量轮电压值*/
       mtxCpy(downAdcsMtqV,Vout,1,3);                                /*下行磁力矩器电压值*/
 
-//      daTran2(0, &Voutmw);                                          /*向DA通道0输出动量轮电压值*/
 //      daTran2(1,&Vout[0]); daTran2(2,&Vout[1]);daTran2(3,&Vout[2]); /*向DA通道1、2、3分别输出三轴磁力矩器电压值*/
      
       cntAttStaFlag++; 
+			
+			for(j=0;j<3;j=j+1)
+      {
+          TqNom[i] = mtqTq[i];
+					mtqTq[i] = 0.0;
+      }
+       pitFltTimUpd(PFSt,PPF,TqNom);
    }   
 }

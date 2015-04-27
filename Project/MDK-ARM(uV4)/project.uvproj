@@ -986,16 +986,6 @@
               <FilePath>..\..\User\ADCS\global.c</FilePath>
             </File>
             <File>
-              <FileName>mySys.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\ADCS\mySys.c</FilePath>
-            </File>
-            <File>
-              <FileName>orbCac.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\ADCS\orbCac.c</FilePath>
-            </File>
-            <File>
               <FileName>sgp4unit.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\ADCS\sgp4unit.c</FilePath>
@@ -1989,16 +1979,6 @@
               <FilePath>..\..\User\ADCS\global.c</FilePath>
             </File>
             <File>
-              <FileName>mySys.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\ADCS\mySys.c</FilePath>
-            </File>
-            <File>
-              <FileName>orbCac.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\ADCS\orbCac.c</FilePath>
-            </File>
-            <File>
               <FileName>sgp4unit.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\ADCS\sgp4unit.c</FilePath>
@@ -2990,16 +2970,6 @@
               <FileName>global.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\ADCS\global.c</FilePath>
-            </File>
-            <File>
-              <FileName>mySys.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\ADCS\mySys.c</FilePath>
-            </File>
-            <File>
-              <FileName>orbCac.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\ADCS\orbCac.c</FilePath>
             </File>
             <File>
               <FileName>sgp4unit.c</FileName>

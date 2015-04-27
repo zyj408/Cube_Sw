@@ -1,8 +1,6 @@
 #ifndef _SGP4UNIT_H_
 #define _SGP4UNIT_H_
 
-#define PI 3.141592653589793
-
 // -------------------------- structure declarations ----------------------------
 typedef struct elsetrec
 {

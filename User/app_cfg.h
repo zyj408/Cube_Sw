@@ -30,13 +30,9 @@
 #define  OUTPUT_TASK_PRIO                 		  				     	2u
 #define  ADC_SAMPLE_TASK_PRIO                                 13u
 
-#define  APP_TASK_ORBDET_PRIO                                 15u
-#define  APP_TASK_ORBPRO_PRIO                                 16u
-#define  APP_TASK_CALCUORB_PRIO                               17u
 #define  APP_TASK_SENGET_PRIO                                 18u
 #define  APP_TASK_MAGDOTDMP_PRIO                              19u
 #define  APP_TASK_PITFLTCOM_PRIO                              20u
-#define  APP_TASK_PITFLTPRO_PRIO                              21u
 #define  APP_TASK_ATTSTACTL_PRIO                              22u
 /*
 *********************************************************************************************************
@@ -59,12 +55,9 @@
 #define  ADC_SAMPLE_TASK_STK_SIZE                  		   	128u
 #define  STO_SOR_MONITOR_TASK_STK_SIZE                    128u
 
-#define  APP_TASK_ORBDET_STK_SIZE                         1024u
-#define  APP_TASK_CALCUORB_STK_SIZE                       1024u
 #define  APP_TASK_SENGET_STK_SIZE                         1024u
 #define  APP_TASK_MAGDOTDMP_STK_SIZE                      1024u
 #define  APP_TASK_PITFLTCOM_STK_SIZE                      1024u
-#define  APP_TASK_PITFLTPRO_STK_SIZE                      1024u
 #define  APP_TASK_ATTSTACTL_STK_SIZE                      1024u
 
 

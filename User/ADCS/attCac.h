@@ -1,10 +1,9 @@
 #ifndef _ATTCAC_H_
 #define _ATTCAC_H_
 
-#define PI 3.141592653589793
-
+#include <includes.h>
 /* 将格里历时间转换成儒略日历 */
-void timeFormTrans(double *tTime,int *year,int *month,int *day,int *hour,int *minute,double *second);
+void timeFormTrans(double *tTime,int *year,int *month,int *day,int *hour,int *minute,int *second);
 
 /* 利用时间信息，获得J2000到TEME坐标的转换矩阵 */
 void cordMtxJToTEMEGet(double JToTEME[3][3],double *tTime);
@@ -51,5 +50,11 @@ void pitFltMagUpd(double PFSt[2],double PPF[2][2],double *PitM);
 
 /* 俯仰滤波器的时间更新 */
 void pitFltTimUpd(double PFSt[2],double PPF[2][2],double TqNomTmp[3]);
+
+/* 惯性系下轨道位置速度得到开普勒六根数 */
+void Get_KplInfo(double Kepler[6],double orbInfo[6]);
+
+/* 由GPS轨道迭代出两行根数 */
+void GetTLEFromGPS(elsetrec *satrecFromGPS,double orbInfoGPS[6],double *tTime);
 
 #endif

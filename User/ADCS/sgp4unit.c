@@ -1,5 +1,4 @@
-#include <base.h>
-
+#include <includes.h>
 
 /*     ----------------------------------------------------------------
  ----------- local functions - only ever used internally by sgp4 ---------- */
@@ -58,7 +57,7 @@ void sgp4init(elsetrec *satrec)
 			double tumin,mu,radiusearthkm,xke,j2,j3,j4,j3oj2,ss,qzms2ttemp,
 						qzms2t,x2o3,ainv,ao,con42,cosio,cosio2,einv,eccsq,omeosq,posq,
 						rp,rteosq,sinio,po,sfour,qzms24,perige,qzms24temp,pinvsq,tsi,etasq,
-						eeta,psisq,coef,coef1,cc2,cc3,cosio4,temp1,temp2,temp3,xhdot1,xpidot,
+						eeta,psisq,coef,coef1,cc2,cc3,cosio4,temp1,temp2,temp3,xhdot1,
 						delmotemp,cc1sq,temp;
      double temp4 = 1.5e-12;
 
@@ -144,7 +143,7 @@ void sgp4init(elsetrec *satrec)
          xhdot1            = -temp1 * cosio;
          satrec->nodedot = xhdot1 + (0.5 * temp2 * (4.0 - 19.0 * cosio2) +
                               2.0 * temp3 * (3.0 - 7.0 * cosio2)) * cosio;
-         xpidot            =  satrec->argpdot+ satrec->nodedot;
+         //xpidot            =  satrec->argpdot+ satrec->nodedot;
          satrec->omgcof   = satrec->bstar * cc3 * cos(satrec->argpo);
          satrec->xmcof    = 0.0;
          if (satrec->ecco > 1.0e-4)
@@ -351,12 +350,12 @@ void sgp4(double r[3],double v[3],elsetrec *satrec,double *tsince)
          vz    =  sini * cossu;
 
          /* --------- position and velocity (in km and km/sec) ---------- */
-         *r = (mrt * ux)* radiusearthkm;
-         *(r+1) = (mrt * uy)* radiusearthkm;
-         *(r+2) = (mrt * uz)* radiusearthkm;
-         *v = (mvt * ux + rvdot * vx) * vkmpersec;
-         *(v+1) = (mvt * uy + rvdot * vy) * vkmpersec;
-         *(v+2) = (mvt * uz + rvdot * vz) * vkmpersec;
+         *r = 1000*(mrt * ux)* radiusearthkm;
+         *(r+1) = 1000*(mrt * uy)* radiusearthkm;
+         *(r+2) = 1000*(mrt * uz)* radiusearthkm;
+         *v = 1000*(mvt * ux + rvdot * vx) * vkmpersec;
+         *(v+1) = 1000*(mvt * uy + rvdot * vy) * vkmpersec;
+         *(v+2) = 1000*(mvt * uz + rvdot * vz) * vkmpersec;
        } 
 
 }

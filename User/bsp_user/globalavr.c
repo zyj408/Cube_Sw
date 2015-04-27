@@ -20,10 +20,10 @@ const CPU_INT32U NorFlashStroeMap[]={
 																	  };
 																		
 /* 星上指令接收状态量 */
-CPU_INT08U IntBuf[BUFFER_SIZE];            /* 指令接收缓冲变量 */
+CPU_INT08U InsBuf[BUFFER_SIZE];            /* 指令接收缓冲变量 */
 CPU_INT16U InsCnt;                         /* 指令接收计数值 */
 CPU_INT08U InsBuf_p;                       /* 指令全局指针 */								
-CPU_INT08U ID_CommandBuf[GT_RCV_SIZE];
+CPU_INT08U ID_CommandBuf[BUFFER_SIZE];
 CPU_INT08U ID_CommandCnt;				
 
 /* 星务板数模转换状态量 */																		
@@ -271,8 +271,8 @@ void bsp_Init_VAR(void)
 	Mem_Set(&TelStrInfo, 0x00, sizeof(struct OBCStoreInfoStr));
 	
 	/* 遥测指令相关初始化 */
-	Mem_Set(IntBuf, 0x00, BUFFER_SIZE);
-	Mem_Set(ID_CommandBuf, 0x00, GT_RCV_SIZE);
+	Mem_Set(InsBuf, 0x00, BUFFER_SIZE);
+	Mem_Set(ID_CommandBuf, 0x00, BUFFER_SIZE);
 	ID_CommandCnt	= 0x00;
 	
 	/* 数模转换相关初始化 */

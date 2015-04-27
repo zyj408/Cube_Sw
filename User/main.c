@@ -35,7 +35,6 @@
 OS_TMR  SPI1_OT_TIMER;
 OS_TMR  COM_OT_TIMER;
 OS_TMR  GPS_OT_TIMER;
-OS_TMR  TEST_OT_TIMER;
 
 /*
 *********************************************************************************************************
@@ -82,12 +81,6 @@ static  CPU_STK  OUTPUT_TASK_STK[OUTPUT_TASK_STK_SIZE];
 static  OS_TCB   ADC_SAMPLE_TASK_TCB;
 static  CPU_STK  ADC_SAMPLE_TASK_STK[ADC_SAMPLE_TASK_STK_SIZE];
 
-static  OS_TCB   AppTaskOrbDetTCB;
-static  CPU_STK  AppTaskOrbDetStk[1024];
-
-static  OS_TCB   AppTaskCalcuOrbTCB;
-static  CPU_STK  AppTaskCalcuOrbStk[1024];
-
 static  OS_TCB   AppTaskSenGetTCB;
 static  CPU_STK  AppTaskSenGetStk[1024];
 
@@ -97,12 +90,9 @@ static  CPU_STK  AppTaskMagDotDmpStk[1024];
 static  OS_TCB   AppTaskPitFltComTCB;
 static  CPU_STK  AppTaskPitFltComStk[1024];
 
-static  OS_TCB   AppTaskPitFltProTCB;
-static  CPU_STK  AppTaskPitFltProStk[1024];
-
 static  OS_TCB   AppTaskAttStaCtlTCB;
 static  CPU_STK  AppTaskAttStaCtlStk[1024];
-OS_SEM   SEM_TEST_REV;	   
+ 
 OS_SEM   SEM_GPS_STO;	   
 OS_SEM   SEM_TEL_STO;	   
 OS_SEM   SEM_PLOAD_STO;	   
@@ -119,8 +109,8 @@ static  void  AppObjCreate          (void);
 static  void  AppTimerCreate          (void);
 
 /* 超时函数 */
-static void ComOT_CallBack (OS_TMR *p_tmr, void *p_arg);
-extern void GPSOT_CallBack (OS_TMR *p_tmr, void *p_arg);
+void ComOT_CallBack (OS_TMR *p_tmr, void *p_arg);
+void GPSOT_CallBack (OS_TMR *p_tmr, void *p_arg);
 
 
 /* 声明函数 */
@@ -410,33 +400,6 @@ static  void  AppTaskCreate (void)
 	
 	
   /*****************************************************************/
-	OSTaskCreate((OS_TCB       *)&AppTaskOrbDetTCB,
-               (CPU_CHAR     *)"App Task OrbDet",    
-               (OS_TASK_PTR   )AppTaskOrbDet,     
-               (void         *)0,                          
-               (OS_PRIO       )APP_TASK_ORBDET_PRIO, 
-               (CPU_STK      *)&AppTaskOrbDetStk[0],
-               (CPU_STK_SIZE  )1024 / 10,
-               (CPU_STK_SIZE  )APP_TASK_ORBDET_STK_SIZE,
-               (OS_MSG_QTY    )0,
-               (OS_TICK       )0,
-               (void         *)0,
-               (OS_OPT        )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
-               (OS_ERR       *)&err);	
-							 
-	OSTaskCreate((OS_TCB       *)&AppTaskCalcuOrbTCB,
-               (CPU_CHAR     *)"App Task CalcuOrb",
-               (OS_TASK_PTR   )AppTaskCalcuOrb,
-               (void         *)0,
-               (OS_PRIO       )APP_TASK_CALCUORB_PRIO,
-               (CPU_STK      *)&AppTaskCalcuOrbStk[0],
-               (CPU_STK_SIZE  )1024 / 10,
-               (CPU_STK_SIZE  )APP_TASK_CALCUORB_STK_SIZE,
-               (OS_MSG_QTY    )0,
-               (OS_TICK       )0, 
-               (void         *)0,
-               (OS_OPT        )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
-               (OS_ERR       *)&err);
 							 
 	OSTaskCreate((OS_TCB       *)&AppTaskSenGetTCB,
                (CPU_CHAR     *)"App Task SenGet",
@@ -480,20 +443,6 @@ static  void  AppTaskCreate (void)
                (OS_OPT        )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                (OS_ERR       *)&err);
 							 
-	OSTaskCreate((OS_TCB       *)&AppTaskPitFltProTCB, 
-               (CPU_CHAR     *)"App Task PitFltPro",    
-               (OS_TASK_PTR   )AppTaskPitFltPro,          
-               (void         *)0,                        
-               (OS_PRIO       )APP_TASK_PITFLTPRO_PRIO, 
-               (CPU_STK      *)&AppTaskPitFltProStk[0],
-               (CPU_STK_SIZE  )1024 / 10,
-               (CPU_STK_SIZE  )APP_TASK_PITFLTPRO_STK_SIZE,
-               (OS_MSG_QTY    )0,
-               (OS_TICK       )0,
-               (void         *)0,
-               (OS_OPT        )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
-               (OS_ERR       *)&err);
-							 
 	OSTaskCreate((OS_TCB       *)&AppTaskAttStaCtlTCB,
                (CPU_CHAR     *)"App Task AttStaCtl",
                (OS_TASK_PTR   )AppTaskAttStaCtl,
@@ -508,7 +457,6 @@ static  void  AppTaskCreate (void)
                (OS_OPT        )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                (OS_ERR       *)&err);						 
 }
-
 
 /*
 *********************************************************************************************************
@@ -528,9 +476,6 @@ static  void  AppTaskCreate (void)
 static  void  AppObjCreate (void)
 {
 	/* 创建互斥信号量 */
-	BSP_OS_SemCreate(&SEM_TEST_REV,
-					 0,	
-					 (CPU_CHAR *)"SEM_TEXT_REV");   /* 地面测试信号灯 */
 	
   BSP_OS_SemCreate(&SEM_GPS_STO,
 					0,	
@@ -545,13 +490,6 @@ static  void  AppObjCreate (void)
 					(CPU_CHAR *)"SEM_PLOAD_STO");   /* 载荷存储信号灯 */
 	
 /********************姿控信号灯*********************/
-	BSP_OS_SemCreate(&SEM_ORB_DET,
-					0,	
-					(CPU_CHAR *)"SEM_ORB_DET");     /* GPS测量信号灯 */
-	
-	BSP_OS_SemCreate(&SEM_ORB_CALCU,
-					0,	
-					(CPU_CHAR *)"SEM_ORB_CALCU");   /* 轨道预报信号灯 */
 	
 	BSP_OS_SemCreate(&SEM_CYC_INFO,
 					0,	
@@ -565,9 +503,6 @@ static  void  AppObjCreate (void)
 					0,	
 					(CPU_CHAR *)"SEM_PIT_FLT_COM");  /* 滤波状态更新信号灯 */
 	
-	BSP_OS_SemCreate(&SEM_PIT_FLT_PRO,
-					0,	
-					(CPU_CHAR *)"SEM_PIT_FLT_PRO");  /* 滤波时间更新信号灯 */
 	
 	BSP_OS_SemCreate(&SEM_ATT_STA_CTL,
 					0,	
@@ -590,7 +525,7 @@ static  void  AppTimerCreate (void)
 	/* 建立通信1超时定时器 */						
 	OSTmrCreate((OS_TMR            *) &COM_OT_TIMER,
 							(CPU_CHAR          *) "COM Over Timer",
-							(OS_TICK            ) 0,
+							(OS_TICK            ) 2*10,
 							(OS_TICK            ) 0,
 							(OS_OPT             ) OS_OPT_TMR_ONE_SHOT,
 							(OS_TMR_CALLBACK_PTR) ComOT_CallBack,
@@ -607,9 +542,4 @@ static  void  AppTimerCreate (void)
 							(void              *) 0,
 							(OS_ERR            *) &err);				
 							
-}
-
-static void ComOT_CallBack (OS_TMR *p_tmr, void *p_arg)
-{
-	//ComRevOTCnt++;
 }
