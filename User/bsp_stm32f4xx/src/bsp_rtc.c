@@ -196,18 +196,67 @@ void RTC_Config(void)
 	}
 }
 
+void bsp_RTCTimeGet(struct tm *tm)
+{
+	unsigned int have_retried = 0;
 
-void bsp_RTCSet(uint8_t hour, uint8_t minute, uint8_t second)
+retry_get_time:	
+	RTC_GetTime(RTC_Format_BIN, &CurTime);
+	RTC_GetDate(RTC_Format_BIN, &CurDate);
+	
+	tm->tm_sec = CurTime.RTC_Seconds;
+	tm->tm_min = CurTime.RTC_Minutes;
+	tm->tm_hour = CurTime.RTC_Hours;
+
+
+	if (tm->tm_sec == 0 && !have_retried) 
+	{
+		have_retried = 1;
+		goto retry_get_time;
+	}	
+	
+	tm->tm_wday = CurDate.RTC_WeekDay;
+	tm->tm_mday = CurDate.RTC_Date;
+	tm->tm_mon = CurDate.RTC_Month;
+	tm->tm_year = CurDate.RTC_Year + 2000;  //15Äê+2000
+}
+
+uint32_t bsp_UTCTimeGet(void)
+{
+	struct tm rtc_time;
+	uint32_t utc_time;
+	
+	bsp_RTCTimeGet(&rtc_time);
+	/* 946684800: UTC 2000-01-01 08:00:00(Beijing) */
+	utc_time = mktime(&rtc_time) - 946684800;
+	
+	return utc_time;
+}
+
+
+void bsp_RTCSet(uint8_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second)
 {
 	RTC_TimeTypeDef RTC_TimeStructure;
-	
+	RTC_DateTypeDef RTC_DateStructure;
 	RTC_TimeStructure.RTC_H12 = RTC_H12_AM;
 	RTC_TimeStructure.RTC_Hours = hour; 
   RTC_TimeStructure.RTC_Minutes = minute;
   RTC_TimeStructure.RTC_Seconds = second;
 	
+	RTC_DateStructure.RTC_WeekDay = 0;
+	RTC_DateStructure.RTC_Date = day;
+	RTC_DateStructure.RTC_Month = month;
+	RTC_DateStructure.RTC_Year = year;
+	
+	
 	if(RTC_SetTime(RTC_Format_BIN, &RTC_TimeStructure) == ERROR)
 	{
 		printf("\n\r>> !! RTC Set Time failed. !! <<\n\r");
 	} 
+	
+	if(RTC_SetDate(RTC_Format_BIN, &RTC_DateStructure) == ERROR)
+	{
+		printf("\n\r>> !! RTC Set Time failed. !! <<\n\r");
+	} 
+	
 }

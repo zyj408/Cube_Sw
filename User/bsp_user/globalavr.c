@@ -47,7 +47,7 @@ struct OBCStoreInfoStr TelStrInfo;
 /* 星上全局时间变量 */
 RTC_TimeTypeDef   CurTime;                 /* 当前卫星时间 */
 RTC_DateTypeDef   CurDate;                 /* 当前卫星日期 */
-
+CPU_INT32U        CurUTCTime;              /* 当前卫星时间UTC格式 */
 /* 星上开机状态标志位 */
 struct OBCBootInfoStr OBCBootInfo;         /* OBC启动状态信息 */
 CPU_INT08U LowVolCnt;                      /* 电源欠压计数 */

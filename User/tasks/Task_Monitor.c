@@ -1,19 +1,20 @@
 #include  <includes.h>
 
-
 void STO_UPDATE_TASK(void *p_arg)
 {
 	(void)p_arg;		/* 避免编译器告警 */
 	
 	while(1)
 	{
-		RTC_GetTime(RTC_Format_BIN, &CurTime);  /* 更新星上时间 */
-		RTC_GetDate(RTC_Format_BIN, &CurDate);  /* 更新星上日期 */
+		CurUTCTime = bsp_UTCTimeGet(); //得到UTC全局时间
+		//RTC_GetTime(RTC_Format_BIN, &CurTime);  /* 更新星上时间 */
+		//RTC_GetDate(RTC_Format_BIN, &CurDate);  /* 更新星上日期 */
+		
 		RandNum_32 = RNG_GetRandomNumber();     /* 真随机数 */
 		
 		IWDG_Feed();
 		
-		BSP_OS_TimeDlyMs(500);
+		BSP_OS_TimeDlyMs(1000);
 	}
 }
 

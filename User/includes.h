@@ -26,6 +26,7 @@
 #include  <math.h>
 #include  <absacc.h>
 #include  <string.h>
+#include  <time.h>
 /*
 *********************************************************************************************************
 *                                              LIBRARIES

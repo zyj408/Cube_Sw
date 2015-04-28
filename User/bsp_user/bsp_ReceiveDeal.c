@@ -8,6 +8,7 @@ uint8_t InsRxIndex;
 uint8_t InsRxLength;
 uint8_t InsRcvErr=0;
 uint8_t GT_ConnStat=0;  /* 没有上位机链接 */
+uint8_t InsCheckSumError = 0;
 
 CPU_INT08U TestRcv(unsigned char rev_data)
 {
@@ -106,8 +107,9 @@ void InsGetCheckSum(uint8_t *Ptr, uint8_t buffsize, uint8_t *checksum)
 	uint8_t checksumtemp;
 	while(buffsize)
 	{
-		checksumtemp ^= Ptr[buffsize];
 		buffsize--;
+		checksumtemp ^= Ptr[buffsize];
+		
 	}
 	*checksum = checksumtemp;
 }
@@ -132,45 +134,204 @@ void InsSendAck(void)
 
 CPU_INT08U InsDecode(uint8_t *InsBuf)
 {
-	/* 添加校验 */
+	uint8_t ins_checksum;
 	
-	
-	switch(*InsBuf)
+	InsGetCheckSum(&InsBuf[2], InsBuf[1], &ins_checksum);
+	if(ins_checksum != InsBuf[(InsBuf[1] + 2)])  //校验码错误
+	{
+		InsCheckSumError++;
+		return 1;
+	}
+	switch(InsBuf[0])
 	{
 		/* 测试指令 */
 		case INS_CONN_TST:  //通信测试指令
 			GT_ConnStat = 1; //上位机连接
 			InsRxCmdCnt++;  //指令计数加1
 			InsSendAck();
-			break;
+		break;
 		case INS_COMM_SWITCH_CLR:  //通信体制16小时重置指令
-		{
-			
-			//UartSend(USART1,OBC_ACK);
-			break;
-		}
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;
 		/* 下行数据指令 */	
 		case INS_DOWN_TEL:
-		{
-			//UartSend(USART1,INS_DOWN_TEL);
-			break;
-		}
+			InsRxCmdCnt++;  //指令计数加1
+		break;
 		case INS_DOWN_PLD:
-		{
-			//UartSend(USART1,INS_DOWN_PLD);
-			break;
-		}			
+			InsRxCmdCnt++;  //指令计数加1
+		break;		
 		case INS_DOWN_CMD:
-		{
-			//UartSend(USART1,INS_DOWN_CMD);
-			break;
-		}					
+			InsRxCmdCnt++;  //指令计数加1
+		break;				
+		case INS_SD_CLR:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;				
+		case INS_FLASH_RST:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;				
+		case INS_OBC_RST:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;				
+		
 		/* 开关指令 */
+		case INS_MTQ_ON:
+			SW_MTQ_ENABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;
+		case INS_MTQ_OFF:
+			SW_MTQ_DISABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;
 		case INS_GPS_A_ON:
-		{
-			//UartSend(USART1,INS_GPS_A_ON);
-			break;
-		}		
+			SW_GPSA_ENABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_GPS_A_OFF:
+			SW_GPSA_DISABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;	
+		case INS_GPS_B_ON:
+			SW_GPSB_ENABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_GPS_B_OFF:
+			SW_GPSB_DISABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;			
+		case INS_RSV_ON:
+			SW_RES_ENABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_RSV_OFF:
+			SW_RES_DISABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;			
+		case INS_MW_A_ON:
+			SW_WHEELA_ENABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_MW_A_OFF:
+			SW_WHEELA_DISABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_MW_B_ON:
+			SW_WHEELB_ENABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_MW_B_OFF:
+			SW_WHEELB_DISABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_SLBRD_ON:
+			SW_SOLAR_ENABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_SLBRD_OFF:
+			SW_SOLAR_DISABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_USB_ON:
+			SW_USB_ENABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_USB_OFF:
+			SW_USB_DISABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_S1_ON:
+			SW_S0_ENABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_S1_OFF:
+			SW_S0_DISABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_S2_ON:
+			SW_S1_ENABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_S2_OFF:
+			SW_S1_DISABLE;
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_S3_ON:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_S3_OFF:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_S4_ON:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_S4_OFF:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		
+		case INS_DET:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_STA:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_DUMP_FOEV_DIS:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_SW_MAG_A:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_SW_MAG_B:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;
+		case INS_SW_1200:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_SW_9600:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_CW_ON:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
+		case INS_COM_TRAN_OFF:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;
+		
 		
 		default:
 		{
