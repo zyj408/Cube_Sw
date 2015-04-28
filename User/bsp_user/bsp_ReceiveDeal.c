@@ -104,7 +104,7 @@ void ComOT_CallBack (OS_TMR *p_tmr, void *p_arg)
 
 void InsGetCheckSum(uint8_t *Ptr, uint8_t buffsize, uint8_t *checksum)
 {
-	uint8_t checksumtemp;
+	uint8_t checksumtemp = 0;
 	while(buffsize)
 	{
 		buffsize--;
@@ -331,8 +331,22 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			InsRxCmdCnt++;  //指令计数加1
 			InsSendAck();
 		break;
+		case INS_TIME_IN:
+			
+			bsp_RTCSet(InsBuf[6],InsBuf[7],InsBuf[8],InsBuf[9],InsBuf[10],InsBuf[11]); //todo
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;
 		
-		
+		case INS_FIPEX_SCRIPT_IN:
+			
+			FipexScriptStop();
+			FipexInfoGet(&InsBuf[6]);
+			FipexScriptStart();  //开始Fipex脚本
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;
+				
 		default:
 		{
 			//UartSend(USART1,0xFF);

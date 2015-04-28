@@ -548,7 +548,7 @@ SD_Error SD_PowerON(void)
   SDIO_InitStructure.SDIO_ClockEdge = SDIO_ClockEdge_Rising;
   SDIO_InitStructure.SDIO_ClockBypass = SDIO_ClockBypass_Disable;
   SDIO_InitStructure.SDIO_ClockPowerSave = SDIO_ClockPowerSave_Disable;
-  SDIO_InitStructure.SDIO_BusWide = SDIO_BusWide_1b;
+  SDIO_InitStructure.SDIO_BusWide = SDIO_BusWide_4b;
   SDIO_InitStructure.SDIO_HardwareFlowControl = SDIO_HardwareFlowControl_Disable;
   SDIO_Init(&SDIO_InitStructure);
 
@@ -3017,10 +3017,11 @@ void SDIO_Interrupts_Config(void)
 
 void bsp_FileSystem(void)
 {
+	//UINT bw;
 	f_result = f_mount(FS_SD, &f_fs);
 	if(f_result == FR_OK)
 	{
-		printf("File System Init OK\r\n");
+		DEBUG_LOG("File System Init OK\r\n");
 	}
 	
 	//f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE | FA_CREATE_ALWAYS);  // NOTE:建立文件名最好全英文

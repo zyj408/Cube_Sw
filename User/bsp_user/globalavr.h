@@ -394,5 +394,5 @@ extern volatile CPU_INT16U FalPld;
 #define INS_TEL_ADRS           0x62    //遥测存储指针变更
 #define INS_GPS_ADRS           0x63    //GPS存储指针变更
 #define INS_TIME_IN            0x64    //时间注入
-
+#define INS_FIPEX_SCRIPT_IN    0x65    //Fipex指令注入
 #endif

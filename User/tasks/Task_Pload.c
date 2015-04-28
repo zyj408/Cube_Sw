@@ -19,6 +19,7 @@ void PLOAD_SAM_TASK(void *p_arg)
 	uint8_t FipexAckTimeout;
 	(void)p_arg;
 
+	FipexScriptStart();
 	while(1)
 	{
 		switch(FipexStatus)
@@ -131,9 +132,7 @@ update:
 								comClearRxFifo(COM3);  //清空串口接收FIFO
 								FipexAckTimeout = 0; //计时清零
 								
-								#if debug_enable
-								printf("Fipex: OBC request for repeat!\r\n");
-								#endif 
+								DEBUG_LOG("Fipex: OBC request for repeat!\r\n");
 											
 								continue;
 							}
@@ -144,9 +143,7 @@ update:
 								comClearRxFifo(COM3);  //清空串口接收FIFO
 								FipexAckTimeout = 0; //计时清零
 								
-								#if debug_enable
-								printf("Fipex: Fipex request for CMD!\r\n");
-								#endif 
+								DEBUG_LOG("Fipex: Fipex request for CMD!\r\n");
 								
 								continue;
 							}
@@ -180,9 +177,7 @@ update:
 			/* 跳出Fipex接收循环 */
 			if(FipexAckTimeout == 50)  // 发生超时
 			{
-				#if debug_enable
-					printf("Fipex: Fipex ACK Timeout!\r\n");
-				#endif 
+				DEBUG_LOG("Fipex: Fipex ACK Timeout!\r\n");
 				
 				if(FipexRspSendCnt == 0)
 				{
@@ -237,9 +232,7 @@ error:  if(FipexErrorFlg)
 					FipexAckWaitFlg = 0;
 					FipexErrorFlg = 0;
 					
-					#if debug_enable
-					printf("Fipex: Fipex Error!\r\n");
-					#endif 
+					DEBUG_LOG("Fipex: Fipex Error!\r\n");
 				}	
 				
 next:		if(FipexCurTime++ > DelayTime) //Fipex时间到达延迟时间 //延时计算

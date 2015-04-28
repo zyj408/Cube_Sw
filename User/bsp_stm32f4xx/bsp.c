@@ -145,6 +145,13 @@ while(_ulDelayTime--)
 }
 }
 
+void DEBUG_LOG(const char *format, ...)
+{
+	#if debug_enable
+		printf("[%02d-%02d:%02d:%02d]->", CurDate.RTC_Date, CurTime.RTC_Hours, CurTime.RTC_Minutes, CurTime.RTC_Seconds);
+		printf(format);
+	#endif
+}
 /*
 *********************************************************************************************************
 *                                            BSP_CPU_ClkFreq()

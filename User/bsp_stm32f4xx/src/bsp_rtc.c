@@ -114,9 +114,9 @@ void RTC_Config(void)
 
 		if(RtcTimeout > RTC_TIMEOUT_US)  //18              /* 判断是否有超时 */
 		{	
-			#if debug_enable
-			printf("Init RTC Wrong: Oscillator time out! \r\n");
-			#endif
+			
+			DEBUG_LOG("Init RTC Wrong: Oscillator time out! \r\n");
+
 			RCC_LSEConfig(RCC_LSE_OFF);
 			OBCBootInfo.BootLSE_Error = 1;
 			OBCBootInfo.BootRTC_Source = 1;   /* 自动配置RTC为内部时钟 */
@@ -124,9 +124,8 @@ void RTC_Config(void)
 	
 		if(OBCBootInfo.BootRTC_Source == 0)
 		{
-			#if debug_enable
-			printf("Enable RTC with LSE \r\n");
-			#endif
+			DEBUG_LOG("Enable RTC with LSE \r\n");
+
 			RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);		/* 选择RTC时钟源 */
 			uwSynchPrediv = 0xFF;
 			uwAsynchPrediv = 0x7F;
@@ -145,18 +144,15 @@ void RTC_Config(void)
 		
 		if(RtcTimeout > RTC_TIMEOUT_US)
 		{
-			#if debug_enable
-			printf("All Oscillator time out! \r\n");
-			#endif
+			DEBUG_LOG("All Oscillator time out! \r\n");
 			//RCC_LSICmd(DISABLE);
 			OBCBootInfo.BootLSI_Error = 1;
 			OBCBootInfo.BootRTC_Source = 2;   /* 自动配置RTC为内部时钟 */
 		}
 		if(OBCBootInfo.BootRTC_Source == 1)
 		{
-			#if debug_enable
-			printf("Enable RTC with LSI \r\n");
-			#endif
+			DEBUG_LOG("Enable RTC with LSI \r\n");
+			
 			RCC_RTCCLKConfig(RCC_RTCCLKSource_LSI);  /* 选择RTC时钟源 */
 			uwSynchPrediv = 0xFF;
 			uwAsynchPrediv = 0x7F;
@@ -175,9 +171,7 @@ void RTC_Config(void)
 	
 	  if (RTC_Init(&RTC_InitStructure) == ERROR)  /* 检测RTC初始化 */
 	  {
-			#if debug_enable
-			printf("RTC Init wrong \r\n");
-			#endif
+			DEBUG_LOG("RTC Init wrong \r\n");
 	  }
 
 	  /* 设置年月日和星期 */

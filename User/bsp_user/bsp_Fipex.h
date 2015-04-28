@@ -123,6 +123,6 @@ uint8_t bsp_FipexGetCheckSum(unsigned char *cmd, unsigned char* checksum, unsign
 void FipexScriptStart(void);
 uint8_t FipexAckHandle(uint8_t *rx_data);
 void FipexScienceDataStore(uint8_t * rx_data);
-
+uint8_t FipexInfoGet(uint8_t* cmd);
 
 #endif

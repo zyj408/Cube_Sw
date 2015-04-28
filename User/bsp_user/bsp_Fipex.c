@@ -52,9 +52,7 @@ uint8_t bsp_FipexSendCmd(uint8_t *cmd, uint16_t length)
 
 void FipexCmdRead(void)  //从CPU_INTER读取数据
 {
-	#if debug_enable
-	printf("Upload Fipex Command from CPU internal Flash\r\n");
-	#endif 
+	DEBUG_LOG("Upload Fipex Command from CPU internal Flash\r\n");
 	
 	bsp_ReadCpuFlash(CurFlashSetor, (uint8_t *)&FipexOperationPara.FipexCmdInfo[0].FipexCmd[0], sizeof(FipexOperationPara));
 }
@@ -78,9 +76,7 @@ uint8_t FipexCmdStore(void)
 	
 	if(!TryTime)
 	{
-		#if debug_enable
-			printf("Internal Flash program error!\r\n");
-		#endif
+			DEBUG_LOG("Internal Flash program error!\r\n");
 	}
 	return 0;
 }
@@ -110,7 +106,6 @@ void FipexScienceDataStore(uint8_t *rx_data)
 
 	uint8_t length = rx_data[2];
 	uint8_t *ptr_obc;
-	//CurTime
 	
 	ptr_obc = rx_data + length + 5;
 	
@@ -125,16 +120,16 @@ void FipexScienceDataStore(uint8_t *rx_data)
 	ret = f_open(&f_file, "0:/fipex.bin", FA_READ | FA_WRITE | FA_CREATE_ALWAYS); // NOTE:建立文件名最好全英文
 	if (ret != 0)
 	{
-		printf("0:/fipex.bin open error\r\n");
+		DEBUG_LOG("0:/fipex.bin open error\r\n");
 		return;
 	}
-	
+	DEBUG_LOG("Fipex store data->");
 	printf("0:/fipex.fsize: %ld\r\n", FipexFileSize);
 	
 	ret = f_lseek(&f_file, FipexFileSize);
 	if (ret != 0)
 	{
-		printf("0:/fipex.bin lseek error\r\n");
+		DEBUG_LOG("0:/fipex.bin lseek error\r\n");
 		f_close(&f_file);
 		return;
 	}
@@ -143,14 +138,14 @@ void FipexScienceDataStore(uint8_t *rx_data)
 	f_write(&f_file, (rx_data + 1), length, &bw);
 	if(length != bw)
 	{
-		printf("0:/fipex.bin write error\r\n");
+		DEBUG_LOG("0:/fipex.bin write error\r\n");
 		f_close(&f_file);
 		return;
 	}
 	
 	ret = f_close(&f_file);
 	if(ret == 0)
-		printf("0:/fipex.bin store ok\r\n");
+		DEBUG_LOG("0:/fipex.bin store ok\r\n");
 	
 	FipexFileSize += length;
 }
@@ -321,7 +316,7 @@ uint8_t FipexInfoGet(uint8_t* cmd)
 	unsigned char *delay_ptr;
 	
 /*******************************************************/
-	printf("Command Frame Check!!!\r\n");
+	DEBUG_LOG("Command Frame Check!!!\r\n");
 	if(FipexInfoCheck(cmd))
 		return 1;
 
@@ -390,10 +385,7 @@ uint8_t FipexInfoGet(uint8_t* cmd)
 void FipexInfomationInit(void)  //从FLASH中读取指令信息
 {
 
-	
-	#if debug_enable
-	printf("Read Fipex Command from CPU Flash\r\n");
-	#endif 
+	DEBUG_LOG("Read Fipex Command from CPU Flash\r\n");
 	
 	bsp_ReadCpuFlash(CurFlashSetor, (uint8_t *)&FipexOperationPara.FipexCmdInfo[0].FipexCmd[0], sizeof(FipexOperationPara));
 	
@@ -442,9 +434,7 @@ uint8_t bsp_FipexPowerOn(void)
 	{
 		FIPEX_3V3_DISABLE;
 		
-		#if debug_enable
-		printf("Fipex 3v3 power on fail!\r\n");
-		#endif
+		DEBUG_LOG("Fipex 3v3 power on fail!\r\n");
 		
 		return 1;  //3.3V上电错误
 	}
@@ -464,9 +454,7 @@ uint8_t bsp_FipexPowerOn(void)
 		FIPEX_5V_DISABLE;
 		FIPEX_3V3_DISABLE;
 		
-		#if debug_enable
-		printf("Fipex 5V power on fail!\r\n");
-		#endif
+		DEBUG_LOG("Fipex 5V power on fail!\r\n");
 		
 		return 2;  //5V上电错误
 	}
@@ -503,9 +491,7 @@ uint8_t bsp_FipexPowerOff(void)
 	
 	if(FipexTimeOut_ms > 290*1000)
 	{
-		#if debug_enable
-			printf("Fipex power 5V off fail!\r\n");
-		#endif
+		DEBUG_LOG("Fipex power 5V off fail!\r\n");
 		return 1;
 	}
 	
@@ -518,9 +504,7 @@ uint8_t bsp_FipexPowerOff(void)
 
 	if(FipexTimeOut_ms > 290*1000)
 	{
-		#if debug_enable
-			printf("Fipex power 3V3 off fail!\r\n");
-		#endif
+		DEBUG_LOG("Fipex power 3V3 off fail!\r\n");
 		return 2;
 	}
 	else
