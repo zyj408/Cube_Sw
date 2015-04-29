@@ -1187,11 +1187,17 @@ SD_Error SD_ReadBlock(uint8_t *readbuff, uint32_t ReadAddr, uint16_t BlockSize)
   SDIO->DCTRL = 0x0;
 
 
+	BlockSize = 512;
   if (CardType == SDIO_HIGH_CAPACITY_SD_CARD)
   {
-    BlockSize = 512;
-    ReadAddr /= 512;
+    /***** 大容量版本 *****/
+    //ReadAddr /= 512;
   }
+	else
+	{
+		/***** 小容量版本 *****/
+		ReadAddr *= 512;
+	}
 
   /* Set Block Size for Card */
   SDIO_CmdInitStructure.SDIO_Argument = (uint32_t) BlockSize;
@@ -1314,11 +1320,18 @@ SD_Error SD_ReadMultiBlocks(uint8_t *readbuff, uint32_t ReadAddr, uint16_t Block
 
   SDIO->DCTRL = 0x0;
 
+	BlockSize = 512;
   if (CardType == SDIO_HIGH_CAPACITY_SD_CARD)
   {
-    BlockSize = 512;
-    ReadAddr /= 512;
+    /***** 大容量版本 *****/
+    //ReadAddr /= 512;
   }
+	else
+	{
+		/***** 小容量版本 *****/
+		ReadAddr *= 512;
+	}
+	
 
   /*!< Set Block Size for Card */
   SDIO_CmdInitStructure.SDIO_Argument = (uint32_t) BlockSize;
@@ -1447,13 +1460,18 @@ SD_Error SD_WriteBlock(uint8_t *writebuff, uint32_t WriteAddr, uint16_t BlockSiz
 
   SDIO->DCTRL = 0x0;
 
-
+	BlockSize = 512;
   if (CardType == SDIO_HIGH_CAPACITY_SD_CARD)
   {
-    BlockSize = 512;
-    WriteAddr /= 512;
+    /***** 大容量版本 *****/
+    //WriteAddr /= 512;
   }
-
+	else
+	{
+		/***** 小容量版本 *****/
+		WriteAddr *= 512;
+	}
+	
   /* Set Block Size for Card */
   SDIO_CmdInitStructure.SDIO_Argument = (uint32_t) BlockSize;
   SDIO_CmdInitStructure.SDIO_CmdIndex = SD_CMD_SET_BLOCKLEN;
@@ -1574,13 +1592,19 @@ SD_Error SD_WriteMultiBlocks(uint8_t *writebuff, uint32_t WriteAddr, uint16_t Bl
   StopCondition = 1;
 
   SDIO->DCTRL = 0x0;
-
+	
+	BlockSize = 512;
   if (CardType == SDIO_HIGH_CAPACITY_SD_CARD)
   {
-    BlockSize = 512;
-    WriteAddr /= 512;
+    /***** 大容量版本 *****/
+    //WriteAddr /= 512;
   }
-
+	else
+	{
+		/***** 小容量版本 *****/
+		WriteAddr *= 512;
+	}
+	
   /* Set Block Size for Card */
   SDIO_CmdInitStructure.SDIO_Argument = (uint32_t) BlockSize;
   SDIO_CmdInitStructure.SDIO_CmdIndex = SD_CMD_SET_BLOCKLEN;
