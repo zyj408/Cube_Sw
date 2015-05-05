@@ -1,6 +1,8 @@
 #include <includes.h>
 #include "globalavr.h"
 
+
+#define SWITCH_TIMEOUT_MS  5
 enum INS_STATUS InsState=INS_IDLE;  /* 地面测试状态初始化 */
 
 uint16_t InsRxCmdCnt = 0;
@@ -135,6 +137,7 @@ void InsSendAck(void)
 CPU_INT08U InsDecode(uint8_t *InsBuf)
 {
 	uint8_t ins_checksum;
+	uint8_t timeout_ms;
 	
 	InsGetCheckSum(&InsBuf[2], InsBuf[1], &ins_checksum);
 	if(ins_checksum != InsBuf[(InsBuf[1] + 2)])  //校验码错误
@@ -178,123 +181,550 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 		break;				
 		
 		/* 开关指令 */
-		case INS_MTQ_ON:
-			SW_MTQ_ENABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+		case INS_MTQ_ON:  //开磁棒
+			timeout_ms = 0; 
+			while(SW_MTQ_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_MTQ_ENABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_MTQ_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;
-		case INS_MTQ_OFF:
-			SW_MTQ_DISABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+		case INS_MTQ_OFF:  //关磁棒
+			timeout_ms = 0; 
+			while(SW_MTQ_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_MTQ_DISABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_MTQ_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			
 		break;
-		case INS_GPS_A_ON:
-			SW_GPSA_ENABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+		case INS_GPS_A_ON:  //开GPS_A
+			timeout_ms = 0; 
+			while(SW_GPSA_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_GPSA_ENABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_GPSA_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			
 		break;		
-		case INS_GPS_A_OFF:
-			SW_GPSA_DISABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+		case INS_GPS_A_OFF:  //关GPS_A
+			timeout_ms = 0; 
+			while(SW_GPSA_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_GPSA_DISABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_GPSA_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;	
-		case INS_GPS_B_ON:
-			SW_GPSB_ENABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+		case INS_GPS_B_ON:  //开GPS_B
+			timeout_ms = 0; 
+			while(SW_GPSB_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_GPSB_ENABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_GPSB_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
-		case INS_GPS_B_OFF:
-			SW_GPSB_DISABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+		case INS_GPS_B_OFF: //关GPS_B
+			timeout_ms = 0; 
+			while(SW_GPSB_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_GPSB_DISABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_GPSB_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;			
 		case INS_RSV_ON:
-			SW_RES_ENABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_RES_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_RES_ENABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_RES_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_RSV_OFF:
-			SW_RES_DISABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_RES_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_RES_DISABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_RES_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;			
 		case INS_MW_A_ON:
-			SW_WHEELA_ENABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_WHEELA_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_WHEELA_ENABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_WHEELA_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_MW_A_OFF:
-			SW_WHEELA_DISABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_WHEELA_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_WHEELA_DISABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_WHEELA_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_MW_B_ON:
-			SW_WHEELB_ENABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_WHEELB_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_WHEELB_ENABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_WHEELB_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_MW_B_OFF:
-			SW_WHEELB_DISABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_WHEELB_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_WHEELB_DISABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_WHEELB_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_SLBRD_ON:
-			SW_SOLAR_ENABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_SOLAR_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_SOLAR_ENABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_SOLAR_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_SLBRD_OFF:
-			SW_SOLAR_DISABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_SOLAR_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_SOLAR_DISABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_SOLAR_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_USB_ON:
-			SW_USB_ENABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_USB_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_USB_ENABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_USB_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_USB_OFF:
-			SW_USB_DISABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_USB_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_USB_DISABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_USB_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_S1_ON:
-			SW_S0_ENABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_S0_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_S0_ENABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_S0_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_S1_OFF:
-			SW_S0_DISABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_S0_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_S0_DISABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_S0_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_S2_ON:
-			SW_S1_ENABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_S1_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_S1_ENABLE;;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_S1_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_S2_OFF:
-			SW_S1_DISABLE;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_S1_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_S1_DISABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_S1_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_S3_ON:
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_S2_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_S2_ENABLE;;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_S2_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_S3_OFF:
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_S2_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_S2_DISABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_S2_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_S4_ON:
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_S3_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_S3_ENABLE;;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_S3_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		case INS_S4_OFF:
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			timeout_ms = 0; 
+			while(SW_S3_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				SW_S3_DISABLE;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && SW_S3_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
 		break;		
 		
+		case INS_MTQ1_DIR_POS:
+			timeout_ms = 0; 
+			while(MTQ_DIR1_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				MTQ1_DIR_POS;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && MTQ_DIR1_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+		break;
+		case INS_MTQ1_DIR_NAG:
+			timeout_ms = 0; 
+			while(MTQ_DIR1_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				MTQ1_DIR_NAG;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && MTQ_DIR1_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+		break;
+		case INS_MTQ2_DIR_POS:
+			timeout_ms = 0; 
+			while(MTQ_DIR2_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				MTQ2_DIR_POS;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && MTQ_DIR2_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}			
+		break;
+		case INS_MTQ2_DIR_NAG:
+			timeout_ms = 0; 
+			while(MTQ_DIR2_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				MTQ2_DIR_NAG;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && MTQ_DIR2_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}			
+		break;		
+		case INS_MTQ3_DIR_POS:
+			timeout_ms = 0; 
+			while(MTQ_DIR3_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				MTQ3_DIR_POS;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && MTQ_DIR3_PIN() == Bit_RESET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}			
+		break;
+		case INS_MTQ3_DIR_NAG:
+			timeout_ms = 0; 
+			while(MTQ_DIR3_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
+			{
+				MTQ3_DIR_NAG;
+				BSP_OS_TimeDlyMs(1);
+				timeout_ms++;
+			}
+			if(timeout_ms == SWITCH_TIMEOUT_MS && MTQ_DIR3_PIN() == Bit_SET)
+			{
+					//错误
+			}
+			else
+			{
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}			
+		break;	
+
 		case INS_DET:
 			InsRxCmdCnt++;  //指令计数加1
 			InsSendAck();
@@ -331,6 +761,46 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			InsRxCmdCnt++;  //指令计数加1
 			InsSendAck();
 		break;
+		
+		/* 数据注入指令 */
+		case INS_CTL_P_PRA:
+			
+		break;
+		case INS_CTL_D_PRA:
+			
+		break;		
+		case INS_ZJD_CTL:
+			
+		break;
+		case INS_DMP_FLAG:
+			
+		break;		
+		case INS_FLT_FLAG:
+			
+		break;
+		case INS_CTL_FLAG:
+			
+		break;		
+		case INS_CNT_DMP_FLAG:
+			
+		break;
+		case INS_CNT_FLT_FLAG:
+			
+		break;						
+		case INS_CNT_CTL_FLAG:
+			
+		break;						
+		case INS_EQUP_INPUT:
+			
+		break;
+		case INS_TEL_ADRS:
+			
+		break;						
+		case INS_GPS_ADRS:
+			
+		break;		
+		
+		
 		case INS_TIME_IN:
 			
 			bsp_RTCSet(InsBuf[6],InsBuf[7],InsBuf[8],InsBuf[9],InsBuf[10],InsBuf[11]); //todo
@@ -348,10 +818,8 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 		break;
 				
 		default:
-		{
 			//UartSend(USART1,0xFF);
 			break;
-		}
 	}
 	
 	return 0;

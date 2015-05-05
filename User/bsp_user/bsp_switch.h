@@ -44,6 +44,14 @@
 #define RCC_S1_EN_PORT    	  RCC_AHB1Periph_GPIOG
 #define GPIO_S1_EN_PIN		    GPIO_Pin_8
 
+#define GPIO_S2_EN_PORT	      GPIOG			
+#define RCC_S2_EN_PORT    	  RCC_AHB1Periph_GPIOG
+#define GPIO_S2_EN_PIN		    GPIO_Pin_7
+
+#define GPIO_S3_EN_PORT	      GPIOG			
+#define RCC_S3_EN_PORT    	  RCC_AHB1Periph_GPIOG
+#define GPIO_S3_EN_PIN		    GPIO_Pin_6
+
 #if OBC_MTQ_ENABLE
 #define GPIO_MTQ_SLEEP_PORT	  GPIOG			
 #define RCC_MTQ_SLEEP_PORT    RCC_AHB1Periph_GPIOG
@@ -74,9 +82,17 @@
 
 #define SW_S0_PIN()        	GPIO_ReadOutputDataBit(GPIO_S0_EN_PORT, GPIO_S0_EN_PIN)
 #define SW_S1_PIN()        	GPIO_ReadOutputDataBit(GPIO_S1_EN_PORT, GPIO_S1_EN_PIN)
+#define SW_S2_PIN()        	GPIO_ReadOutputDataBit(GPIO_S2_EN_PORT, GPIO_S2_EN_PIN)
+#define SW_S3_PIN()        	GPIO_ReadOutputDataBit(GPIO_S3_EN_PORT, GPIO_S3_EN_PIN)
 
+
+#if OBC_MTQ_ENABLE 
 #define MTQ_POWER_PIN()       GPIO_ReadOutputDataBit(GPIO_MTQ_EN_PORT, GPIO_MTQ_EN_PIN)      
 #define MTQ_SLEEP_PIN()       GPIO_ReadOutputDataBit(GPIO_MTQ_SLEEP_PORT, GPIO_MTQ_SLEEP_PIN)  
+#define MTQ_DIR1_PIN()        GPIO_ReadOutputDataBit(GPIO_MTQ1_DIR_PORT, GPIO_MTQ1_DIR_PIN)      
+#define MTQ_DIR2_PIN()        GPIO_ReadOutputDataBit(GPIO_MTQ2_DIR_PORT, GPIO_MTQ2_DIR_PIN)  
+#define MTQ_DIR3_PIN()        GPIO_ReadOutputDataBit(GPIO_MTQ3_DIR_PORT, GPIO_MTQ3_DIR_PIN)  
+#endif
 /***************************************************************/
 /* 开关量定义 */
 
@@ -101,6 +117,10 @@
 #define SW_S0_DISABLE        GPIO_ResetBits(GPIO_S0_EN_PORT, GPIO_S0_EN_PIN)
 #define SW_S1_ENABLE         GPIO_SetBits(GPIO_S1_EN_PORT, GPIO_S1_EN_PIN)
 #define SW_S1_DISABLE        GPIO_ResetBits(GPIO_S1_EN_PORT, GPIO_S1_EN_PIN)
+#define SW_S2_ENABLE         GPIO_SetBits(GPIO_S2_EN_PORT, GPIO_S2_EN_PIN)
+#define SW_S2_DISABLE        GPIO_ResetBits(GPIO_S2_EN_PORT, GPIO_S2_EN_PIN)
+#define SW_S3_ENABLE         GPIO_SetBits(GPIO_S3_EN_PORT, GPIO_S3_EN_PIN)
+#define SW_S3_DISABLE        GPIO_ResetBits(GPIO_S3_EN_PORT, GPIO_S3_EN_PIN)
 
 #if OBC_MTQ_ENABLE
 #define MTQ_WAKEN             GPIO_SetBits(GPIO_MTQ_SLEEP_PORT, GPIO_MTQ_SLEEP_PIN)

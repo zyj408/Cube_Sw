@@ -64,15 +64,22 @@ void bsp_InitSwitch(void)
 	SW_SOLAR_ENABLE;     //打开太阳能翻板供电
 	SW_RES_ENABLE;       //打开保留供电
 
-  RCC_AHB1PeriphClockCmd(RCC_S0_EN_PORT | RCC_S1_EN_PORT, ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_S0_EN_PORT | RCC_S1_EN_PORT | RCC_S2_EN_PORT | RCC_S3_EN_PORT, ENABLE);
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_S0_EN_PIN;	
 	GPIO_Init(GPIO_S0_EN_PORT, &GPIO_InitStructure);
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_S1_EN_PIN;	
 	GPIO_Init(GPIO_S1_EN_PORT, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_S2_EN_PIN;	
+	GPIO_Init(GPIO_S2_EN_PORT, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_S3_EN_PIN;	
+	GPIO_Init(GPIO_S3_EN_PORT, &GPIO_InitStructure);
 	
 	SW_S0_DISABLE;
 	SW_S1_DISABLE;
-	
+	SW_S2_DISABLE;
+	SW_S3_DISABLE;
 }

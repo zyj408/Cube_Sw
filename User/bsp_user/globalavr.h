@@ -355,15 +355,20 @@ extern volatile CPU_INT16U FalPld;
 #define INS_SLBRD_OFF          0x1D		 //帆板关
 #define INS_USB_ON             0x1E		 //USB开
 #define INS_USB_OFF            0x1F		 //USB关
-#define INS_S1_ON              0x20		 //磁棒开
-#define INS_S1_OFF             0x21		 //磁棒关
-#define INS_S2_ON              0x22		 //GPSA开
-#define INS_S2_OFF             0x23		 //GPSA关
-#define INS_S3_ON              0x24		 //GPSB开
-#define INS_S3_OFF             0x25		 //GPSB关
-#define INS_S4_ON              0x26		 //保留开关1开
-#define INS_S4_OFF             0x27		 //保留开关1关
-
+#define INS_S1_ON              0x20		 //S1开
+#define INS_S1_OFF             0x21		 //S1关
+#define INS_S2_ON              0x22		 //S2开
+#define INS_S2_OFF             0x23		 //S2关
+#define INS_S3_ON              0x24		 //S3开
+#define INS_S3_OFF             0x25		 //S3关
+#define INS_S4_ON              0x26		 //S4开
+#define INS_S4_OFF             0x27		 //S4关
+#define INS_MTQ1_DIR_POS       0x28		 //磁棒1正方向
+#define INS_MTQ1_DIR_NAG       0x29		 //磁棒1反方向
+#define INS_MTQ2_DIR_POS       0x2A		 //磁棒2正方向
+#define INS_MTQ2_DIR_NAG       0x2B		 //磁棒2反方向
+#define INS_MTQ3_DIR_POS       0x2C		 //磁棒3正方向
+#define INS_MTQ3_DIR_NAG       0x2D		 //磁棒3反方向
 /* 姿控系统指令 */
 #define INS_DET                0x31    //重新阻尼
 #define INS_STA                0x32		 //永久阻尼使能

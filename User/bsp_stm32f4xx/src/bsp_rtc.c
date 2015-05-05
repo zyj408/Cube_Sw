@@ -245,12 +245,12 @@ void bsp_RTCSet(uint8_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t 
 	
 	if(RTC_SetTime(RTC_Format_BIN, &RTC_TimeStructure) == ERROR)
 	{
-		printf("\n\r>> !! RTC Set Time failed. !! <<\n\r");
+		//printf("\n\r>> !! RTC Set Time failed. !! <<\n\r");
 	} 
 	
 	if(RTC_SetDate(RTC_Format_BIN, &RTC_DateStructure) == ERROR)
 	{
-		printf("\n\r>> !! RTC Set Time failed. !! <<\n\r");
+		//printf("\n\r>> !! RTC Set Time failed. !! <<\n\r");
 	} 
 	
 }
