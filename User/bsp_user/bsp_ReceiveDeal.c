@@ -183,6 +183,10 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			InsRxCmdCnt++;  //指令计数加1
 			InsSendAck();
 		break;				
+		case INS_OBC_REV:
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;				
 		
 		/* 开关指令 */
 		case INS_MTQ_ON:  //开磁棒
@@ -931,7 +935,84 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
       // upXwAdcsTLEMo;
       // upXwAdcsTLENo;
 			// upXwAdcsTLENodeo;
-		
+			if(InsBuf[6] == 0xFF || InsBuf[6] == 0x00)
+			{
+				if(InsBuf[6] == 0xFF)
+					upXwAdcsTLEFlag = VALID;
+				else if(InsBuf[6] == 0x00)
+					upXwAdcsTLEFlag = INVALID;
+				
+				data_inject = 0;
+				for(i=7; i<11; i++)
+				{
+					data_inject >>=8;
+					data_inject |= InsBuf[i];
+				}
+				upXwAdcsTLEBstar = (double)(data_inject / 1000.0);
+				
+				data_inject = 0;
+				for(i=11; i<15; i++)
+				{
+					data_inject >>=8;
+					data_inject |= InsBuf[i];
+				}
+				upXwAdcsTLEEcco = (double)(data_inject / 1000.0);
+
+				data_inject = 0;
+				for(i=15; i<19; i++)
+				{
+					data_inject >>=8;
+					data_inject |= InsBuf[i];
+				}
+				upXwAdcsTLEInclo = (double)(data_inject / 1000.0);			
+				
+				data_inject = 0;
+				for(i=19; i<23; i++)
+				{
+					data_inject >>=8;
+					data_inject |= InsBuf[i];
+				}
+				upXwAdcsTLEArgpo = (double)(data_inject / 1000.0);	
+				
+				data_inject = 0;
+				for(i=23; i<27; i++)
+				{
+					data_inject >>=8;
+					data_inject |= InsBuf[i];
+				}
+				upXwAdcsTLEJdsatepoch = (double)(data_inject / 1000.0);	
+				
+				data_inject = 0;
+				for(i=27; i<31; i++)
+				{
+					data_inject >>=8;
+					data_inject |= InsBuf[i];
+				}
+				upXwAdcsTLEMo = (double)(data_inject / 1000.0);	
+				
+				data_inject = 0;
+				for(i=31; i<35; i++)
+				{
+					data_inject >>=8;
+					data_inject |= InsBuf[i];
+				}
+				upXwAdcsTLENo = (double)(data_inject / 1000.0);	
+
+				data_inject = 0;
+				for(i=35; i<39; i++)
+				{
+					data_inject >>=8;
+					data_inject |= InsBuf[i];
+				}
+				upXwAdcsTLENodeo = (double)(data_inject / 1000.0);	
+				
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			else
+			{
+				
+			}
 		break;
 		case INS_EQUP_INPUT:
 			

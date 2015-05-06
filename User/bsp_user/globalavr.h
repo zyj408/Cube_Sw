@@ -337,6 +337,7 @@ extern volatile CPU_INT16U FalPld;
 #define INS_SD_CLR             0x06    //SD卡清空
 #define INS_FLASH_RST          0x07    //FLASH指针还原
 #define INS_OBC_RST            0x08    //星务计算机重启
+#define INS_OBC_REV            0x09    //星务计算
 
 /* 供电开关指令 */
 #define INS_MTQ_ON             0x10		 //磁棒开
