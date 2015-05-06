@@ -726,14 +726,16 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 		break;	
 
 		case INS_DET:
+			//upXwAdcsReDmp = VALID;
 			InsRxCmdCnt++;  //指令计数加1
 			InsSendAck();
 		break;		
-		case INS_STA:
+		case INS_STA:			//去掉
+
 			InsRxCmdCnt++;  //指令计数加1
 			InsSendAck();
 		break;		
-		case INS_DUMP_FOEV_DIS:
+		case INS_DUMP_FOEV_DIS:			//去掉
 			InsRxCmdCnt++;  //指令计数加1
 			InsSendAck();
 		break;		
@@ -764,32 +766,48 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 		
 		/* 数据注入指令 */
 		case INS_CTL_P_PRA:
-			
+			//upXwAdcsConP
+			//upXwAdcsConPFlag = VALID / INVALID
 		break;
 		case INS_CTL_D_PRA:
-			
+			//upXwAdcsConD
+			//upXwAdcsConDFlag = VALID / INVALID
 		break;		
 		case INS_ZJD_CTL:
-			
+			//upXwAdcsConZ
+			//upXwAdcsConZFlag = VALID / INVALID
 		break;
 		case INS_DMP_FLAG:
-			
+			//upXwAdcsDmpFlgFlag = VALID / INVALID
 		break;		
 		case INS_FLT_FLAG:
-			
+			//upXwAdcsFltFlgFlag = VALID / INVALID
 		break;
 		case INS_CTL_FLAG:
+			//upXwAdcsCtlFlgFlag = VALID / INVALID
 			
 		break;		
-		case INS_CNT_DMP_FLAG:
-			
+		case INS_CNT_DMP_FLAG:			//去掉
+			//cntDmpFlag
 		break;
-		case INS_CNT_FLT_FLAG:
-			
+		case INS_CNT_FLT_FLAG:			//去掉
+			//cntPitcomFlag
 		break;						
-		case INS_CNT_CTL_FLAG:
-			
+		case INS_CNT_CTL_FLAG:			//去掉
+			//cntAttStaFlag
 		break;						
+		case INS_ORB_TLE_FLAG:
+			//upXwAdcsTLEFlag =  VALID / INVALID
+			//double     upXwAdcsTLEBstar;
+      // upXwAdcsTLEEcco;
+      // upXwAdcsTLEInclo;
+      // upXwAdcsTLEArgpo;
+      // upXwAdcsTLEJdsatepoch;
+      // upXwAdcsTLEMo;
+      // upXwAdcsTLENo;
+			// upXwAdcsTLENodeo;
+		
+		break;
 		case INS_EQUP_INPUT:
 			
 		break;

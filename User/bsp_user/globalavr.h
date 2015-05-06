@@ -375,6 +375,8 @@ extern volatile CPU_INT16U FalPld;
 #define INS_DUMP_FOEV_DIS      0x33    //永久阻尼禁止
 #define INS_SW_MAG_A           0x34    //切换至磁强计A
 #define INS_SW_MAG_B           0x35    //切换至磁强计B
+#define INS_SW_MW_A            0x36    //切换至动量轮A
+#define INS_SW_MW_B            0x37    //切换至动量轮B
 /* 通信系统指令 */
 #define INS_SW_1200            0x41    //BPSK1200切换
 #define INS_SW_9600            0x42		 //BPSK9600开
@@ -394,6 +396,8 @@ extern volatile CPU_INT16U FalPld;
 #define INS_CNT_DMP_FLAG       0x57    //阻尼计数器
 #define INS_CNT_FLT_FLAG       0x58    //测量计数器
 #define INS_CNT_CTL_FLAG       0x59    //控制计数器
+
+#define INS_ORB_TLE_FLAG       0x5A    //TLE轨道上注 modify by ZYJ 2015.05.06
 /**************************/
 #define INS_EQUP_INPUT         0x61    //器件健康状态变更指令
 #define INS_TEL_ADRS           0x62    //遥测存储指针变更
