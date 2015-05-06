@@ -138,6 +138,10 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 {
 	uint8_t ins_checksum;
 	uint8_t timeout_ms;
+	int32_t data_inject = 0;
+	uint8_t i;
+	
+	
 	
 	InsGetCheckSum(&InsBuf[2], InsBuf[1], &ins_checksum);
 	if(ins_checksum != InsBuf[(InsBuf[1] + 2)])  //校验码错误
@@ -727,8 +731,20 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 
 		case INS_DET:
 			//upXwAdcsReDmp = VALID;
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
+			if(InsBuf[6] == 0xFF || InsBuf[6] == 0x00)
+			{
+				if(InsBuf[6] == 0xFF)
+					upXwAdcsReDmp = VALID;
+				else if(InsBuf[6] == 0x00)
+					upXwAdcsReDmp = INVALID;
+				
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			else
+			{
+				
+			}
 		break;		
 		case INS_STA:			//去掉
 
@@ -768,24 +784,133 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 		case INS_CTL_P_PRA:
 			//upXwAdcsConP
 			//upXwAdcsConPFlag = VALID / INVALID
+		
+			if(InsBuf[6] == 0xFF || InsBuf[6] == 0x00)
+			{
+				if(InsBuf[6] == 0xFF)
+					upXwAdcsConPFlag = VALID;
+				else if(InsBuf[6] == 0x00)
+					upXwAdcsConPFlag = INVALID;
+				
+				data_inject = 0;
+				for(i=7; i<11; i++)
+				{
+					data_inject >>=8;
+					data_inject |= InsBuf[i];
+				}
+				upXwAdcsConP = (double)(data_inject / 1000.0);
+				
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			else
+			{
+				
+			}
 		break;
 		case INS_CTL_D_PRA:
 			//upXwAdcsConD
 			//upXwAdcsConDFlag = VALID / INVALID
+			if(InsBuf[6] == 0xFF || InsBuf[6] == 0x00)
+			{
+				if(InsBuf[6] == 0xFF)
+					upXwAdcsConDFlag = VALID;
+				else if(InsBuf[6] == 0x00)
+					upXwAdcsConDFlag = INVALID;
+				
+				data_inject = 0;
+				for(i=7; i<11; i++)
+				{
+					data_inject >>=8;
+					data_inject |= InsBuf[i];
+				}
+				upXwAdcsConD = (double)(data_inject / 1000.0);
+				
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			else
+			{
+				
+			}
+			
 		break;		
 		case INS_ZJD_CTL:
 			//upXwAdcsConZ
 			//upXwAdcsConZFlag = VALID / INVALID
+			if(InsBuf[6] == 0xFF || InsBuf[6] == 0x00)
+			{
+				if(InsBuf[6] == 0xFF)
+					upXwAdcsConZFlag = VALID;
+				else if(InsBuf[6] == 0x00)
+					upXwAdcsConZFlag = INVALID;
+				
+				data_inject = 0;
+				for(i=7; i<11; i++)
+				{
+					data_inject >>=8;
+					data_inject |= InsBuf[i];
+				}
+				upXwAdcsConZ = (double)(data_inject / 1000.0);
+				
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			else
+			{
+				
+			}
 		break;
 		case INS_DMP_FLAG:
 			//upXwAdcsDmpFlgFlag = VALID / INVALID
+			if(InsBuf[6] == 0xFF || InsBuf[6] == 0x00)
+			{
+				if(InsBuf[6] == 0xFF)
+					upXwAdcsDmpFlgFlag = VALID;
+				else if(InsBuf[6] == 0x00)
+					upXwAdcsDmpFlgFlag = INVALID;
+				
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			else
+			{
+				
+			}
 		break;		
 		case INS_FLT_FLAG:
 			//upXwAdcsFltFlgFlag = VALID / INVALID
+			if(InsBuf[6] == 0xFF || InsBuf[6] == 0x00)
+			{
+				if(InsBuf[6] == 0xFF)
+					upXwAdcsFltFlgFlag = VALID;
+				else if(InsBuf[6] == 0x00)
+					upXwAdcsFltFlgFlag = INVALID;
+				
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			else
+			{
+				
+			}
 		break;
 		case INS_CTL_FLAG:
 			//upXwAdcsCtlFlgFlag = VALID / INVALID
-			
+			if(InsBuf[6] == 0xFF || InsBuf[6] == 0x00)
+			{
+				if(InsBuf[6] == 0xFF)
+					upXwAdcsCtlFlgFlag = VALID;
+				else if(InsBuf[6] == 0x00)
+					upXwAdcsCtlFlgFlag = INVALID;
+				
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			else
+			{
+				
+			}
 		break;		
 		case INS_CNT_DMP_FLAG:			//去掉
 			//cntDmpFlag
