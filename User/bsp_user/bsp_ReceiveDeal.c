@@ -19,7 +19,7 @@ CPU_INT08U TestRcv(unsigned char rev_data)
 	switch(InsState)
 	{
 			case INS_IDLE:  //空闲状态
-				if(rev_data == 0XA5)
+				if(rev_data == 0XEB)
 				{
 					InsRxIndex = 0;
 					InsRxLength = 0;
@@ -35,7 +35,7 @@ CPU_INT08U TestRcv(unsigned char rev_data)
 			break;
 				
 			case INS_SNYC:  //同步状态
-				if(rev_data == 0X5A)
+				if(rev_data == 0X50)
 				{
 					InsState = INS_RCV;
 					InsRxIndex = 0;  /* 接收数据索引清零 */
@@ -122,8 +122,8 @@ void InsSendAck(void)
 	uint8_t ins_data_temp[10] = {0};
 	uint8_t ins_checksum;
 	
-	ins_data_temp[0] = 0xA5;
-  ins_data_temp[1] = 0x5A;
+	ins_data_temp[0] = 0xEB;
+  ins_data_temp[1] = 0x50;
 	ins_data_temp[2] = 0x30; //Ack指令码
 	ins_data_temp[3] = 0x02; //长度
   ins_data_temp[4] = (uint8_t)(InsRxCmdCnt & 0x00FF);  //数据域
