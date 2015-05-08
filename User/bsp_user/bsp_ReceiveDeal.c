@@ -733,6 +733,48 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			}			
 		break;	
 
+		case INS_MTQ1_PWM:
+			if(InsBuf[6] <= 100)
+			{
+				PwmSetDuty_1 = InsBuf[6];
+				
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			else
+			{
+				//错误
+			}
+		break;
+
+		case INS_MTQ2_PWM:
+			if(InsBuf[6] <= 100)
+			{
+				PwmSetDuty_2 = InsBuf[6];
+				
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			else
+			{
+				//错误
+			}
+		break;
+
+		case INS_MTQ3_PWM:
+			if(InsBuf[6] <= 100)
+			{
+				PwmSetDuty_3 = InsBuf[6];
+				
+				InsRxCmdCnt++;  //指令计数加1
+				InsSendAck();
+			}
+			else
+			{
+				//错误
+			}
+		break;
+			
 		case INS_DET:
 			//upXwAdcsReDmp = VALID;
 			if(InsBuf[6] == 0xFF || InsBuf[6] == 0x00)

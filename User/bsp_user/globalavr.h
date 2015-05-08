@@ -399,6 +399,10 @@ extern volatile CPU_INT16U FalPld;
 #define INS_CNT_CTL_FLAG       0x59    //控制计数器
 
 #define INS_ORB_TLE_FLAG       0x5A    //TLE轨道上注 modify by ZYJ 2015.05.06
+
+#define INS_MTQ1_PWM           0x5B
+#define INS_MTQ2_PWM           0x5C
+#define INS_MTQ3_PWM           0x5D
 /**************************/
 #define INS_EQUP_INPUT         0x61    //器件健康状态变更指令
 #define INS_TEL_ADRS           0x62    //遥测存储指针变更

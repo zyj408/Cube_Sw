@@ -53,6 +53,12 @@ void bsp_InitSwitch(void)
 	GPIO_Init(GPIO_MTQ2_DIR_PORT, &GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = GPIO_MTQ3_DIR_PIN;	
 	GPIO_Init(GPIO_MTQ3_DIR_PORT, &GPIO_InitStructure);
+	
+	MTQ1_DIR_POS;
+  MTQ2_DIR_POS;
+  MTQ3_DIR_POS;
+	
+	
 	#endif
 	
 	SW_MTQ_ENABLE;       //打开磁棒供电
