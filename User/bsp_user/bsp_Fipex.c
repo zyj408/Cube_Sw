@@ -23,8 +23,6 @@ int FipexCurTime = 0;
 int DelayTime = 0;
 
 
-
-
 void FipexScriptStop(void)
 {
 	CurrentScript = 0;  

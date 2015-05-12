@@ -14,34 +14,13 @@
 #ifndef _BSP_USART_FIFO_H_
 #define _BSP_USART_FIFO_H_
 
-/*
-	如果需要更改串口对应的管脚，请自行修改 bsp_uart_fifo.c文件中的 static void InitHardUart(void)函数
-*/
-
-/* 定义使能的串口, 0 表示不使能（不增加代码大小）， 1表示使能 */
-#ifdef STM32_X3	
-	#define	UART1_FIFO_EN	0
-	#define	UART2_FIFO_EN	0
-	#define	UART3_FIFO_EN	0
-	#define	UART4_FIFO_EN	0
-	#define	UART5_FIFO_EN	0
-	#define	UART6_FIFO_EN	0
-#else
 	#define	UART1_FIFO_EN	1    //地面测试串口
-	#define	UART2_FIFO_EN	1    //GPSA测试串口
+	#define	UART2_FIFO_EN	1    //GPSB测试串口
 	#define	UART3_FIFO_EN	1    //载荷接收串口
-	#define	UART4_FIFO_EN	0
+	#define	UART4_FIFO_EN	1    //GPSA测试串口
 	#define	UART5_FIFO_EN	0
 	#define	UART6_FIFO_EN	1    //USB应答机测试串口
 
-	/* RS485芯片发送使能GPIO, PB2 */
-	#define RCC_RS485_TXEN 	RCC_AHB1Periph_GPIOB
-	#define PORT_RS485_TXEN  GPIOB
-	#define PIN_RS485_TXEN	 GPIO_Pin_2
-
-	#define RS485_RX_EN()	PORT_RS485_TXEN->BSRRH = PIN_RS485_TXEN
-	#define RS485_TX_EN()	PORT_RS485_TXEN->BSRRL = PIN_RS485_TXEN
-#endif
 
 /* 定义端口号 */
 typedef enum

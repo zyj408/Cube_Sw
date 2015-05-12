@@ -256,36 +256,6 @@ void comClearRxFifo(COM_PORT_E _ucPort)
 	pUart->usRxCount = 0;
 }
 
-/* 如果是RS485通信，请按如下格式编写函数， 我们仅举了 USART3作为RS485的例子 */
-
-/*
-*********************************************************************************************************
-*	函 数 名: USART3_SendBefor
-*	功能说明: USART1 发送数据前的准备工作。对于RS485通信，请设置RS485芯片为发送状态，
-*			  并修改 UartVarInit()中的函数指针等于本函数名，比如 g_tUart3.SendBefor = USART3_SendBefor
-*	形    参: 无
-*	返 回 值: 无
-*********************************************************************************************************
-*/
-void USART3_SendBefor(void)
-{
-	RS485_TX_EN();	/* 切换RS485收发芯片为发送模式 */
-}
-
-/*
-*********************************************************************************************************
-*	函 数 名: USART3_SendOver
-*	功能说明: USART3 发送一串数据结束后的善后处理。对于RS485通信，请设置RS485芯片为接收状态，
-*			  并修改 UartVarInit()中的函数指针等于本函数名，比如 g_tUart3.SendOver = USART3_SendOver
-*	形    参: 无
-*	返 回 值: 无
-*********************************************************************************************************
-*/
-void USART3_SendOver(void)
-{
-	RS485_RX_EN();	/* 切换RS485收发芯片为接收模式 */
-}
-
 /*
 *********************************************************************************************************
 *	函 数 名: UartVarInit
@@ -342,8 +312,8 @@ static void UartVarInit(void)
 	g_tUart3.usRxRead = 0;						/* 接收FIFO读索引 */
 	g_tUart3.usRxCount = 0;						/* 接收到的新数据个数 */
 	g_tUart3.usTxCount = 0;						/* 待发送的数据个数 */	
-	g_tUart3.SendBefor = USART3_SendBefor;		/* 发送数据前的回调函数 */
-	g_tUart3.SendOver = USART3_SendOver;		/* 发送完毕后的回调函数 */
+	g_tUart3.SendBefor = 0;		/* 发送数据前的回调函数 */
+	g_tUart3.SendOver = 0;		/* 发送完毕后的回调函数 */
 	g_tUart3.ReciveNew = 0;						/* 接收到新数据后的回调函数 */
 #endif
 
@@ -413,7 +383,7 @@ static void InitHardUart(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
 
-#if UART1_FIFO_EN == 1		/* 串口1 TX = PA9   RX = PA10 或 TX = PB6   RX = PB7*/
+#if UART1_FIFO_EN == 1		/* 串口1 TX = PA9   RX = PA10 或 TX = PB6   RX = PB7 */
 
 	/* 第1步： 配置GPIO */
 	#if 0	/* TX = PA9   RX = PA10 */
@@ -492,7 +462,7 @@ static void InitHardUart(void)
 	USART_ClearFlag(USART1, USART_FLAG_TC);     /* 清发送完成标志，Transmission Complete flag */
 #endif
 
-#if UART2_FIFO_EN == 1		/* 串口2 TX = PD5   RX = PD6 或  TX = PA2， RX = PA3  */
+#if UART2_FIFO_EN == 1		/* 串口2 TX = PD5   RX = PD6 或  TX = PA2   RX = PA3 */
 	/* 第1步： 配置GPIO */
 	#if 0	/* 串口2 TX = PD5   RX = PD6 */
 		/* 打开 GPIO 时钟 */
@@ -572,20 +542,7 @@ static void InitHardUart(void)
 	USART_ClearFlag(USART2, USART_FLAG_TC);     /* 清发送完成标志，Transmission Complete flag */
 #endif
 
-#if UART3_FIFO_EN == 1			/* 串口3 TX = PB10   RX = PB11 */
-
-	/* 配置 PB2为推挽输出，用于切换 RS485芯片的收发状态 */
-	{
-		RCC_AHB1PeriphClockCmd(RCC_RS485_TXEN, ENABLE);
-
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;		/* 设为输出口 */
-		GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;		/* 设为推挽模式 */
-		GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;	/* 上下拉电阻不使能 */
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;	/* IO口最大速度 */
-
-		GPIO_InitStructure.GPIO_Pin = PIN_RS485_TXEN;
-		GPIO_Init(PORT_RS485_TXEN, &GPIO_InitStructure);
-	}
+#if UART3_FIFO_EN == 1		/* 串口3 TX = PB10   RX = PB11 */
 
 	/* 打开 GPIO 时钟 */
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
@@ -635,9 +592,9 @@ static void InitHardUart(void)
 	USART_ClearFlag(USART3, USART_FLAG_TC);     /* 清发送完成标志，Transmission Complete flag */
 #endif
 
-#if UART4_FIFO_EN == 1			/* 串口4 TX = PC10   RX = PC11 */
+#if UART4_FIFO_EN == 1		/* 串口4 TX = PC10   RX = PC11 或 TX = PA0   RX = PA1 */
 	/* 第1步： 配置GPIO */
-
+#if 0 /* 串口4 TX = PC10   RX = PC11 */
 	/* 打开 GPIO 时钟 */
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 
@@ -645,10 +602,10 @@ static void InitHardUart(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 
 	/* 将 PC10 映射为 UART4_TX */
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_USART1);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_UART4);
 
 	/* 将 PC11 映射为 UART4_RX */
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_USART1);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_UART4);
 
 	/* 配置 USART Tx 为复用功能 */
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;	/* 输出类型为推挽 */
@@ -664,8 +621,36 @@ static void InitHardUart(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
+#else  /* TX = PA0   RX = PA1 */
+	/* 打开 GPIO 时钟 */
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+	/* 打开 UART 时钟 */
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
+
+	/* 将 PC10 映射为 UART4_TX */
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource0, GPIO_AF_UART4);
+
+	/* 将 PC11 映射为 UART4_RX */
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource1, GPIO_AF_UART4);
+
+	/* 配置 USART Tx 为复用功能 */
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;	/* 输出类型为推挽 */
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;	/* 内部上拉电阻使能 */
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;	/* 复用模式 */
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	/* 配置 USART Rx 为复用功能 */
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+#endif
 	/* 第2步： 配置串口硬件参数 */
-	USART_InitStructure.USART_BaudRate = UART1_BAUD;	/* 波特率 */
+	USART_InitStructure.USART_BaudRate = UART4_BAUD;	/* 波特率 */
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No ;
