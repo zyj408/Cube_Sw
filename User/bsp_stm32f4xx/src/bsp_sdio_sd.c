@@ -223,8 +223,8 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "bsp_sdio_sd.h"
 #include <includes.h>
+
 
 /** @addtogroup Utilities
   * @{
@@ -518,10 +518,10 @@ uint8_t SD_Detect(void)
   __IO uint8_t status = SD_PRESENT;
 
   /*!< Check GPIO to detect SD */
-//  if (GPIO_ReadInputDataBit(SD_DETECT_GPIO_PORT, SD_DETECT_PIN) != Bit_RESET)
-//  {
-//    status = SD_NOT_PRESENT;
-//  }
+//   if (GPIO_ReadInputDataBit(SD_DETECT_GPIO_PORT, SD_DETECT_PIN) != Bit_RESET)
+//   {
+//     status = SD_NOT_PRESENT;
+//   }
   return status;
 }
 
@@ -542,13 +542,11 @@ SD_Error SD_PowerON(void)
   /*!< SDIO_CK = SDIOCLK / (SDIO_INIT_CLK_DIV + 2) */
   /*!< on STM32F4xx devices, SDIOCLK is fixed to 48MHz */
   /*!< SDIO_CK for initialization should not exceed 400 KHz */
-	Mem_Set(&SDIO_InitStructure, 0x00, sizeof(SDIO_InitTypeDef));
-	
   SDIO_InitStructure.SDIO_ClockDiv = SDIO_INIT_CLK_DIV;
   SDIO_InitStructure.SDIO_ClockEdge = SDIO_ClockEdge_Rising;
   SDIO_InitStructure.SDIO_ClockBypass = SDIO_ClockBypass_Disable;
   SDIO_InitStructure.SDIO_ClockPowerSave = SDIO_ClockPowerSave_Disable;
-  SDIO_InitStructure.SDIO_BusWide = SDIO_BusWide_4b;
+  SDIO_InitStructure.SDIO_BusWide = SDIO_BusWide_1b;
   SDIO_InitStructure.SDIO_HardwareFlowControl = SDIO_HardwareFlowControl_Disable;
   SDIO_Init(&SDIO_InitStructure);
 
@@ -560,8 +558,6 @@ SD_Error SD_PowerON(void)
 
   /*!< CMD0: GO_IDLE_STATE ---------------------------------------------------*/
   /*!< No CMD response required */
-	Mem_Set(&SDIO_CmdInitStructure, 0x00, sizeof(SDIO_CmdInitTypeDef));
-	
   SDIO_CmdInitStructure.SDIO_Argument = 0x0;
   SDIO_CmdInitStructure.SDIO_CmdIndex = SD_CMD_GO_IDLE_STATE;
   SDIO_CmdInitStructure.SDIO_Response = SDIO_Response_No;
@@ -583,7 +579,6 @@ SD_Error SD_PowerON(void)
                - [11:8]: Supply Voltage (VHS) 0x1 (Range: 2.7-3.6 V)
                - [7:0]: Check Pattern (recommended 0xAA) */
   /*!< CMD Response: R7 */
-
   SDIO_CmdInitStructure.SDIO_Argument = SD_CHECK_PATTERN;
   SDIO_CmdInitStructure.SDIO_CmdIndex = SDIO_SEND_IF_COND;
   SDIO_CmdInitStructure.SDIO_Response = SDIO_Response_Short;
@@ -601,7 +596,6 @@ SD_Error SD_PowerON(void)
   else
   {
     /*!< CMD55 */
-
     SDIO_CmdInitStructure.SDIO_Argument = 0x00;
     SDIO_CmdInitStructure.SDIO_CmdIndex = SD_CMD_APP_CMD;
     SDIO_CmdInitStructure.SDIO_Response = SDIO_Response_Short;
@@ -611,7 +605,6 @@ SD_Error SD_PowerON(void)
     errorstatus = CmdResp1Error(SD_CMD_APP_CMD);
   }
   /*!< CMD55 */
-
   SDIO_CmdInitStructure.SDIO_Argument = 0x00;
   SDIO_CmdInitStructure.SDIO_CmdIndex = SD_CMD_APP_CMD;
   SDIO_CmdInitStructure.SDIO_Response = SDIO_Response_Short;
@@ -629,6 +622,7 @@ SD_Error SD_PowerON(void)
     /*!< Send ACMD41 SD_APP_OP_COND with Argument 0x80100000 */
     while ((!validvoltage) && (count < SD_MAX_VOLT_TRIAL))
     {
+
       /*!< SEND CMD55 APP_CMD with RCA as 0 */
       SDIO_CmdInitStructure.SDIO_Argument = 0x00;
       SDIO_CmdInitStructure.SDIO_CmdIndex = SD_CMD_APP_CMD;
@@ -1187,17 +1181,11 @@ SD_Error SD_ReadBlock(uint8_t *readbuff, uint32_t ReadAddr, uint16_t BlockSize)
   SDIO->DCTRL = 0x0;
 
 
-	BlockSize = 512;
   if (CardType == SDIO_HIGH_CAPACITY_SD_CARD)
   {
-    /***** 大容量版本 *****/
-    //ReadAddr /= 512;
+    BlockSize = 512;
+    ReadAddr /= 512;
   }
-	else
-	{
-		/***** 小容量版本 *****/
-		ReadAddr *= 512;
-	}
 
   /* Set Block Size for Card */
   SDIO_CmdInitStructure.SDIO_Argument = (uint32_t) BlockSize;
@@ -1320,18 +1308,11 @@ SD_Error SD_ReadMultiBlocks(uint8_t *readbuff, uint32_t ReadAddr, uint16_t Block
 
   SDIO->DCTRL = 0x0;
 
-	BlockSize = 512;
   if (CardType == SDIO_HIGH_CAPACITY_SD_CARD)
   {
-    /***** 大容量版本 *****/
-    //ReadAddr /= 512;
+    BlockSize = 512;
+    ReadAddr /= 512;
   }
-	else
-	{
-		/***** 小容量版本 *****/
-		ReadAddr *= 512;
-	}
-	
 
   /*!< Set Block Size for Card */
   SDIO_CmdInitStructure.SDIO_Argument = (uint32_t) BlockSize;
@@ -1460,18 +1441,13 @@ SD_Error SD_WriteBlock(uint8_t *writebuff, uint32_t WriteAddr, uint16_t BlockSiz
 
   SDIO->DCTRL = 0x0;
 
-	BlockSize = 512;
+
   if (CardType == SDIO_HIGH_CAPACITY_SD_CARD)
   {
-    /***** 大容量版本 *****/
-    //WriteAddr /= 512;
+    BlockSize = 512;
+    WriteAddr /= 512;
   }
-	else
-	{
-		/***** 小容量版本 *****/
-		WriteAddr *= 512;
-	}
-	
+
   /* Set Block Size for Card */
   SDIO_CmdInitStructure.SDIO_Argument = (uint32_t) BlockSize;
   SDIO_CmdInitStructure.SDIO_CmdIndex = SD_CMD_SET_BLOCKLEN;
@@ -1592,19 +1568,13 @@ SD_Error SD_WriteMultiBlocks(uint8_t *writebuff, uint32_t WriteAddr, uint16_t Bl
   StopCondition = 1;
 
   SDIO->DCTRL = 0x0;
-	
-	BlockSize = 512;
+
   if (CardType == SDIO_HIGH_CAPACITY_SD_CARD)
   {
-    /***** 大容量版本 *****/
-    //WriteAddr /= 512;
+    BlockSize = 512;
+    WriteAddr /= 512;
   }
-	else
-	{
-		/***** 小容量版本 *****/
-		WriteAddr *= 512;
-	}
-	
+
   /* Set Block Size for Card */
   SDIO_CmdInitStructure.SDIO_Argument = (uint32_t) BlockSize;
   SDIO_CmdInitStructure.SDIO_CmdIndex = SD_CMD_SET_BLOCKLEN;
@@ -2884,10 +2854,9 @@ void SD_LowLevel_DeInit(void)
 void SD_LowLevel_Init(void)
 {
   GPIO_InitTypeDef  GPIO_InitStructure;
-	Mem_Set(&GPIO_InitStructure, 0x00, sizeof(GPIO_InitTypeDef));
-	
+
   /* GPIOC and GPIOD Periph clock enable */
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD | SD_DETECT_GPIO_CLK, ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD, ENABLE);
 
   GPIO_PinAFConfig(GPIOC, GPIO_PinSource8, GPIO_AF_SDIO);
   GPIO_PinAFConfig(GPIOC, GPIO_PinSource9, GPIO_AF_SDIO);
@@ -2914,10 +2883,10 @@ void SD_LowLevel_Init(void)
   GPIO_Init(GPIOC, &GPIO_InitStructure);
 
   /*!< Configure SD_SPI_DETECT_PIN pin: SD Card detect pin */
-//  GPIO_InitStructure.GPIO_Pin = SD_DETECT_PIN;
-//  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-//  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-//  GPIO_Init(SD_DETECT_GPIO_PORT, &GPIO_InitStructure);
+  //GPIO_InitStructure.GPIO_Pin = SD_DETECT_PIN;
+  //GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  //GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+  //GPIO_Init(SD_DETECT_GPIO_PORT, &GPIO_InitStructure);
 
   /* Enable the SDIO APB2 Clock */
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SDIO, ENABLE);
@@ -3021,8 +2990,6 @@ void SDIO_Interrupts_Config(void)
 {
   NVIC_InitTypeDef NVIC_InitStructure;
 
-	Mem_Set(&NVIC_InitStructure, 0x00, sizeof(NVIC_InitTypeDef));
-	
   /* Configure the NVIC Preemption Priority Bits */
 //   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
 
@@ -3038,23 +3005,25 @@ void SDIO_Interrupts_Config(void)
   NVIC_Init(&NVIC_InitStructure);
 #endif
 }
-
 void bsp_FileSystem(void)
 {
-	//UINT bw;
+	UINT bw, br;
+	char str[20];
 	f_result = f_mount(FS_SD, &f_fs);
 	if(f_result == FR_OK)
 	{
 		DEBUG_LOG("File System Init OK\r\n");
 	}
 	
-	//f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE | FA_CREATE_ALWAYS);  // NOTE:建立文件名最好全英文
-	//f_write(&f_file, "haha2", 18, &bw);
-	//	printf("Current write size of Byte: %d\r\n", bw);
-	//f_close(&f_file);
+	f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE | FA_CREATE_ALWAYS);  // NOTE:建立文件名最好全英文
+	f_write(&f_file, "haha2", 18, &bw);
+		printf("Current write size of Byte: %d\r\n", bw);
+	f_close(&f_file);
 	
-	//	f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE);
-	//	f_read(&f_file, (void *)str, bw, &br);
-	//	printf("read data: %s\r\n Read size of Byte: %d", str, br);
-	//f_close(&f_file);	
+		f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE);
+		f_read(&f_file, (void *)str, bw, &br);
+		printf("read data: %s\r\n Read size of Byte: %d", str, br);
+	f_close(&f_file);	
 }
+
+/******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/

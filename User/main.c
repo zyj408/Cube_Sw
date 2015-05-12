@@ -184,9 +184,11 @@ static  void  AppTaskStart (void *p_arg)
 
    (void)p_arg;
 
+	BSP_Tick_Init();
+	
  	bsp_Init();
 	CPU_Init();
-	BSP_Tick_Init();
+	
 
 	//Mem_Init();  //内存管理模块                           
 //  Math_Init();                         

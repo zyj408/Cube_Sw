@@ -119,7 +119,7 @@ void InsGetCheckSum(uint8_t *Ptr, uint8_t buffsize, uint8_t *checksum)
 
 void InsSendAck(void)
 {
-	uint8_t ins_data_temp[10] = {0};
+	uint8_t ins_data_temp[20] = {0};
 	uint8_t ins_checksum;
 	
 	ins_data_temp[0] = 0xEB;
@@ -134,6 +134,29 @@ void InsSendAck(void)
 	comSendBuf(COM6, ins_data_temp, 7);
 }
 
+
+void InsSendHouseKeepingData(void)
+{
+	uint8_t ins_data_temp[20] = {0};
+	uint8_t ins_checksum;
+	
+	ins_data_temp[0] = 0xEB;
+  ins_data_temp[1] = 0x50;
+	ins_data_temp[2] = 0x31; //Ack指令码
+	ins_data_temp[3] = 0x06; //长度
+  ins_data_temp[4] = (uint8_t)(InsRxCmdCnt & 0x00FF);  //数据域
+	ins_data_temp[5] = (uint8_t)((InsRxCmdCnt >> 8) & 0x00FF); //数据域
+  ins_data_temp[6] = CurDate.RTC_Date;
+	ins_data_temp[7] = CurTime.RTC_Hours;
+	ins_data_temp[8] = CurTime.RTC_Minutes;
+	ins_data_temp[9] = CurTime.RTC_Seconds;
+	InsGetCheckSum(&ins_data_temp[4], ins_data_temp[3], &ins_checksum);
+	ins_data_temp[10] = ins_checksum;
+	comSendBuf(COM6, ins_data_temp, 11);
+
+}
+
+
 CPU_INT08U InsDecode(uint8_t *InsBuf)
 {
 	uint8_t ins_checksum;
@@ -147,6 +170,17 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 	if(ins_checksum != InsBuf[(InsBuf[1] + 2)])  //校验码错误
 	{
 		InsCheckSumError++;
+		
+		switch(InsBuf[0])
+		{
+			case INS_TIME_IN:
+			
+			bsp_RTCSet(InsBuf[6],InsBuf[7],InsBuf[8],InsBuf[9],InsBuf[10],InsBuf[11]); //todo
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;
+		}
+
 		return 1;
 	}
 	switch(InsBuf[0])
@@ -164,6 +198,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 		/* 下行数据指令 */	
 		case INS_DOWN_TEL:
 			InsRxCmdCnt++;  //指令计数加1
+			InsSendHouseKeepingData();
 		break;
 		case INS_DOWN_PLD:
 			InsRxCmdCnt++;  //指令计数加1

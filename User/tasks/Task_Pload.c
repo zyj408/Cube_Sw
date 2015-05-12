@@ -1,6 +1,9 @@
 #include <includes.h>
 
 #define FIPEX_RX_SIZE 256
+#define FIPEX_ACK_TIMEOUT 500
+
+
 
 uint8_t FipexRxBuf[FIPEX_RX_SIZE] = {0};
 uint8_t FipexRxPtr = 0;
@@ -175,7 +178,7 @@ update:
 			}
 			
 			/* 跳出Fipex接收循环 */
-			if(FipexAckTimeout == 50)  // 发生超时
+			if(FipexAckTimeout == FIPEX_ACK_TIMEOUT)  // 发生超时
 			{
 				DEBUG_LOG("Fipex: Fipex ACK Timeout!\r\n");
 				
