@@ -61,8 +61,14 @@ void NMI_Handler(void)
   * @param  None
   * @retval None
   */
+__asm void GoBack(void)
+{
+	BX LR
+}
+
 void HardFault_Handler(void)
 {
+	GoBack();
   /* Go to infinite loop when Hard Fault exception occurs */
   while (1)
   {

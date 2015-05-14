@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 14-May-2015 17:19:45
+% Last Modified by GUIDE v2.5 14-May-2015 21:49:36
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -477,31 +477,32 @@ end
 
 % --- Executes on button press in pushbutton2.
 function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+    if getappdata(handles.figure1, 'connect_stat')
+        data_temp = 255;
+        uart_inject_data(handles, 49, data_temp);
+    end
 
 % --- Executes on button press in pushbutton4.
 function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+    if getappdata(handles.figure1, 'connect_stat')
+        data_temp = 255;
+        uart_inject_data(handles, 84, data_temp);
+    end
 
 % --- Executes on button press in pushbutton5.
 function pushbutton5_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+    if getappdata(handles.figure1, 'connect_stat')
+        data_temp = 255;
+        uart_inject_data(handles, 85, data_temp);
+    end
 
 
 % --- Executes on button press in pushbutton7.
 function pushbutton7_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+    if getappdata(handles.figure1, 'connect_stat')
+        data_temp = 255;
+        uart_inject_data(handles, 86, data_temp);
+    end
 
 
 function edit8_Callback(hObject, eventdata, handles)
@@ -689,9 +690,66 @@ end
 
 % --- Executes on button press in pushbutton8.
 function pushbutton8_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+    if getappdata(handles.figure1, 'connect_stat')
+            data_temp(1) = 255;
+     
+        p_value = floor(str2double(get(handles.edit8, 'String')) * 1000000);
+        
+        for i = 1:4
+            data_temp(1 + i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+        
+         p_value = floor(str2double(get(handles.edit9, 'String')) * 1000000);
+        
+        for i = 1:4
+            data_temp(5 + i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+        
+                p_value = floor(str2double(get(handles.edit10, 'String')) * 1000000);
+        
+        for i = 1:4
+            data_temp(9 + i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+        
+                p_value = floor(str2double(get(handles.edit11, 'String')) * 1000000);
+        
+        for i = 1:4
+            data_temp(13 + i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+        
+                p_value = floor(str2double(get(handles.edit12, 'String')) * 1000000);
+        
+        for i = 1:4
+            data_temp(17 + i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+        
+                p_value = floor(str2double(get(handles.edit13, 'String')) * 1000000);
+        
+        for i = 1:4
+            data_temp(21 + i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+        
+                p_value = floor(str2double(get(handles.edit14, 'String')) * 1000000);
+        
+        for i = 1:4
+            data_temp(25 + i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+                p_value = floor(str2double(get(handles.edit15, 'String')) * 1000000);
+        
+        for i = 1:4
+            data_temp(29 + i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+        
+        uart_inject_data(handles, 90, data_temp);
+    end
 
 
 % --- Executes on button press in radiobutton18.
@@ -796,25 +854,6 @@ function uart_inject_data(handles, opt, data)
 
 % --- Executes on key press with focus on edit5 and none of its controls.
 function edit5_KeyPressFcn(hObject, eventdata, handles)
-enter_key=eventdata.Key;
-if strcmp(enter_key, 'return')
-    if getappdata(handles.figure1, 'connect_stat')
-        p_flag = get(handles.radiobutton18, 'Value');
-        if p_flag == 1
-            data_temp(1) = 255;
-        else
-            data_temp(1) = 0;
-        end    
-        p_value = floor(str2double(get(handles.edit5, 'String')) * 1000);
-        
-        for i = 1:4
-            data_temp(1 + i) = floor(p_value /(256^(4-i)));
-            p_value = mod(p_value, (256^(4-i)));
-        end
-        uart_inject_data(handles, 81, data_temp);
-        
-   end
-end
 
 
 
@@ -862,21 +901,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-% --- Executes on key press with focus on edit6 and none of its controls.
-function edit6_KeyPressFcn(hObject, eventdata, handles)
-enter_key=eventdata.Key;
-if enter_key == 'return'
-   a=1; 
-end
-
-
-% --- Executes on key press with focus on edit7 and none of its controls.
-function edit7_KeyPressFcn(hObject, eventdata, handles)
-enter_key=eventdata.Key;
-if enter_key == 'return'
-   a=1; 
-end
 
 function uart_ping(handles)
 if getappdata(handles.figure1, 'connect_stat')
@@ -1002,3 +1026,95 @@ if getappdata(handles.figure1, 'connect_stat')
         end
     
 end
+
+
+% --- Executes on button press in pushbutton12.
+function pushbutton12_Callback(hObject, eventdata, handles)
+    if getappdata(handles.figure1, 'connect_stat')
+        p_flag = get(handles.radiobutton18, 'Value');
+        if p_flag == 1
+            data_temp(1) = 255;
+        else
+            data_temp(1) = 0;
+        end    
+        p_value = floor(str2double(get(handles.edit5, 'String')) * 1000);
+        
+        for i = 1:4
+            data_temp(1 + i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+        uart_inject_data(handles, 81, data_temp);
+   end
+
+
+% --- Executes on button press in pushbutton13.
+function pushbutton13_Callback(hObject, eventdata, handles)
+    if getappdata(handles.figure1, 'connect_stat')
+        p_flag = get(handles.radiobutton19, 'Value');
+        if p_flag == 1
+            data_temp(1) = 255;
+        else
+            data_temp(1) = 0;
+        end    
+        p_value = floor(str2double(get(handles.edit6, 'String')) * 1000);
+        
+        for i = 1:4
+            data_temp(1 + i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+        uart_inject_data(handles, 82, data_temp);
+    end
+   
+% --- Executes on button press in pushbutton14.
+function pushbutton14_Callback(hObject, eventdata, handles)
+    if getappdata(handles.figure1, 'connect_stat')
+        p_flag = get(handles.radiobutton20, 'Value');
+        if p_flag == 1
+            data_temp(1) = 255;
+        else
+            data_temp(1) = 0;
+        end    
+        p_value = floor(str2double(get(handles.edit7, 'String')) * 1000);
+        
+        for i = 1:4
+            data_temp(1 + i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+        uart_inject_data(handles, 83, data_temp);
+    end
+
+
+
+function edit21_Callback(hObject, eventdata, handles)
+% hObject    handle to edit21 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit21 as text
+%        str2double(get(hObject,'String')) returns contents of edit21 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit21_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit21 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton15.
+function pushbutton15_Callback(hObject, eventdata, handles)
+    if getappdata(handles.figure1, 'connect_stat')
+        p_value = floor(str2double(get(handles.edit21, 'String')) * 1000000);
+        
+        for i = 1:4
+            data_temp(i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+        uart_inject_data(handles, 94, data_temp);
+    end

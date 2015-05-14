@@ -28,7 +28,7 @@ void AppTaskSenGet(void)
             cntAttStaFlag = 0;
       }
 			
-			adcs_timer = OSTimeGet (&err);
+			adcs_timer = OSTimeGet(&err);
 			TinSat = TinSat0 + ((double)adcs_timer) * 1.0 / 1000.0 / 86400.0;
 			
 			if(upXwAdcsTLEFlag == VALID)                         /*原ORBFlag 轨道上注有效标志位 现7分钟释放一次,upXwAdcsTLEFlag为轨道上注有效标志*/ 

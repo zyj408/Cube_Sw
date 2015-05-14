@@ -5,6 +5,10 @@
 #define SWITCH_TIMEOUT_MS  5
 enum INS_STATUS InsState=INS_IDLE;  /* 地面测试状态初始化 */
 
+
+
+
+OS_ERR   err;
 uint16_t InsRxCmdCnt = 0;
 uint8_t InsRxIndex;
 uint8_t InsRxLength;
@@ -892,7 +896,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 				data_inject = 0;
 				for(i=7; i<11; i++)
 				{
-					data_inject >>=8;
+					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
 				upXwAdcsConD = (double)(data_inject / 1000.0);
@@ -919,7 +923,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 				data_inject = 0;
 				for(i=7; i<11; i++)
 				{
-					data_inject >>=8;
+					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
 				upXwAdcsConZ = (double)(data_inject / 1000.0);
@@ -1012,66 +1016,66 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 				data_inject = 0;
 				for(i=7; i<11; i++)
 				{
-					data_inject >>=8;
+					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
-				upXwAdcsTLEBstar = (double)(data_inject / 1000.0);
+				upXwAdcsTLEBstar = (double)(data_inject / 1000000.0);
 				
 				data_inject = 0;
 				for(i=11; i<15; i++)
 				{
-					data_inject >>=8;
+					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
-				upXwAdcsTLEEcco = (double)(data_inject / 1000.0);
+				upXwAdcsTLEEcco = (double)(data_inject / 1000000.0);
 
 				data_inject = 0;
 				for(i=15; i<19; i++)
 				{
-					data_inject >>=8;
+					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
-				upXwAdcsTLEInclo = (double)(data_inject / 1000.0);			
+				upXwAdcsTLEInclo = (double)(data_inject / 1000000.0);			
 				
 				data_inject = 0;
 				for(i=19; i<23; i++)
 				{
-					data_inject >>=8;
+					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
-				upXwAdcsTLEArgpo = (double)(data_inject / 1000.0);	
+				upXwAdcsTLEArgpo = (double)(data_inject / 1000000.0);	
 				
 				data_inject = 0;
 				for(i=23; i<27; i++)
 				{
-					data_inject >>=8;
+					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
-				upXwAdcsTLEJdsatepoch = (double)(data_inject / 1000.0);	
+				upXwAdcsTLEJdsatepoch = (double)(data_inject / 1000000.0);	
 				
 				data_inject = 0;
 				for(i=27; i<31; i++)
 				{
-					data_inject >>=8;
+					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
-				upXwAdcsTLEMo = (double)(data_inject / 1000.0);	
+				upXwAdcsTLEMo = (double)(data_inject / 1000000.0);	
 				
 				data_inject = 0;
 				for(i=31; i<35; i++)
 				{
-					data_inject >>=8;
+					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
-				upXwAdcsTLENo = (double)(data_inject / 1000.0);	
+				upXwAdcsTLENo = (double)(data_inject / 1000000.0);	
 
 				data_inject = 0;
 				for(i=35; i<39; i++)
 				{
-					data_inject >>=8;
+					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
-				upXwAdcsTLENodeo = (double)(data_inject / 1000.0);	
+				upXwAdcsTLENodeo = (double)(data_inject / 1000000.0);	
 				
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
@@ -1081,6 +1085,18 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 				
 			}
 		break;
+		case INS_ADCS_TIME_IN:
+			for(i=6; i<10; i++)
+			{
+				data_inject <<=8;
+				data_inject |= InsBuf[i];
+			}
+				TinSat = (double)(data_inject / 1000000.0);	
+				OSTimeSet (0, &err);
+			
+			InsRxCmdCnt++;  //指令计数加1
+			InsSendAck();
+		break;		
 		case INS_EQUP_INPUT:
 			
 		break;

@@ -403,6 +403,9 @@ extern volatile CPU_INT16U FalPld;
 #define INS_MTQ1_PWM           0x5B
 #define INS_MTQ2_PWM           0x5C
 #define INS_MTQ3_PWM           0x5D
+
+#define INS_ADCS_TIME_IN       0x5E
+
 /**************************/
 #define INS_EQUP_INPUT         0x61    //器件健康状态变更指令
 #define INS_TEL_ADRS           0x62    //遥测存储指针变更
