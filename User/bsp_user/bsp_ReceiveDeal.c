@@ -170,19 +170,9 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 	if(ins_checksum != InsBuf[(InsBuf[1] + 2)])  //校验码错误
 	{
 		InsCheckSumError++;
-		
-		switch(InsBuf[0])
-		{
-			case INS_TIME_IN:
-			
-			bsp_RTCSet(InsBuf[6],InsBuf[7],InsBuf[8],InsBuf[9],InsBuf[10],InsBuf[11]); //todo
-			InsRxCmdCnt++;  //指令计数加1
-			InsSendAck();
-		break;
-		}
-
 		return 1;
 	}
+
 	switch(InsBuf[0])
 	{
 		/* 测试指令 */
@@ -876,7 +866,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 				data_inject = 0;
 				for(i=7; i<11; i++)
 				{
-					data_inject >>=8;
+					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
 				upXwAdcsConP = (double)(data_inject / 1000.0);

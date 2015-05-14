@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 08-May-2015 15:45:03
+% Last Modified by GUIDE v2.5 14-May-2015 17:19:45
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -176,21 +176,23 @@ function uart_switch(handles, opt)
 
 if getappdata(handles.figure1, 'connect_stat')
     scom = getappdata(handles.figure1, 'uart');
-    data_temp = [165 90 opt 04 00 00 00 00 00];
+    data_temp = [235 80 opt 04 00 00 00 00 00];
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
     
-    pause(0.1);
-    
-    if get(scom, 'BytesAvailable') == 7 %接收到7个数据
-       data_rx = fread(scom, 7, 'char');
-       if data_rx(1) == 165 && data_rx(2) == 90 && data_rx(3) == 48
-           time_temp = datestr(now, 13);
-           set(handles.text31, 'String', num2str(time_temp));
-           setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
-           set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-       end
+
+    while(1)
+        if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
+            data_rx = fread(scom, 7, 'char');
+            if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
+                time_temp = datestr(now, 13);
+                set(handles.text31, 'String', num2str(time_temp));
+                setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
+                set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+            end
+        end
+        pause(0.001);
     end
 end
 
@@ -764,12 +766,54 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+function uart_inject_data(handles, opt, data)
+    xor_checksum = 0;
+    deta_length = size(data,2);
+    for i=1:deta_length
+        xor_checksum=bitxor(xor_checksum,data(i), 'uint8');   
+    end
+    
+    scom = getappdata(handles.figure1, 'uart');        
+    data_temp = [235 80 opt (4+deta_length) 00 00 00 00 data xor_checksum];
+    fwrite(scom, data_temp, 'char');
+    setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
+    set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
+    
+        while(1)
+        if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
+            data_rx = fread(scom, 7, 'char');
+            if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
+                time_temp = datestr(now, 13);
+                set(handles.text31, 'String', num2str(time_temp));
+                setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
+                set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+            end
+            break;
+        end
+        pause(0.001);
+        end
+        
 
 % --- Executes on key press with focus on edit5 and none of its controls.
 function edit5_KeyPressFcn(hObject, eventdata, handles)
 enter_key=eventdata.Key;
-if enter_key == 'return'
-   a=1; 
+if strcmp(enter_key, 'return')
+    if getappdata(handles.figure1, 'connect_stat')
+        p_flag = get(handles.radiobutton18, 'Value');
+        if p_flag == 1
+            data_temp(1) = 255;
+        else
+            data_temp(1) = 0;
+        end    
+        p_value = floor(str2double(get(handles.edit5, 'String')) * 1000);
+        
+        for i = 1:4
+            data_temp(1 + i) = floor(p_value /(256^(4-i)));
+            p_value = mod(p_value, (256^(4-i)));
+        end
+        uart_inject_data(handles, 81, data_temp);
+        
+   end
 end
 
 
@@ -837,21 +881,26 @@ end
 function uart_ping(handles)
 if getappdata(handles.figure1, 'connect_stat')
     scom = getappdata(handles.figure1, 'uart');
-    data_temp = [165 90 01 04 00 00 00 00 00];
+    data_temp = [235 80 01 04 00 00 00 00 00];
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
     
-    pause(0.1);
     
-    if get(scom, 'BytesAvailable') == 7 %接收到7个数据
-       data_rx = fread(scom, 7, 'char');
-       if data_rx(1) == 165 && data_rx(2) == 90 && data_rx(3) == 48
-           time_temp = datestr(now, 13);
-           set(handles.text31, 'String', num2str(time_temp));
-           setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
-           set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-       end
+    
+    
+    while(1)
+        if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
+            data_rx = fread(scom, 7, 'char');
+            if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
+                time_temp = datestr(now, 13);
+                set(handles.text31, 'String', num2str(time_temp));
+                setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
+                set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+            end
+            break;
+        end
+        pause(0.001);
     end
 end
 
@@ -867,21 +916,23 @@ function uart_inject_pwm(handles, opt, val)
 if getappdata(handles.figure1, 'connect_stat')
     scom = getappdata(handles.figure1, 'uart');
     %val = str2num(val);
-    data_temp = [165 90 opt 05 00 00 00 00 val val];
+    data_temp = [235 80 opt 05 00 00 00 00 val val];
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
     
-    pause(0.1);
-    
-    if get(scom, 'BytesAvailable') == 7 %接收到7个数据
-       data_rx = fread(scom, 7, 'char');
-       if data_rx(1) == 165 && data_rx(2) == 90 && data_rx(3) == 48
-           time_temp = datestr(now, 13);
-           set(handles.text31, 'String', num2str(time_temp));
-           setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
-           set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-       end
+
+    while(1)
+        if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
+            data_rx = fread(scom, 7, 'char');
+            if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
+                time_temp = datestr(now, 13);
+                set(handles.text31, 'String', num2str(time_temp));
+                setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
+                set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+            end
+        end
+        pause(0.001);
     end
 end
 
@@ -916,3 +967,38 @@ enter_key=eventdata.Key;
             uart_inject_pwm(handles, 93, pwm_temp);
         end
     end
+
+
+% --- Executes on button press in pushbutton11.
+function pushbutton11_Callback(hObject, eventdata, handles)
+if getappdata(handles.figure1, 'connect_stat')
+    time_temp = clock;
+    time_temp(1) = time_temp(1) - 2000;
+    time_temp(6) = floor(time_temp(6));
+    
+    xor_checksum = 0;
+           
+    for i=1:6
+        xor_checksum=bitxor(xor_checksum,time_temp(i),'int8');   
+    end
+    scom = getappdata(handles.figure1, 'uart');        
+    data_temp = [235 80 100 10 00 00 00 00 time_temp(1) time_temp(2) time_temp(3) time_temp(4) time_temp(5) time_temp(6) xor_checksum];
+    fwrite(scom, data_temp, 'char');
+    setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
+    set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
+    
+        while(1)
+        if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
+            data_rx = fread(scom, 7, 'char');
+            if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
+                time_temp = datestr(now, 13);
+                set(handles.text31, 'String', num2str(time_temp));
+                setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
+                set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+            end
+            break;
+        end
+        pause(0.001);
+        end
+    
+end
