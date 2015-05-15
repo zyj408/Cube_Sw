@@ -7,8 +7,8 @@ void bsp_PVD_Init(void)
   EXTI_InitTypeDef EXTI_InitStructure;
 
   NVIC_InitStruct.NVIC_IRQChannel = PVD_IRQn;
-  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 2;
-  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 2;
+  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;
+  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 5;
   NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
    
 

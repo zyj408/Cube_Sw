@@ -41,6 +41,8 @@ void NVIC_Configuration(void);
 *	返 回 值: 无
 *********************************************************************************************************
 */
+uint8_t SysClkSource;
+uint32_t CpuFreq;
 
 void bsp_Init(void)
 {
@@ -63,6 +65,25 @@ void bsp_Init(void)
 	bsp_PVD_Init();      /* 初始化电压监视模块 */
 	bsp_InitRNG();       /* 初始化随机数发生器模块 */
 
+
+	#if debug_enable
+	SysClkSource = RCC_GetSYSCLKSource();
+	switch(SysClkSource)
+	{
+		case 0x00:
+			printf("Current system clock:HSI\r\n");
+		break;
+		case 0x04:
+			printf("Current system clock:HSE\r\n");
+		break;
+		case 0x08:
+			printf("Current system clock:PLL\r\n");
+		break;
+	}
+	CpuFreq = BSP_CPU_ClkFreq();
+	#endif
+	
+	
 	bsp_FileSystem();    /* 初始化文件系统 */
 	
 	//bsp_InitIwdg(10000);    /* 独立看门狗初始化1000ms */
@@ -92,7 +113,7 @@ void bsp_Init(void)
 void NVIC_Configuration(void)
 {			
 	/* 设置NVIC优先级分组为Group2：0-3抢占式优先级，0-3的响应式优先级 */
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
 }
 
 /*

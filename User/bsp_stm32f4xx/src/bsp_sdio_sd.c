@@ -260,7 +260,7 @@
   */
 #define NULL 0
 #define SDIO_STATIC_FLAGS               ((uint32_t)0x000005FF)
-#define SDIO_CMD0TIMEOUT                ((uint32_t)0x00010000)
+#define SDIO_CMD0TIMEOUT                ((uint32_t)0x00400000)
 
 /**
   * @brief  Mask for errors Card Status R1 (OCR Register)
@@ -449,6 +449,10 @@ SD_Error SD_Init(void)
   if (errorstatus == SD_OK)
   {
     errorstatus = SD_EnableWideBusOperation(SDIO_BusWide_4b);
+	  if(errorstatus != SD_OK)
+	  {
+		errorstatus = SD_EnableWideBusOperation(SDIO_BusWide_1b);
+	  }
   }
 
   return(errorstatus);
@@ -537,11 +541,13 @@ SD_Error SD_PowerON(void)
   uint32_t response = 0, count = 0, validvoltage = 0;
   uint32_t SDType = SD_STD_CAPACITY;
 
+  SDIO_StructInit(&SDIO_InitStructure);
   /*!< Power ON Sequence -----------------------------------------------------*/
   /*!< Configure the SDIO peripheral */
   /*!< SDIO_CK = SDIOCLK / (SDIO_INIT_CLK_DIV + 2) */
   /*!< on STM32F4xx devices, SDIOCLK is fixed to 48MHz */
   /*!< SDIO_CK for initialization should not exceed 400 KHz */
+	
   SDIO_InitStructure.SDIO_ClockDiv = SDIO_INIT_CLK_DIV;
   SDIO_InitStructure.SDIO_ClockEdge = SDIO_ClockEdge_Rising;
   SDIO_InitStructure.SDIO_ClockBypass = SDIO_ClockBypass_Disable;
@@ -2098,6 +2104,7 @@ static SD_Error CmdResp7Error(void)
 
   while (!(status & (SDIO_FLAG_CCRCFAIL | SDIO_FLAG_CMDREND | SDIO_FLAG_CTIMEOUT)) && (timeout > 0))
   {
+	  
     timeout--;
     status = SDIO->STA;
   }
@@ -2921,7 +2928,7 @@ void SD_LowLevel_DMA_TxConfig(uint32_t *BufferSRC, uint32_t BufferSize)
   SDDMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
   SDDMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
   SDDMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-  SDDMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  SDDMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
   SDDMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
   SDDMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
   SDDMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
@@ -2963,7 +2970,7 @@ void SD_LowLevel_DMA_RxConfig(uint32_t *BufferDST, uint32_t BufferSize)
   SDDMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
   SDDMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
   SDDMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-  SDDMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  SDDMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
   SDDMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
   SDDMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
   SDDMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
@@ -2991,7 +2998,7 @@ void SDIO_Interrupts_Config(void)
   NVIC_InitTypeDef NVIC_InitStructure;
 
   /* Configure the NVIC Preemption Priority Bits */
-//   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
 
   NVIC_InitStructure.NVIC_IRQChannel = SDIO_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
@@ -3001,29 +3008,33 @@ void SDIO_Interrupts_Config(void)
 
 #if 1
   NVIC_InitStructure.NVIC_IRQChannel = SD_SDIO_DMA_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
   NVIC_Init(&NVIC_InitStructure);
 #endif
 }
+
+
+char str[20];
 void bsp_FileSystem(void)
 {
 	UINT bw, br;
-	char str[20];
+	
 	f_result = f_mount(FS_SD, &f_fs);
 	if(f_result == FR_OK)
 	{
 		DEBUG_LOG("File System Init OK\r\n");
 	}
 	
-	f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE | FA_CREATE_ALWAYS);  // NOTE:建立文件名最好全英文
-	f_write(&f_file, "haha2", 18, &bw);
-		printf("Current write size of Byte: %d\r\n", bw);
-	f_close(&f_file);
-	
-		f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE);
-		f_read(&f_file, (void *)str, bw, &br);
-		printf("read data: %s\r\n Read size of Byte: %d", str, br);
-	f_close(&f_file);	
+//	f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE | FA_CREATE_ALWAYS);  // NOTE:建立文件名最好全英文
+//	f_write(&f_file, "haha2", 18, &bw);
+//		printf("Current write size of Byte: %d\r\n", bw);
+//	f_close(&f_file);
+//	
+//		f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE);
+//		f_read(&f_file, (void *)str, bw, &br);
+//		printf("read data: %s\r\n Read size of Byte: %d", str, br);
+//	f_close(&f_file);	
 }
 
 /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/

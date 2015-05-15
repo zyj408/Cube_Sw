@@ -81,6 +81,7 @@
 void bsp_Init(void);
 void bsp_DelayUS(uint32_t _ulDelayTime);
 void BSP_Tick_Init (void);
+CPU_INT32U  BSP_CPU_ClkFreq (void);
 static void NVIC_Configuration(void);
 
 #define ENABLE_INT()	__set_PRIMASK(0)	/* 使能全局中断 */

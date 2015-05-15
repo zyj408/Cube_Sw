@@ -19,14 +19,6 @@ __IO uint32_t uwSynchPrediv = 0;
 */
 void bsp_InitRTC(void)
 {
-	#if debug_enable
-	if(RCC_GetSYSCLKSource() == 0x00)
-		printf("Current system clock:HSI\r\n");
-	if(RCC_GetSYSCLKSource() == 0x04)
-		printf("Current system clock:HSE\r\n");
-	else if(RCC_GetSYSCLKSource() == 0x08)
-		printf("Current system clock:PLL\r\n");
-	#endif
 	//RTC_DeInit();
 	RTC_Config();   /* 配置RTC模块 */
 	
@@ -101,7 +93,7 @@ void RTC_Config(void)
 	PWR_BackupAccessCmd(ENABLE);/* 允许访问RTC */
 	
 	
-
+try_again:
 	if(OBCBootInfo.BootRTC_Source == 0)  /* 选择LSE作为时钟源 */
 	{
 		RCC_LSEConfig(RCC_LSE_ON);   	     /* 使能LSE振荡器  */
@@ -139,7 +131,7 @@ void RTC_Config(void)
 		RtcTimeout = 0;      /*  等待内部时钟稳定*/
 		while((RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET) && ((RtcTimeout++) < RTC_TIMEOUT_US))
 		{
-			__nop();__nop();__nop();__nop();__nop();/* STM32延迟函数 */
+			bsp_DelayUS(1);             /* STM32延迟函数 */
 		}
 		
 		if(RtcTimeout > RTC_TIMEOUT_US)
@@ -172,6 +164,11 @@ void RTC_Config(void)
 	  if (RTC_Init(&RTC_InitStructure) == ERROR)  /* 检测RTC初始化 */
 	  {
 			DEBUG_LOG("RTC Init wrong \r\n");
+			if(OBCBootInfo.BootRTC_Source == 0)
+			{
+				OBCBootInfo.BootRTC_Source = 1;
+				goto try_again;
+			}
 	  }
 
 	  /* 设置年月日和星期 */
