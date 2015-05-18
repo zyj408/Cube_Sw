@@ -94,15 +94,18 @@ void FipexSetDefaultInfo(void)
 	
 	//FipexCmdStore();
 }
-
+#if SD_FILESYSTEM_ENABLE
 static unsigned long FipexFileSize = 0;
+#endif
 void FipexScienceDataStore(uint8_t *rx_data)
 {
-		uint32_t bw;
-		uint8_t ret;
-		uint8_t i;
+	#if SD_FILESYSTEM_ENABLE
+	uint32_t bw;
+	uint8_t ret;
+	#endif
+	uint8_t i;
 
-	uint8_t length = rx_data[2];
+	uint8_t length = rx_data[2] + 4 + 24;
 	uint8_t *ptr_obc;
 	
 	ptr_obc = rx_data + length + 5;
@@ -115,6 +118,7 @@ void FipexScienceDataStore(uint8_t *rx_data)
 	for(i=0; i<20; i++)
 		*ptr_obc++ = 0xFF;
 	
+	#if SD_FILESYSTEM_ENABLE
 	ret = f_open(&f_file, "0:/fipex.bin", FA_READ | FA_WRITE | FA_CREATE_ALWAYS); // NOTE:建立文件名最好全英文
 	if (ret != 0)
 	{
@@ -146,6 +150,10 @@ void FipexScienceDataStore(uint8_t *rx_data)
 		DEBUG_LOG("0:/fipex.bin store ok\r\n");
 	
 	FipexFileSize += length;
+	
+	#else
+		comSendBuf(COM6, ptr_obc, length);
+	#endif
 }
 
 

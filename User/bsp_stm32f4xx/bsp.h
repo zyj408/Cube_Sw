@@ -87,5 +87,7 @@ static void NVIC_Configuration(void);
 #define ENABLE_INT()	__set_PRIMASK(0)	/* 使能全局中断 */
 #define DISABLE_INT()	__set_PRIMASK(1)	/* 禁止全局中断 */
 
+#define SD_FILESYSTEM_ENABLE   0
+
 void DEBUG_LOG(const char *format, ...);
 #endif
