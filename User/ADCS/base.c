@@ -13,10 +13,17 @@ void AppTaskSenGet(void)
 	
    while(1)
    {
-		 	/*读磁强计读数*/
-	
+
 			BSP_OS_SemWait(&SEM_CYC_INFO, 0);
       
+		 	/*读磁强计读数*/
+	
+		 	Get_Mag_Result(MagCurOut);
+		  magnetometer[0] = MagCurOut[0];
+		  magnetometer[1] = MagCurOut[1];
+		  magnetometer[2] = MagCurOut[2];
+		 
+		 
       if(upXwAdcsReDmp == VALID)                          /*阻尼恢复*/
       {
             upXwAdcsReDmp = INVALID;

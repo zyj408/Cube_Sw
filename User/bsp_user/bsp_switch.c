@@ -55,15 +55,15 @@ void bsp_InitSwitch(void)
 	GPIO_Init(GPIO_MTQ3_DIR_PORT, &GPIO_InitStructure);
 	
 	MTQ1_DIR_POS;
-  MTQ2_DIR_POS;
-  MTQ3_DIR_POS;
+	MTQ2_DIR_POS;
+	MTQ3_DIR_POS;
 	
 	
 	#endif
 	
 	SW_MTQ_ENABLE;       //打开磁棒供电
 	SW_WHEELA_ENABLE;    //打开动量轮A供电
-  SW_WHEELB_ENABLE;    //打开动量轮B供电
+	SW_WHEELB_ENABLE;    //打开动量轮B供电
 	SW_GPSA_ENABLE;      //打开GPSA供电
 	SW_GPSB_ENABLE;      //打开GPSB供电
 	SW_USB_ENABLE;       //打开USB应答机供电

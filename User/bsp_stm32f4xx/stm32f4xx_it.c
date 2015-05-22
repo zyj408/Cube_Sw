@@ -68,10 +68,13 @@ __asm void GoBack(void)
 
 void HardFault_Handler(void)
 {
+	//__asm("bx rl")
+	
 	GoBack();
   /* Go to infinite loop when Hard Fault exception occurs */
   while (1)
   {
+	  
   }
 }
 

@@ -57,7 +57,7 @@
                                                             /* ------------------- STATISTIC TASK ------------------- */
 #define  OS_CFG_STAT_TASK_PRIO     (OS_CFG_PRIO_MAX - 2u)   /* Priority                                               */
 #define  OS_CFG_STAT_TASK_RATE_HZ         10u               /* Rate of execution (10 Hz Typ.)                         */
-#define  OS_CFG_STAT_TASK_STK_SIZE       128u               /* Stack size (number of CPU_STK elements)                */
+#define  OS_CFG_STAT_TASK_STK_SIZE       256u               /* Stack size (number of CPU_STK elements)                */
 
 
                                                             /* ------------------------ TICKS ----------------------- */

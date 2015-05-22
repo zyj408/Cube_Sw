@@ -179,7 +179,9 @@ extern CPU_INT08U ID_CommandCnt;
 extern CPU_INT16U ObcAdValue[16][6];              /* 电源获取量 */
 extern CPU_INT08U ObcAdErr[16];
 extern CPU_INT08U ObcCommErr;
-																		
+								
+extern CPU_INT16U TempAdValue[16][6];             /* 温度获取量 */
+extern CPU_INT08U TempAdErr[16];								
 /* 星上存储指针状态量 */
 extern CPU_INT32U TelCurPtr;                      /* 当前遥测存储指针 */
 extern CPU_INT32U GpsCurPtr;                      /* 当前GPS存储指针 */
@@ -211,6 +213,7 @@ extern CPU_INT08U ComRevOTCnt;                    /* COM传输超时计数 */
 extern CPU_INT32U MotorSetOutput;
 extern CPU_INT32U MotorCurOutput;
 
+extern double MagCurOut[4];
 extern CPU_INT08U MotorCommErr;
 extern CPU_INT16U PwmSetDuty_1;
 extern CPU_INT16U PwmSetDuty_2;

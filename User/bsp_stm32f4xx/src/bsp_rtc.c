@@ -92,7 +92,7 @@ void RTC_Config(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);/* 使能PWR时钟 */
 	PWR_BackupAccessCmd(ENABLE);/* 允许访问RTC */
 	
-	
+	OBCBootInfo.BootRTC_Source = 0;
 try_again:
 	if(OBCBootInfo.BootRTC_Source == 0)  /* 选择LSE作为时钟源 */
 	{

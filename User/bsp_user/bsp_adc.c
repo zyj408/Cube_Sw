@@ -50,6 +50,7 @@ static void InitSPI1_GPIO(void)
 	
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF, ENABLE);
 	
 	/* 配置MSK、MISO、MOSI复用功能 */
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_SPI1);
@@ -78,13 +79,22 @@ static void InitSPI1_GPIO(void)
 	GPIO_InitStructure.GPIO_Pin = EPS_CS1_PIN;
 	GPIO_Init(EPS_CS1_GPIO, &GPIO_InitStructure);	
 	
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_InitStructure.GPIO_Pin = EPS_CS2_PIN;
 	GPIO_Init(EPS_CS2_GPIO, &GPIO_InitStructure);
 	
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Pin = TEMP_CS_PIN;
+	GPIO_Init(TEMP_CS_GPIO, &GPIO_InitStructure);
+	
+//TEMP_CS_LOW()
+	TEMP_CS_HIGH();
 	OBC_CS_HIGH();
 	EPS_CS1_HIGH();
 	EPS_CS2_HIGH();
@@ -111,6 +121,92 @@ void SPI1_IRQHandler(void)
 		ObcCommErr++;
 	}
 	OSIntExit();
+}
+
+CPU_INT16U TempSendByte(uint16_t _ucValue)
+{
+	CPU_INT32U i=0;
+	/* 等待上次数据发送完毕 */
+	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET)
+	{
+		__nop();__nop();__nop();;
+		if(i++ > 200000)
+		{
+			//EpsTranOTCnt++;
+			return 1;
+		}
+	}
+	TEMP_CS_LOW();
+	/* 通过SPI1发送一个字节 */
+	SPI_I2S_SendData(SPI1, _ucValue);
+
+	/* 等待接接收一个字节完成 */
+	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET)
+	{
+		__nop();__nop();__nop();;
+	  if(i++ > 200000)
+	  {
+		  //EpsRevOTCnt++;
+	  	
+	  	return 1;
+	  }
+  }
+	/* 返回SPI接收字节 */
+	TEMP_CS_HIGH();
+	return SPI_I2S_ReceiveData(SPI1);
+}
+
+
+void TempAdStart(void)
+{
+	CPU_INT16U command;
+	command = WRITE | SEQ_CFG | CHANNEL_0 | POWER_NORMAL | RANGE_DOUBLE | DATA_BIN;
+  
+	TempSendByte(command);
+	__nop();__nop();__nop();;
+	TempSendByte(ALL_CHANNEL);
+
+}
+
+void TempDataProcess(CPU_INT16U data)
+{
+	CPU_INT08U index;
+	CPU_INT08U channel;
+	CPU_INT16U ad_temp;
+
+	channel = (CPU_INT08U)(data >> 12);  /* 获取转换的通道 */
+	ad_temp = data & 0x0FFF;  /* 获取该通道的AD转换值 */
+
+	if(ad_temp<TEMP_AD_HIGH && ad_temp>TEMP_AD_LOW)  /* 所采样的AD值在正常范围内 */
+	{
+		for(index=0; index<4; index++)
+		{
+			TempAdValue[channel][index] = TempAdValue[channel][index+1];
+		}
+		TempAdValue[channel][4] = ad_temp;  /* 将AD值传入AD矩阵 */
+	}
+	else  /* AD值错误 */
+	{
+		
+		for(index=0; index<4; index++)
+		{
+			TempAdValue[channel][index] = TempAdValue[channel][index+1];
+		}
+		TempAdValue[channel][4] = ad_temp;  /* 将AD值传入AD矩阵 */
+		
+		TempAdErr[channel]++;
+	}	
+}
+
+CPU_INT08U TempAdUpdate(void)
+{
+	CPU_INT16U data;
+
+	data = TempSendByte(DATA_UPDATE);
+
+	TempDataProcess(data);
+	
+	return 0;
 }
 
 void ObcDataProcess(CPU_INT16U data)

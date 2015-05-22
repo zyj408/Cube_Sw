@@ -44,17 +44,17 @@
 #define RCC_S1_EN_PORT    	  RCC_AHB1Periph_GPIOG
 #define GPIO_S1_EN_PIN		    GPIO_Pin_8
 
-#define GPIO_S2_EN_PORT	      GPIOG			
-#define RCC_S2_EN_PORT    	  RCC_AHB1Periph_GPIOG
-#define GPIO_S2_EN_PIN		    GPIO_Pin_7
+#define GPIO_S2_EN_PORT	      	GPIOG			
+#define RCC_S2_EN_PORT    	  	RCC_AHB1Periph_GPIOG
+#define GPIO_S2_EN_PIN		  	GPIO_Pin_7
 
-#define GPIO_S3_EN_PORT	      GPIOG			
-#define RCC_S3_EN_PORT    	  RCC_AHB1Periph_GPIOG
-#define GPIO_S3_EN_PIN		    GPIO_Pin_6
+#define GPIO_S3_EN_PORT	      	GPIOG			
+#define RCC_S3_EN_PORT    	  	RCC_AHB1Periph_GPIOG
+#define GPIO_S3_EN_PIN		 	GPIO_Pin_6
 
 #if OBC_MTQ_ENABLE
-#define GPIO_MTQ_SLEEP_PORT	  GPIOG			
-#define RCC_MTQ_SLEEP_PORT    RCC_AHB1Periph_GPIOG
+#define GPIO_MTQ_SLEEP_PORT	  	GPIOG			
+#define RCC_MTQ_SLEEP_PORT    	RCC_AHB1Periph_GPIOG
 #define GPIO_MTQ_SLEEP_PIN		GPIO_Pin_11
 /* 电机1方向 */
 #define GPIO_MTQ1_DIR_PORT	  GPIOB			

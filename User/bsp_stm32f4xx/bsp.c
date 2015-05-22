@@ -46,14 +46,15 @@ uint32_t CpuFreq;
 
 void bsp_Init(void)
 {
+	bsp_InitTimer();     /* 初始化定时器 */
 	bsp_InitUart(); 	   /* 初始化串口 */	
 	bsp_Init_VAR();
 
 	NVIC_Configuration();  /* 中断优先级分组配置 */
 	
-  //bsp_InitLed();
+	//bsp_InitLed();
 	bsp_InitSPI1();      /* 初始化板载AD转换芯片 */
-  bsp_InitSwitch();
+	bsp_InitSwitch();
 	bsp_FipexSwitchInit();
 	bsp_PWMInit();
 	bsp_PWMCaptureInit();
@@ -62,6 +63,7 @@ void bsp_Init(void)
 	bsp_InitNorFlash();  /* 初始化NOR_Flash模块 */		
 	
 	bsp_InitRTC();       /* RTC初始化 */
+	printf("Current system clock:HSI\r\n");
 	bsp_PVD_Init();      /* 初始化电压监视模块 */
 	bsp_InitRNG();       /* 初始化随机数发生器模块 */
 
@@ -91,9 +93,9 @@ void bsp_Init(void)
 
 	
 	/* 姿控子系统连接 */
-	//bsp_InitSPI2();      /* 初始化动量轮模块 */	
-
+	bsp_InitSPI2();      /* 初始化动量轮模块 */	
 	
+	\
 #ifdef TRACE_EN                                                 /* See project / compiler preprocessor options.         */
     BSP_CPU_REG_DBGMCU_CR |=  BSP_DBGMCU_CR_TRACE_IOEN_MASK;    /* Enable tracing (see Note #2).                        */
     BSP_CPU_REG_DBGMCU_CR &= ~BSP_DBGMCU_CR_TRACE_MODE_MASK;    /* Clr trace mode sel bits.                             */
@@ -116,55 +118,6 @@ void NVIC_Configuration(void)
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
 }
 
-/*
-*********************************************************************************************************
-*	函 数 名: bsp_DelayUS
-*	功能说明: 这里的延时采用CPU的内部计数实现，32位计数器
-*             	OSSchedLock(&err);
-*				bsp_DelayUS(5);
-*				OSSchedUnlock(&err); 根据实际情况看看是否需要加调度锁或选择关中断
-*	形    参：n : 延迟长度，单位1 us
-*	返 回 值: 无
-*********************************************************************************************************
-*/
-void bsp_DelayUS(uint32_t _ulDelayTime)
-{
-//	uint32_t ticks;
-//	uint32_t told,tnow,tcnt=0;
-//		    	 
-//	ticks = _ulDelayTime * 168;      /* 需要的节拍数 */	  		 
-//	tcnt = 0;
-//	told = (uint32_t)CPU_TS_TmrRd();           /* 刚进入时的计数器值 */
-
-//	while(1)
-//	{
-//		tnow = (uint32_t)CPU_TS_TmrRd();	
-//		if(tnow != told)
-//		{	
-//		    /* 这里注意一下SYSTICK是一个递减的计数器 */    
-//			if(tnow > told)
-//			{
-//				tcnt += tnow - told;	
-//			}
-//			/* 重新装载递减 */
-//			else 
-//			{
-//				tcnt += UINT32_MAX - told + tnow;	
-//			}	    
-//			told = tnow;
-
-//			/*时间超过/等于要延迟的时间,则退出 */
-//			if(tcnt >= ticks)break;
-//		}  
-//	}
-uint8_t i;
-
-while(_ulDelayTime--)
-{
-	for(i = 0; i < 168; i++)
-		__nop();
-}
-}
 
 void DEBUG_LOG(const char *format, ...)
 {

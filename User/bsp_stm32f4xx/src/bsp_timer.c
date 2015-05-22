@@ -1,25 +1,3 @@
-/*
-*********************************************************************************************************
-*
-*	模块名称 : 定时器模块
-*	文件名称 : bsp_timer.c
-*	版    本 : V1.0
-*	说    明 : 配置systick定时器作为系统滴答定时器。缺省定时周期为1ms。
-*
-*				实现了多个软件定时器供主程序使用(精度1ms)， 可以通过修改 TMR_COUNT 增减定时器个数
-*				实现了ms级别延迟函数（精度1ms） 和us级延迟函数
-*				实现了系统运行时间函数（1ms单位）
-*
-*	修改记录 :
-*		版本号  日期        作者     说明
-*		V1.0    2013-02-01 armfly  正式发布
-*		V1.1    2013-06-21 armfly  增加us级延迟函数 bsp_DelayUS
-*
-*	Copyright (C), 2012-2013, 安富莱电子 www.armfly.com
-*
-*********************************************************************************************************
-*/
-
 #include "bsp.h"
 
 /* 这2个全局变量转用于 bsp_DelayMS() 函数 */
@@ -81,8 +59,7 @@ void bsp_InitTimer(void)
 *	返 回 值: 无
 *********************************************************************************************************
 */
-extern void bsp_RunPer1ms(void);
-extern void bsp_RunPer10ms(void);
+
 void SysTick_ISR(void)
 {
 	static uint8_t s_count = 0;
@@ -110,13 +87,10 @@ void SysTick_ISR(void)
 		g_iRunTime = 0;
 	}
 
-	bsp_RunPer1ms();		/* 每隔1ms调用一次此函数，此函数在 bsp.c */
-
 	if (++s_count >= 10)
 	{
 		s_count = 0;
 
-		bsp_RunPer10ms();	/* 每隔10ms调用一次此函数，此函数在 bsp.c */
 	}
 }
 
@@ -174,8 +148,6 @@ void bsp_DelayMS(uint32_t n)
 
 	while (1)
 	{
-		bsp_Idle();				/* CPU空闲执行的操作， 见 bsp.c 和 bsp.h 文件 */
-
 		/*
 			等待延迟时间到
 			注意：编译器认为 s_ucTimeOutFlag = 0，所以可能优化错误，因此 s_ucTimeOutFlag 变量必须申明为 volatile
@@ -249,8 +221,6 @@ void bsp_StartTimer(uint8_t _id, uint32_t _period)
 {
 	if (_id >= TMR_COUNT)
 	{
-		/* 打印出错的源代码文件名、函数名称 */
-		BSP_Printf("Error: file %s, function %s()\r\n", __FILE__, __FUNCTION__);
 		while(1); /* 参数异常，死机等待看门狗复位 */
 	}
 
@@ -277,8 +247,6 @@ void bsp_StartAutoTimer(uint8_t _id, uint32_t _period)
 {
 	if (_id >= TMR_COUNT)
 	{
-		/* 打印出错的源代码文件名、函数名称 */
-		BSP_Printf("Error: file %s, function %s()\r\n", __FILE__, __FUNCTION__);
 		while(1); /* 参数异常，死机等待看门狗复位 */
 	}
 
@@ -304,8 +272,6 @@ void bsp_StopTimer(uint8_t _id)
 {
 	if (_id >= TMR_COUNT)
 	{
-		/* 打印出错的源代码文件名、函数名称 */
-		BSP_Printf("Error: file %s, function %s()\r\n", __FILE__, __FUNCTION__);
 		while(1); /* 参数异常，死机等待看门狗复位 */
 	}
 
@@ -365,18 +331,3 @@ int32_t bsp_GetRunTime(void)
 
 	return runtime;
 }
-
-/*
-*********************************************************************************************************
-*	函 数 名: SysTick_Handler
-*	功能说明: 系统嘀嗒定时器中断服务程序。启动文件中引用了该函数。
-*	形    参:  无
-*	返 回 值: 无
-*********************************************************************************************************
-*/
-void SysTick_Handler(void)
-{
-	SysTick_ISR();
-}
-
-/***************************** 安富莱电子 www.armfly.com (END OF FILE) *********************************/

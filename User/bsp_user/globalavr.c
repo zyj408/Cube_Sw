@@ -4,20 +4,20 @@
 /************************************************* 星务计算机全局变量 ***************************************************************/
 /* 星上Flash存储表 */
 const CPU_INT32U NorFlashStroeMap[]={
-	                                   NOR_FLASH_SA0 ,NOR_FLASH_SA1 ,NOR_FLASH_SA2 ,NOR_FLASH_SA3 ,NOR_FLASH_SA4 ,
-																		 NOR_FLASH_SA5 ,NOR_FLASH_SA6 ,NOR_FLASH_SA7 ,NOR_FLASH_SA8 ,NOR_FLASH_SA9 ,
-																		 NOR_FLASH_SA10,NOR_FLASH_SA11,NOR_FLASH_SA12,NOR_FLASH_SA13,NOR_FLASH_SA14,
-                                     NOR_FLASH_SA15,NOR_FLASH_SA16,NOR_FLASH_SA17,NOR_FLASH_SA18,NOR_FLASH_SA19,
-                                     NOR_FLASH_SA20,NOR_FLASH_SA21,NOR_FLASH_SA22,NOR_FLASH_SA23,NOR_FLASH_SA24,
-                                     NOR_FLASH_SA25,NOR_FLASH_SA26,NOR_FLASH_SA27,NOR_FLASH_SA28,NOR_FLASH_SA29,
-                                     NOR_FLASH_SA30,NOR_FLASH_SA31,NOR_FLASH_SA32,NOR_FLASH_SA33,NOR_FLASH_SA34,
-                                     NOR_FLASH_SA35,NOR_FLASH_SA36,NOR_FLASH_SA37,NOR_FLASH_SA38,NOR_FLASH_SA39,
-                                     NOR_FLASH_SA40,NOR_FLASH_SA41,NOR_FLASH_SA42,NOR_FLASH_SA43,NOR_FLASH_SA44,
-                                     NOR_FLASH_SA45,NOR_FLASH_SA46,NOR_FLASH_SA47,NOR_FLASH_SA48,NOR_FLASH_SA49,
-                                     NOR_FLASH_SA50,NOR_FLASH_SA51,NOR_FLASH_SA52,NOR_FLASH_SA53,NOR_FLASH_SA54,
-                                     NOR_FLASH_SA55,NOR_FLASH_SA56,NOR_FLASH_SA57,NOR_FLASH_SA58,NOR_FLASH_SA59,
-                                     NOR_FLASH_SA60,NOR_FLASH_SA61,NOR_FLASH_SA62
-																	  };
+										NOR_FLASH_SA0 ,NOR_FLASH_SA1 ,NOR_FLASH_SA2 ,NOR_FLASH_SA3 ,NOR_FLASH_SA4 ,
+										NOR_FLASH_SA5 ,NOR_FLASH_SA6 ,NOR_FLASH_SA7 ,NOR_FLASH_SA8 ,NOR_FLASH_SA9 ,
+										NOR_FLASH_SA10,NOR_FLASH_SA11,NOR_FLASH_SA12,NOR_FLASH_SA13,NOR_FLASH_SA14,
+										NOR_FLASH_SA15,NOR_FLASH_SA16,NOR_FLASH_SA17,NOR_FLASH_SA18,NOR_FLASH_SA19,
+										NOR_FLASH_SA20,NOR_FLASH_SA21,NOR_FLASH_SA22,NOR_FLASH_SA23,NOR_FLASH_SA24,
+										NOR_FLASH_SA25,NOR_FLASH_SA26,NOR_FLASH_SA27,NOR_FLASH_SA28,NOR_FLASH_SA29,
+										NOR_FLASH_SA30,NOR_FLASH_SA31,NOR_FLASH_SA32,NOR_FLASH_SA33,NOR_FLASH_SA34,
+										NOR_FLASH_SA35,NOR_FLASH_SA36,NOR_FLASH_SA37,NOR_FLASH_SA38,NOR_FLASH_SA39,
+										NOR_FLASH_SA40,NOR_FLASH_SA41,NOR_FLASH_SA42,NOR_FLASH_SA43,NOR_FLASH_SA44,
+										NOR_FLASH_SA45,NOR_FLASH_SA46,NOR_FLASH_SA47,NOR_FLASH_SA48,NOR_FLASH_SA49,
+										NOR_FLASH_SA50,NOR_FLASH_SA51,NOR_FLASH_SA52,NOR_FLASH_SA53,NOR_FLASH_SA54,
+										NOR_FLASH_SA55,NOR_FLASH_SA56,NOR_FLASH_SA57,NOR_FLASH_SA58,NOR_FLASH_SA59,
+										NOR_FLASH_SA60,NOR_FLASH_SA61,NOR_FLASH_SA62
+									};
 																		
 /* 星上指令接收状态量 */
 CPU_INT08U InsBuf[BUFFER_SIZE];            /* 指令接收缓冲变量 */
@@ -30,7 +30,11 @@ CPU_INT08U ID_CommandCnt;
 CPU_INT16U ObcAdValue[16][6];              /* 电源获取量 */
 CPU_INT08U ObcAdErr[16];
 CPU_INT08U ObcCommErr;
-																		
+
+CPU_INT16U TempAdValue[16][6];              /* 温度获取量 */
+CPU_INT08U TempAdErr[16];
+
+								
 /* 星上存储指针状态量 */
 CPU_INT32U TelCurPtr;                      /* 当前遥测存储指针 */
 CPU_INT32U GpsCurPtr;                      /* 当前GPS存储指针 */
@@ -58,6 +62,11 @@ CPU_INT08U EpsRevOTCnt;                    /* EPS传输接收计数 */
 CPU_INT08U ComTranOTCnt;                   /* COM传输超时计数 */
 CPU_INT08U ComRevOTCnt;                    /* COM传输超时计数 */
 
+
+
+/* 姿控采集变量 */
+
+double MagCurOut[4];
 /* 动量轮输出变量 */
 CPU_INT32U MotorSetOutput;
 CPU_INT32U MotorCurOutput;
@@ -91,10 +100,10 @@ typedef struct pld_frm
 
 
 /********************************** GPS接收相关变量 **********************************/
-NMEA_MSG GpsCurInfo;                                /* GPS当前状态量集 */
-CPU_INT08U GpsRevBuf[GPS_MAX_REV_SIZE];    /* GPS接收数据结构体 */
-volatile CPU_INT16U GpsRevCnt = 0;									/* GPS接收数据计数 */
-//NMEA_MSG GpsCurInfo;                                /* GPS当前状态量集 */
+NMEA_MSG GpsCurInfo;                       	/* GPS当前状态量集 */
+CPU_INT08U GpsRevBuf[GPS_MAX_REV_SIZE];    	/* GPS接收数据结构体 */
+volatile CPU_INT16U GpsRevCnt = 0;			/* GPS接收数据计数 */
+//NMEA_MSG GpsCurInfo;                  	/* GPS当前状态量集 */
 /********************************** 电源相关变量 **********************************/
 /* 电源变量 */
 CPU_INT16U EpsAdValue[32][6];   /* 电源获取量 */

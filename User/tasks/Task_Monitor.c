@@ -35,7 +35,11 @@ void ADC_SAMPLE_TASK(void *p_arg)
 
 	EpsAdStart();
 	ObcAdStart();
+	TempAdStart();
+	
+	//AD7192StartContinuousConvertion(AIN1_COM|AIN2_COM|AIN3_COM|AIN4_COM);
 	BSP_OS_TimeDlyMs(100);
+	
 	while(1)
 	{
 		for(round = 0; round < 16; round++)
@@ -44,13 +48,21 @@ void ADC_SAMPLE_TASK(void *p_arg)
 			BSP_OS_TimeDlyMs(1);
 			
 			EpsAdUpdate(EPS_AD_CS2);
-			AdDataFliter(EpsAdValue, 32);
-			
 			BSP_OS_TimeDlyMs(1);
+			
 			ObcAdUpdate();
-			AdDataFliter(ObcAdValue, 16);
+			BSP_OS_TimeDlyMs(1);
+			
+			TempAdUpdate();
+			BSP_OS_TimeDlyMs(1);
 		}
+		AdDataFliter(EpsAdValue, 32);
+		AdDataFliter(ObcAdValue, 16);
+		AdDataFliter(TempAdValue, 16);
 		
+		
+		/* 磁强计调用 */
+		Get_Mag_Result(MagCurOut);
 		BSP_OS_TimeDlyMs(1000);
 	}
 	

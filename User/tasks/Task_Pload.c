@@ -19,7 +19,7 @@ const uint8_t FipexRspFrame[4] = {0x7E, 0x11, 0x00, 0x11};
 void PLOAD_SAM_TASK(void *p_arg)
 {
 	uint8_t Fipex_data;
-	uint8_t FipexAckTimeout;
+	uint16_t FipexAckTimeout;
 	(void)p_arg;
 
 	FipexScriptStart();
@@ -104,7 +104,7 @@ update:
 			FipexAckTimeout = 0;
 			FipexRxLength = 0;
 			FipexRxSyncFlg = 0;
-			while(FipexAckTimeout < 50)  //接收串口数据（超时设置为5ms）
+			while(FipexAckTimeout < FIPEX_ACK_TIMEOUT)  //接收串口数据（超时设置为5ms）
 			{
 				if(comGetChar(COM3, &Fipex_data))  //串口获取一个数据
 				{

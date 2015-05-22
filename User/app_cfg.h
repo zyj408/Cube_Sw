@@ -48,11 +48,11 @@
 #define  TEL_STO_TASK_STK_SIZE                            512u
 #define  PLOAD_SAM_TASK_STK_SIZE                          128u
 #define  PLOAD_STO_TASK_STK_SIZE                          128u
-#define  STO_UPDATE_TASK_STK_SIZE                 		  	128u
-#define  FAULT_TASK_STK_SIZE                      		  	128u
-#define  TEST_TASK_STK_SIZE                      		     	128u
-#define  OUTPUT_TASK_STK_SIZE                      		   	128u
-#define  ADC_SAMPLE_TASK_STK_SIZE                  		   	128u
+#define  STO_UPDATE_TASK_STK_SIZE                 		  128u
+#define  FAULT_TASK_STK_SIZE                      		  128u
+#define  TEST_TASK_STK_SIZE                      		  128u
+#define  OUTPUT_TASK_STK_SIZE                      		  128u
+#define  ADC_SAMPLE_TASK_STK_SIZE                  		  512u
 #define  STO_SOR_MONITOR_TASK_STK_SIZE                    128u
 
 #define  APP_TASK_SENGET_STK_SIZE                         1024u

@@ -83,7 +83,7 @@ unsigned char MotorChange(unsigned int val);
 unsigned char AD5722_SendByte(unsigned char byte);
 void AD5722_RegEdit(unsigned char* WriteBuffer, unsigned char *ReadBuffer, unsigned char NumberOfByte);
 void AD5722_Write(unsigned char code);
-void WriteToAD5754RViaSpi(long int *RegisterData);
+void WriteToAD5754RViaSpi(int *RegisterData);
 void ConfigAD5754R(void);
 void bsp_InitSPI2_GPIO(void);
 void bsp_InitSPI2(void);

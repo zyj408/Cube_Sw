@@ -201,7 +201,7 @@ static  void  AppTaskStart (void *p_arg)
     CPU_IntDisMeasMaxCurReset();
 #endif
 	
-		AppTimerCreate();
+	AppTimerCreate();
     AppObjCreate();                                            
     AppTaskCreate();                                           
     while (1)

@@ -152,7 +152,7 @@ void FipexScienceDataStore(uint8_t *rx_data)
 	FipexFileSize += length;
 	
 	#else
-		comSendBuf(COM6, ptr_obc, length);
+		comSendBuf(COM6, (rx_data + 1), length);
 	#endif
 }
 

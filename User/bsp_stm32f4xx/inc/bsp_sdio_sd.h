@@ -45,17 +45,6 @@
   * @brief  SD FLASH SDIO Interface
   */
 
-#ifdef STM32_X4
-	#define SD_DETECT_PIN                    GPIO_Pin_0
-	#define SD_DETECT_GPIO_PORT              GPIOE
-	#define SD_DETECT_GPIO_CLK               RCC_AHB1Periph_GPIOE
-#else	/* STM32_F4 */
-	#define SD_DETECT_PIN                    GPIO_Pin_7
-	#define SD_DETECT_GPIO_PORT              GPIOD
-	#define SD_DETECT_GPIO_CLK               RCC_AHB1Periph_GPIOD
-#endif
-
-
 #define SDIO_FIFO_ADDRESS                ((uint32_t)0x40012C80)
 /**
   * @brief  SDIO Intialization Frequency (400KHz max)

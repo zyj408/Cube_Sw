@@ -74,7 +74,7 @@
 #include "bsp_i2c0.h"
 #include "bsp_i2c1.h"
 #include "bsp_switch.h"
-
+#include "AD7192.h"
 #include "bsp_Fipex.h"
 
 
