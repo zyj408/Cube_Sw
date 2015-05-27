@@ -372,7 +372,7 @@ void  OS_CPU_SysTickHandler (void)
     CPU_CRITICAL_EXIT();
 
     OSTimeTick();                                           /* Call uC/OS-III's OSTimeTick()                          */
-	SysTick_ISR();
+	
     OSIntExit();                                            /* Tell uC/OS-III that we are leaving the ISR             */
 }
 

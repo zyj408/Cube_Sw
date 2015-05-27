@@ -37,7 +37,7 @@ void ADC_SAMPLE_TASK(void *p_arg)
 	ObcAdStart();
 	TempAdStart();
 	
-	//AD7192StartContinuousConvertion(AIN1_COM|AIN2_COM|AIN3_COM|AIN4_COM);
+//	AD7192StartContinuousConvertion(AIN1_COM|AIN2_COM|AIN3_COM|AIN4_COM);
 	BSP_OS_TimeDlyMs(100);
 	
 	while(1)
@@ -62,7 +62,7 @@ void ADC_SAMPLE_TASK(void *p_arg)
 		
 		
 		/* 磁强计调用 */
-		Get_Mag_Result(MagCurOut);
+		//Get_Mag_Result(MagCurOut);
 		BSP_OS_TimeDlyMs(1000);
 	}
 	

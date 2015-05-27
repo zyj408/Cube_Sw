@@ -466,11 +466,6 @@
               <FilePath>..\..\User\bsp_stm32f4xx\bsp_os.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_sdio_sd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_sdio_sd.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_fsmc_sram.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_fsmc_sram.c</FilePath>
@@ -1479,11 +1474,6 @@
               <FilePath>..\..\User\bsp_stm32f4xx\bsp_os.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_sdio_sd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_sdio_sd.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_fsmc_sram.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_fsmc_sram.c</FilePath>
@@ -2490,11 +2480,6 @@
               <FileName>bsp_os.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_stm32f4xx\bsp_os.c</FilePath>
-            </File>
-            <File>
-              <FileName>bsp_sdio_sd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_sdio_sd.c</FilePath>
             </File>
             <File>
               <FileName>bsp_fsmc_sram.c</FileName>

@@ -18,7 +18,11 @@ void AppTaskSenGet(void)
       
 		 	/*¶Á´ÅÇ¿¼Æ¶ÁÊý*/
 	
-		 	Get_Mag_Result(MagCurOut);
+		  Get_Mag_Result(MagCurOut);
+	    #if debug_enable
+	   
+			printf("%04.8f %04.8f %04.8f %04.8f\r\n",MagCurOut[0],MagCurOut[1],MagCurOut[2],MagCurOut[3]);
+		#endif
 		  magnetometer[0] = MagCurOut[0];
 		  magnetometer[1] = MagCurOut[1];
 		  magnetometer[2] = MagCurOut[2];

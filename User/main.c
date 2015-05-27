@@ -479,7 +479,7 @@ static  void  AppObjCreate (void)
 {
 	/* 创建互斥信号量 */
 	
-  BSP_OS_SemCreate(&SEM_GPS_STO,
+	BSP_OS_SemCreate(&SEM_GPS_STO,
 					0,	
 					(CPU_CHAR *)"SEM_GPS_STO");     /* GPS存储信号灯 */
 	

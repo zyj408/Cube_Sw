@@ -35,7 +35,7 @@ void bsp_InitSPI2(void)
 	SPI_InitTypeDef  SPI_InitStructure;
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);		
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE );	
-	/* 配置MSK、MISO、MOSI复用功能 */
+	/* 配置SCLK、MISO、MOSI复用功能 */
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_SPI2);
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource14, GPIO_AF_SPI2);
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource15, GPIO_AF_SPI2);
@@ -95,7 +95,8 @@ void Init_GPIO(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12; 
   GPIO_Init(GPIOB, &GPIO_InitStructure);                       //CS PIN
 	
-	AD7192_SET_LOW();
+	//AD7192_SET_LOW();
+	AD7192_SET_HIGH();
 	AD7192_RESET_HIGH();	
 }	
 
@@ -258,17 +259,17 @@ u32 AD7192ReadConvertingData(void)
 
 void Mag_Set(int delaytime)
 {
-	AD7192_RESET_LOW(); 
-   AD7192_Delaytime(delaytime);
-	AD7192_SET_HIGH();  
+  AD7192_RESET_LOW(); 
+  AD7192_Delaytime(delaytime);
+  AD7192_SET_HIGH();  
 
 }
 
 void Mag_Reset(int delaytime)
 {
   AD7192_SET_LOW();  
-AD7192_Delaytime(delaytime);
-	AD7192_RESET_HIGH(); 
+  AD7192_Delaytime(delaytime);
+  AD7192_RESET_HIGH(); 
 }
 
  
@@ -289,17 +290,20 @@ void Get_Mag_Read(double* M)
 	   	else if(CH==1)
 	  	{
 		  	vin=(vin-M[0])*1000;
+//			printf("x=%6f",vin);
 				M[1]=vin;
 		  }
 	  	else if(CH==2)
 	  	{
 
 			  vin=(vin-M[0])*1000;
+//				printf("y=%6f",vin);
 				M[2]=vin;
 		  }
 	  	else if(CH==3)
 		  {
 				vin=(vin-M[0])*1000;
+//			  	printf("z=%6f\n",vin);
 				M[3]=vin;
 		  }
 		CH=CH+1;	
@@ -309,36 +313,94 @@ void Get_Mag_Read(double* M)
 
 void Get_Mag_Result(double* Mag)
 {
+	int i;
 	double MS[4];
+	double MS1[4];
 	double MR[4];
-	
+	double MR1[4];
   Init_AD7192();	//AD7192初始化和模式配置
 	
 	Mag_Set(5);
-	Get_Mag_Read(MS);
+	AD7192_Delaytime(400);
+	//五次循环开始
+	Get_Mag_Read(MS1);
+	for(i=0;i<4;i++)
+	{
+	  MS[i]=MS1[i]+MS[i];
+	}
+    Get_Mag_Read(MS1);
+	for(i=0;i<4;i++)
+	{
+	  MS[i]=MS1[i]+MS[i];
+	}
+	Get_Mag_Read(MS1);
+    for(i=0;i<4;i++)
+	{
+	  MS[i]=MS1[i]+MS[i];
+	}
+	Get_Mag_Read(MS1);
+	for(i=0;i<4;i++)
+	{
+	  MS[i]=MS1[i]+MS[i];
+	}
+	Get_Mag_Read(MS1);
+	for(i=0;i<4;i++)
+	{
+	MS[i]=MS1[i]+MS[i];
+	MS[i]=MS[i]/5;
+	}	
+	//五次循环结束
 	Mag_Reset(5);
-	Get_Mag_Read(MR);
+	AD7192_Delaytime(400);
+	//五次循环开始
+	Get_Mag_Read(MR1);
+	for(i=0;i<4;i++)
+	{
+	  MR[i]=MR1[i]+MR[i];
+	}
+    Get_Mag_Read(MR1);
+	for(i=0;i<4;i++)
+	{
+	  MR[i]=MR1[i]+MR[i];
+	}
+	Get_Mag_Read(MR1);
+    for(i=0;i<4;i++)
+	{
+	  MR[i]=MR1[i]+MR[i];
+	}
+	Get_Mag_Read(MR1);
+	for(i=0;i<4;i++)
+	{
+	  MR[i]=MR1[i]+MR[i];
+	}
+	Get_Mag_Read(MR1);
+	for(i=0;i<4;i++)
+	{
+	MR[i]=MR1[i]+MR[i];
+	MR[i]=MR[i]/5;
+	}	
+	//五次循环结束
 	Mag[0]=((MS[1]-MR[1])/2.0)*100.0;
 	Mag[1]=((MS[2]-MR[2])/2.0)*100.0;
 	Mag[2]=((MS[3]-MR[3])/2.0)*100.0;
 	Mag[3]=(MS[0]+MR[0])/2;       //磁场值读取
 
 	if(Mag[3] < AD7192_REF_TEST_DOWN||Mag[3] > AD7192_REF_TEST_UP)
-		{
-     	AD7192_CS_HIGH();
-     AD7192_Delaytime(200); 
-      AD7192_CS_LOW();	
-      Init_AD7192();
-			Mag_Fault_Counts++;
+	{
+		AD7192_CS_HIGH();
+		AD7192_Delaytime(200); 
+		AD7192_CS_LOW();	
+		Init_AD7192();
+		Mag_Fault_Counts++;
      }
 	if(Mag_Error_Flag==1)
 	{
 		Mag[0]=-1;
-	  Mag[1]=-1;
-	  Mag[2]=-1;
-	  Mag[3]=-1;
+		Mag[1]=-1;
+		Mag[2]=-1;
+		Mag[3]=-1;
 		Mag_Error_Flag=0;
-  }                                   //故障检测
+	}                                   //故障检测
 	AD7192_CS_HIGH();
 }
 	

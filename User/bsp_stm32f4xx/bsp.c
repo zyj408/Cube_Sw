@@ -46,7 +46,7 @@ uint32_t CpuFreq;
 
 void bsp_Init(void)
 {
-	bsp_InitTimer();     /* 初始化定时器 */
+	
 	bsp_InitUart(); 	   /* 初始化串口 */	
 	bsp_Init_VAR();
 
@@ -85,9 +85,7 @@ void bsp_Init(void)
 	CpuFreq = BSP_CPU_ClkFreq();
 	#endif
 	
-	
-	bsp_FileSystem();    /* 初始化文件系统 */
-	
+		
 	//bsp_InitIwdg(10000);    /* 独立看门狗初始化1000ms */
 
 
@@ -112,6 +110,15 @@ void bsp_Init(void)
 *	返 回 值: 无
 *********************************************************************************************************
 */
+void bsp_DelayUS (uint32_t _ulDelayTime)
+{
+	uint8_t i;
+	while(_ulDelayTime--)
+	{
+		for(i=0; i<40; i++);
+	}
+}
+
 void NVIC_Configuration(void)
 {			
 	/* 设置NVIC优先级分组为Group2：0-3抢占式优先级，0-3的响应式优先级 */

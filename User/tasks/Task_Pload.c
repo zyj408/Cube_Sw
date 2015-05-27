@@ -22,7 +22,7 @@ void PLOAD_SAM_TASK(void *p_arg)
 	uint16_t FipexAckTimeout;
 	(void)p_arg;
 
-	FipexScriptStart();
+	//FipexScriptStart();
 	while(1)
 	{
 		switch(FipexStatus)

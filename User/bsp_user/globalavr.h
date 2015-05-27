@@ -139,7 +139,7 @@ struct OBCStoreInfoStr
 		unsigned char Empty             :1; /* 空闲标志位 */
 		unsigned char Full              :1; /* 存满标志位 */
 		unsigned char Downed            :1; /* 优先级 */
-	  unsigned char Broke             :1; /* 错误数 */
+		unsigned char Broke             :1; /* 错误数 */
 		unsigned char EraserTime        :4; /* 擦除次数 */
 	}SectorInfo[32];
 	
@@ -148,10 +148,10 @@ struct OBCStoreInfoStr
 
 struct OBCTaskStatus
 {
-		unsigned char CpuUsage;    
-		CPU_STK_SIZE StackFree;    
-	  CPU_STK_SIZE StackUsed;
-		CPU_TS TimeStamp;           
+	unsigned char CpuUsage;    
+	CPU_STK_SIZE StackFree;    
+	CPU_STK_SIZE StackUsed;
+	CPU_TS TimeStamp;           
 };
 
 /* 声明外部软件超时定时器 */

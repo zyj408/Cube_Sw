@@ -3014,20 +3014,31 @@ void SDIO_Interrupts_Config(void)
 #endif
 }
 
-
+FRESULT res;
+FATFS fs;
 char str[20];
 void bsp_FileSystem(void)
 {
 	#if SD_FILESYSTEM_ENABLE
-	UINT bw, br;
-	
-	f_result = f_mount(FS_SD, &f_fs);
-	if(f_result == FR_OK)
-	{
-		DEBUG_LOG("File System Init OK\r\n");
-	}
+//	UINT bw, br;
+//	
+//	f_result = f_mount(FS_SD, &f_fs);
+//	if(f_result == FR_OK)
+//	{
+//		DEBUG_LOG("File System Init OK\r\n");
+//	}
 	
 	#endif
+	bsp_InitSPI2();
+	res = f_mount(0, &fs);
+	if(res!=FR_OK)
+    {
+		while(1);
+    }
+	
+	
+	
+	
 //	f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE | FA_CREATE_ALWAYS);  // NOTE:建立文件名最好全英文
 //	f_write(&f_file, "haha2", 18, &bw);
 //		printf("Current write size of Byte: %d\r\n", bw);

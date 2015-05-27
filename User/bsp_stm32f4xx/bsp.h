@@ -34,7 +34,6 @@
 #include "bsp_rtc.h"
 #include "bsp_iwdg.h"
 #include "bsp_cpu_flash.h"
-#include "bsp_sdio_sd.h"
 #include "bsp_fsmc_sram.h"
 
 
@@ -76,7 +75,7 @@
 #include "bsp_switch.h"
 #include "AD7192.h"
 #include "bsp_Fipex.h"
-
+#include "bsp_spi_sd.h"
 
 void bsp_Init(void);
 void bsp_DelayUS(uint32_t _ulDelayTime);

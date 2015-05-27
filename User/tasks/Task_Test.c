@@ -22,15 +22,51 @@ char pl_on = 2;
 
 void TEST_TASK(void *p_arg)
 {	
+//	UINT bw, br;
 	(void)p_arg;
+	
+//	f_result = f_mount(FS_SD, &f_fs);
+//	if(f_result == FR_OK)
+//	{
+//		DEBUG_LOG("File System Init OK\r\n");
+//	}
 	
 	while(1)
 	{
-		GndTsRxHandle();
-		BSP_OS_TimeDlyMs(1);
+//		GndTsRxHandle();
+//		BSP_OS_TimeDlyMs(100);
+		#if adcs_debug
+		uint8_t buf;
+		
+		if(comGetChar(COM1, &buf))
+		{
+		
+			if(buf == '1')
+			{
+				BSP_OS_SemPost(&SEM_CYC_INFO);
+			}
+		}
+		#else
+			GndTsRxHandle();
+		#endif
+		
+		BSP_OS_TimeDlyMs(10);
+//	f_result = f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE | FA_OPEN_EXISTING);  // NOTE:建立文件名最好全英文
+//	f_result = f_lseek(&f_file,f_file.fsize);
+//	f_result = f_write(&f_file, "haha", 4, &bw);
+//		printf("Current write size of Byte: %d\r\n", bw);
+//	f_result = f_write(&f_file, "wawa", 4, &bw);
+//		printf("Current write size of Byte: %d\r\n", bw);
+//	f_result = f_close(&f_file);	
 		
 		
-		#if 1
+		#if 0
+		
+		
+		
+		
+		
+		
 		if(gpsa_sw != 2)
 		{
 			if(gpsa_sw == 1)

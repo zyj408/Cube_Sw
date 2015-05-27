@@ -72,10 +72,10 @@ void HardFault_Handler(void)
 	
 	GoBack();
   /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-	  
-  }
+//  while (1)
+//  {
+//	  
+//  }
 }
 
 /**
@@ -143,52 +143,6 @@ void DebugMon_Handler(void)
 void PendSV_Handler(void)
 {
 }
-
-/*
-*********************************************************************************************************
-*	函 数 名: SDIO_IRQHandler
-*	功能说明: This function handles WWDG interrupt request.
-*	形    参：无
-*	返 回 值: 无
-*********************************************************************************************************
-*/
-void SDIO_IRQHandler(void)
-{
-  	CPU_SR_ALLOC();
-	
-	CPU_CRITICAL_ENTER();  
-	OSIntNestingCtr++;
-	CPU_CRITICAL_EXIT();
-
-	SD_ProcessIRQSrc();
-
-	/* 在os_core.c文件里定义,如果有更高优先级的任务就绪了,则执行一次任务切换 */
-	OSIntExit();
-}
-
-/*
-*********************************************************************************************************
-*	函 数 名: SD_SDIO_DMA_IRQHANDLER
-*	功能说明: This function handles WWDG interrupt request.
-*	形    参：无
-*	返 回 值: 无
-*********************************************************************************************************
-*/
-void SD_SDIO_DMA_IRQHANDLER(void)
-{
-  	CPU_SR_ALLOC();
-	
-	CPU_CRITICAL_ENTER();  
-	OSIntNestingCtr++;
-	CPU_CRITICAL_EXIT();
-
-	SD_ProcessDMAIRQ();
-
-	/* 在os_core.c文件里定义,如果有更高优先级的任务就绪了,则执行一次任务切换 */
-	OSIntExit();
-}
-
-
 
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

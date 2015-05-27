@@ -8,12 +8,9 @@
 /*-----------------------------------------------------------------------*/
 
 #include "diskio.h"		/* FatFs lower layer API */
-#include "bsp_sdio_sd.h"
-
+#include <includes.h>
 /* Definitions of physical drive number for each media */
-#define ATA		0
-#define MMC		1
-#define USB		2
+extern MSD_CARDINFO SD0_CardInfo;
 
 
 #define SECTOR_SIZE		512
@@ -26,20 +23,15 @@ DSTATUS disk_initialize (
 )
 {
 	DSTATUS stat = STA_NOINIT;
-	SD_CardInfo SDCardInfo;
 
 	switch (pdrv)
 	{
 		case FS_SD :		/* SD卡 */
-			if (SD_Init() == SD_OK)
-			{
-				stat = RES_OK;
-			}
+			stat = MSD0_Init();
+			if(stat==0) 
+				return RES_OK; 
 			else
-			{
-				stat = STA_NODISK;
-			}
-			break;
+				return STA_NOINIT; 
 
 		case FS_NAND :		/* NAND Flash */
 		
@@ -118,44 +110,32 @@ DRESULT disk_read (
 	BYTE count		/* Number of sectors to read (1..128) */
 )
 {
-	DRESULT res;
 
+	int Status;
+	
+	if(!count)  
+		return RES_PARERR;  /* count不能等于0，否则返回参数错误 */
+	
 	switch (pdrv)
 	{
 		case FS_SD :
-		{
-			SD_Error Status = SD_OK;
-
-			if (count == 1)
-			{
-				Status = SD_ReadBlock(buff, sector << 9 , SECTOR_SIZE);
-			}
-			else
-			{
-				Status = SD_ReadMultiBlocks(buff, sector << 9 , SECTOR_SIZE, count);
-			}
-			if (Status != SD_OK)
-			{
-				res = RES_ERROR;
-				break;
-			}
-
-		#ifdef SD_DMA_MODE
-			/* SDIO工作在DMA模式，需要检查操作DMA传输是否完成 */
-			Status = SD_WaitReadOperation();
-			if (Status != SD_OK)
-			{
-				res = RES_ERROR;
-				break;
-			}
-
-			while(SD_GetStatus() != SD_TRANSFER_OK);
-		#endif
-
-			res = RES_OK;
-			break;
-		}
-
+			if(count == 1)
+            {   
+				Status =  MSD0_ReadSingleBlock( sector ,buff );
+				if(Status == 0) 
+					return RES_OK;
+				else
+					return RES_ERROR;    
+			}                                                
+			else	/* 多个sector的读操作 */     
+			{  
+				Status = MSD0_ReadMultiBlock( sector , buff ,count);
+				if(Status == 0)
+					return RES_OK;
+				else
+					return RES_ERROR; 
+			}                                                
+			
 		case FS_NAND :
 		
 			break;
@@ -176,7 +156,7 @@ DRESULT disk_read (
 	
 			break;
 	}
-	return res;
+	return RES_PARERR;
 }
 
 
@@ -193,43 +173,32 @@ DRESULT disk_write (
 	BYTE count			/* Number of sectors to write (1..128) */
 )
 {
- DRESULT res;
-
+	
+	int Status;
+	if( !count )
+	{    
+		return RES_PARERR;  /* count不能等于0，否则返回参数错误 */
+	}
+	
 	switch (pdrv)
 	{
 		case FS_SD :
-			{
-				SD_Error Status = SD_OK;
-	
-				if (count == 1) 
-				{
-					Status = SD_WriteBlock((uint8_t *)buff, sector << 9 ,SECTOR_SIZE);
-				} 
-				else 
-				{
-					Status = SD_WriteMultiBlocks((uint8_t *)buff, sector << 9 ,SECTOR_SIZE, count);	
-				}
-				if (Status != SD_OK) 
-				{
-					res =  RES_ERROR;
-				}
-			
-			#ifdef SD_DMA_MODE	
-				/* SDIO工作在DMA模式，需要检查操作DMA传输是否完成 */
-				Status = SD_WaitReadOperation();
-				if (Status != SD_OK) 
-				{
-					res =  RES_ERROR;
-				}
-				
-				while(SD_GetStatus() != SD_TRANSFER_OK);
-			#endif	
-	
-				while(SD_GetStatus() != SD_TRANSFER_OK);
-	
-				res =  RES_OK;
-				break;
-			}
+			if(count==1) /* 1个sector的写操作 */      
+			{   
+				Status = MSD0_WriteSingleBlock( sector , (uint8_t *)(&buff[0]) ); 
+				if(Status == 0)
+					return RES_OK;
+				else
+					return RES_ERROR;
+			}                                                
+			else /* 多个sector的写操作 */    
+			{  
+				Status = MSD0_WriteMultiBlock( sector , (uint8_t *)(&buff[0]) , count );
+				if(Status == 0)
+					return RES_OK;
+				else
+					return RES_ERROR;   
+			}                                             		
 
 		case FS_NAND :
 		
@@ -248,10 +217,9 @@ DRESULT disk_write (
 			break;
 
 		default:
-			res = RES_PARERR;
 			break;
 	}
-	return res;
+	return RES_PARERR;
 }
 #endif
 
@@ -267,14 +235,28 @@ DRESULT disk_ioctl (
 	void *buff		/* Buffer to send/receive control data */
 )
 {
-	DRESULT res;
 
 	switch (pdrv) {
 	case FS_SD :
-		/* SD卡磁盘容量： SDCardInfo.CardCapacity */
-		res = RES_OK;
-		return res;
-
+		MSD0_GetCardInfo(&SD0_CardInfo);
+		switch (cmd) 
+		{
+			case CTRL_SYNC : 
+				return RES_OK;
+			case GET_SECTOR_COUNT : 
+				*(DWORD*)buff = SD0_CardInfo.Capacity/SD0_CardInfo.BlockSize;
+				return RES_OK;
+			case GET_BLOCK_SIZE :
+				*(WORD*)buff = SD0_CardInfo.BlockSize;
+				return RES_OK;	
+			case CTRL_POWER :
+				break;
+			case CTRL_LOCK :
+				break;
+			case CTRL_EJECT :
+				break;
+		} 
+		break;
 	case FS_NAND :
 	    break;
 
