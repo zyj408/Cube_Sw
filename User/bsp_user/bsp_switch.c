@@ -61,16 +61,9 @@ void bsp_InitSwitch(void)
 	
 	#endif
 	
-	SW_MTQ_ENABLE;       //打开磁棒供电
-	SW_WHEELA_ENABLE;    //打开动量轮A供电
-	SW_WHEELB_ENABLE;    //打开动量轮B供电
-	SW_GPSA_ENABLE;      //打开GPSA供电
-	SW_GPSB_ENABLE;      //打开GPSB供电
-	SW_USB_ENABLE;       //打开USB应答机供电
-	SW_SOLAR_ENABLE;     //打开太阳能翻板供电
-	SW_RES_ENABLE;       //打开保留供电
+	out_en(OUT_ALL, ENABLE);
 
-  RCC_AHB1PeriphClockCmd(RCC_S0_EN_PORT | RCC_S1_EN_PORT | RCC_S2_EN_PORT | RCC_S3_EN_PORT, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_S0_EN_PORT | RCC_S1_EN_PORT | RCC_S2_EN_PORT | RCC_S3_EN_PORT, ENABLE);
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_S0_EN_PIN;	
 	GPIO_Init(GPIO_S0_EN_PORT, &GPIO_InitStructure);

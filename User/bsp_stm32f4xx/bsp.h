@@ -60,7 +60,7 @@
 //#include "bsp_oled.h"
 //#include "bsp_mg323.h"
 
-
+#include "bsp_eps.h"
 #include "bsp_spi_eps.h"
 #include "bsp_spi_motor.h"
 #include "bsp_adc.h"

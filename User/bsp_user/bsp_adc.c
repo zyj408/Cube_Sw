@@ -106,19 +106,19 @@ void SPI1_IRQHandler(void)
 	if(SPI_I2S_GetITStatus(SPI1, SPI_IT_CRCERR) == SET)
 	{
 		SPI_I2S_ClearITPendingBit(SPI1, SPI_IT_CRCERR);
-		ObcCommErr++;
+		
 	}
 	
 	if(SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_OVR) == SET)
 	{
 		SPI_I2S_ClearITPendingBit(SPI1, SPI_I2S_IT_OVR);
-		ObcCommErr++;
+		
 	}	
 	
 	if(SPI_I2S_GetITStatus(SPI1, SPI_IT_MODF) == SET)
 	{
 		SPI_I2S_ClearITPendingBit(SPI1, SPI_IT_MODF);
-		ObcCommErr++;
+		
 	}
 	OSIntExit();
 }
@@ -177,25 +177,11 @@ void TempDataProcess(CPU_INT16U data)
 	channel = (CPU_INT08U)(data >> 12);  /* 获取转换的通道 */
 	ad_temp = data & 0x0FFF;  /* 获取该通道的AD转换值 */
 
-	if(ad_temp<TEMP_AD_HIGH && ad_temp>TEMP_AD_LOW)  /* 所采样的AD值在正常范围内 */
+	for(index=0; index<4; index++)
 	{
-		for(index=0; index<4; index++)
-		{
-			TempAdValue[channel][index] = TempAdValue[channel][index+1];
-		}
-		TempAdValue[channel][4] = ad_temp;  /* 将AD值传入AD矩阵 */
+		TempAdValue[channel][index] = TempAdValue[channel][index+1];
 	}
-	else  /* AD值错误 */
-	{
-		
-		for(index=0; index<4; index++)
-		{
-			TempAdValue[channel][index] = TempAdValue[channel][index+1];
-		}
-		TempAdValue[channel][4] = ad_temp;  /* 将AD值传入AD矩阵 */
-		
-		TempAdErr[channel]++;
-	}	
+	TempAdValue[channel][4] = ad_temp;  /* 将AD值传入AD矩阵 */
 }
 
 CPU_INT08U TempAdUpdate(void)
@@ -218,25 +204,11 @@ void ObcDataProcess(CPU_INT16U data)
 	channel = (CPU_INT08U)(data >> 12);  /* 获取转换的通道 */
 	ad_temp = data & 0x0FFF;  /* 获取该通道的AD转换值 */
 
-	if(ad_temp<OBC_AD_HIGH && ad_temp>OBC_AD_LOW)  /* 所采样的AD值在正常范围内 */
+	for(index=0; index<4; index++)
 	{
-		for(index=0; index<4; index++)
-		{
-			ObcAdValue[channel][index] = ObcAdValue[channel][index+1];
-		}
-		ObcAdValue[channel][4] = ad_temp;  /* 将AD值传入AD矩阵 */
+		ObcAdValue[channel][index] = ObcAdValue[channel][index+1];
 	}
-	else  /* AD值错误 */
-	{
-		
-		for(index=0; index<4; index++)
-		{
-			ObcAdValue[channel][index] = ObcAdValue[channel][index+1];
-		}
-		ObcAdValue[channel][4] = ad_temp;  /* 将AD值传入AD矩阵 */
-		
-		ObcAdErr[channel]++;
-	}
+	ObcAdValue[channel][4] = ad_temp;  /* 将AD值传入AD矩阵 */
 }
 
 void ObcAdStart(void)
@@ -321,25 +293,12 @@ void EpsDataProcess(CPU_INT16U data, CPU_INT08U chipNum)
 	{
 		channel += 16;
 	}
-	if(ad_temp<EPS_AD_HIGH && ad_temp>EPS_AD_LOW)  /* 所采样的AD值在正常范围内 */
+	
+	for(index=0; index<4; index++)
 	{
-		for(index=0; index<4; index++)
-		{
-			EpsAdValue[channel][index] = EpsAdValue[channel][index+1];
-		}
-		EpsAdValue[channel][4] = ad_temp;  /* 将AD值传入AD矩阵 */
+		EpsAdValue[channel][index] = EpsAdValue[channel][index+1];
 	}
-	else  /* AD值错误 */
-	{
-		
-		for(index=0; index<4; index++)
-		{
-			EpsAdValue[channel][index] = EpsAdValue[channel][index+1];
-		}
-		EpsAdValue[channel][4] = ad_temp;  /* 将AD值传入AD矩阵 */
-		
-		EpsAdErr[channel]++;
-	}
+	EpsAdValue[channel][4] = ad_temp;  /* 将AD值传入AD矩阵 */
 }
 
 CPU_INT08U EpsAdUpdate(CPU_INT08U chip)
@@ -403,7 +362,7 @@ CPU_INT16U EpsSendByte(uint16_t _ucValue, uint8_t _chipNum)
 	return SPI_I2S_ReceiveData(SPI1);
 }
 
-void AdDataFliter(CPU_INT16U ad_table[][6], CPU_INT08U channel_num)
+void AdDataFliter(CPU_INT16U ad_table[][5], CPU_INT16U* ad_aver_table, CPU_INT08U channel_num)
 {
 	CPU_INT16U max;
 	CPU_INT16U min;
@@ -423,6 +382,6 @@ void AdDataFliter(CPU_INT16U ad_table[][6], CPU_INT08U channel_num)
 			sum = sum + ad_table[channel_temp][index];
 		}
 		
-		ad_table[channel_temp][5] = (sum - max - min) / 3;
+		ad_aver_table[channel_temp] = (sum - max - min) / 3;
 	}
 }

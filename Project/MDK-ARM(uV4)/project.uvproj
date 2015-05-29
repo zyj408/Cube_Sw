@@ -981,6 +981,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_user\AD7192.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_eps.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_user\bsp_eps.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1995,6 +2000,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_user\AD7192.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_eps.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_user\bsp_eps.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -3008,6 +3018,11 @@
               <FileName>AD7192.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_user\AD7192.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_eps.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_user\bsp_eps.c</FilePath>
             </File>
           </Files>
         </Group>

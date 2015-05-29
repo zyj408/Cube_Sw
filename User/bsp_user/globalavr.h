@@ -176,12 +176,11 @@ extern CPU_INT08U ID_CommandBuf[BUFFER_SIZE];
 extern CPU_INT08U ID_CommandCnt;				
 
 /* 星务板数模转换状态量 */																		
-extern CPU_INT16U ObcAdValue[16][6];              /* 电源获取量 */
-extern CPU_INT08U ObcAdErr[16];
-extern CPU_INT08U ObcCommErr;
-								
-extern CPU_INT16U TempAdValue[16][6];             /* 温度获取量 */
-extern CPU_INT08U TempAdErr[16];								
+extern CPU_INT16U ObcAdValue[16][5];              /* 电源获取量 */
+extern CPU_INT16U ObcAdValueAver[16];
+
+extern CPU_INT16U TempAdValue[16][5];              /* 温度获取量 */
+extern CPU_INT16U TempAdValueAver[16];							
 /* 星上存储指针状态量 */
 extern CPU_INT32U TelCurPtr;                      /* 当前遥测存储指针 */
 extern CPU_INT32U GpsCurPtr;                      /* 当前GPS存储指针 */
@@ -235,9 +234,10 @@ extern CPU_INT08U TFCardTestErrCnt;
 extern char DebugFlag;
 
 
-extern CPU_INT16U EpsAdValue[32][6];
-extern CPU_INT08U EpsAdErr[32];
-extern CPU_INT08U EpsCommErr;
+extern CPU_INT16U EpsAdValue[32][5];   /* 电源获取量 */
+extern CPU_INT16U EpsAdValueAver[32];
+
+
 extern volatile CPU_INT08U BatInC;
 extern volatile CPU_INT08U BatOutC;
 extern volatile CPU_INT08U BusC;
@@ -281,11 +281,15 @@ extern volatile CPU_INT08U Temp5;
 extern volatile CPU_INT08U Temp6;
 extern volatile CPU_INT08U Temp7;
 extern volatile CPU_INT08U Temp8;
-/* μ??′?a1?á? */
+
 extern volatile CPU_INT16U SwSubSys;
 extern volatile CPU_INT16U SwPld;
 extern volatile CPU_INT16U FalSubSys;
 extern volatile CPU_INT16U FalPld;
+
+extern eps_hk_adc_t eps_adc_data; 		/* 定义eps 所有可测量结构体 */
+extern eps_bat_t eps_bat;	 			/* 定义全局变量 bat结构体 */
+extern eps_hk_state_t eps_state;		/* define eps hk state struct avariable */
 
 /* 电源相关宏 */
 

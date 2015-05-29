@@ -61,7 +61,7 @@ void bsp_Init(void)
 	bsp_InitI2C0();      /* 初始化软件I2C0 */
 	bsp_InitI2C1();      /* 初始化软件I2C0 */
 	bsp_InitNorFlash();  /* 初始化NOR_Flash模块 */		
-	
+	eps_data_Init();  	 /* EPS变量初始化 */
 	bsp_InitRTC();       /* RTC初始化 */
 	printf("Current system clock:HSI\r\n");
 	bsp_PVD_Init();      /* 初始化电压监视模块 */

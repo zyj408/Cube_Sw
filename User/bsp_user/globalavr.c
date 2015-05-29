@@ -27,12 +27,11 @@ CPU_INT08U ID_CommandBuf[BUFFER_SIZE];
 CPU_INT08U ID_CommandCnt;				
 
 /* 星务板数模转换状态量 */																		
-CPU_INT16U ObcAdValue[16][6];              /* 电源获取量 */
-CPU_INT08U ObcAdErr[16];
-CPU_INT08U ObcCommErr;
+CPU_INT16U ObcAdValue[16][5];              /* 电源获取量 */
+CPU_INT16U ObcAdValueAver[16];
 
-CPU_INT16U TempAdValue[16][6];              /* 温度获取量 */
-CPU_INT08U TempAdErr[16];
+CPU_INT16U TempAdValue[16][5];              /* 温度获取量 */
+CPU_INT16U TempAdValueAver[16];
 
 								
 /* 星上存储指针状态量 */
@@ -106,9 +105,10 @@ volatile CPU_INT16U GpsRevCnt = 0;			/* GPS接收数据计数 */
 //NMEA_MSG GpsCurInfo;                  	/* GPS当前状态量集 */
 /********************************** 电源相关变量 **********************************/
 /* 电源变量 */
-CPU_INT16U EpsAdValue[32][6];   /* 电源获取量 */
-CPU_INT08U EpsAdErr[32];
-CPU_INT08U EpsCommErr;
+CPU_INT16U EpsAdValue[32][5];   /* 电源获取量 */
+CPU_INT16U EpsAdValueAver[32];
+
+
 volatile CPU_INT08U BatInC;  	  /* 电池充电电流 */
 volatile CPU_INT08U BatOutC;    /* 电池放电电流 */
 volatile CPU_INT08U BusC;  		  /* 总线电流 */
@@ -155,21 +155,18 @@ volatile CPU_INT08U Temp8;  		/* 温度8 */
 
 /* 电源开关量 */
 volatile CPU_INT16U SwSubSys;   /* 负载开关量1 */
-volatile CPU_INT16U SwPld;			/* 负载开关量2 */
+volatile CPU_INT16U SwPld;		/* 负载开关量2 */
 volatile CPU_INT16U FalSubSys;  /* 负载故障状态1 */
-volatile CPU_INT16U FalPld;			/* 负载故障状态2 */
+volatile CPU_INT16U FalPld;		/* 负载故障状态2 */
+
+
+
+eps_hk_adc_t eps_adc_data; 		/* 定义eps 所有可测量结构体 */
+eps_bat_t eps_bat;	 			/* 定义全局变量 bat结构体 */
+eps_hk_state_t eps_state;		/* define eps hk state struct avariable */
 
 
 /***************************** 星上用户定义变量初始化函数 *****************************/
-
-void EPS_Init_VAR(void)
-{
-	Mem_Set(&EpsAdValue[0][0], 0x00, sizeof(EpsAdValue));
-	Mem_Set(EpsAdErr, 0x00, sizeof(EpsAdErr));
-	EpsCommErr = 0;
-}
-
-
 
 void VarBak(void)
 {
@@ -286,8 +283,8 @@ void bsp_Init_VAR(void)
 	
 	/* 数模转换相关初始化 */
 	Mem_Set(&ObcAdValue[0][0], 0x00, sizeof(ObcAdValue));
-	Mem_Set(ObcAdErr, 0x00, sizeof(ObcAdErr));
-  ObcCommErr = 0;
+	Mem_Set(&EpsAdValue[0][0], 0x00, sizeof(EpsAdValue));
+	Mem_Set(&TempAdValue[0][0], 0x00, sizeof(TempAdValue));
 	
 	/* 星上全局时间变量初始化 */
 	Mem_Set(&CurTime, 0x00, sizeof(RTC_TimeTypeDef));
@@ -315,7 +312,6 @@ void bsp_Init_VAR(void)
 	
 	CurFlashSetor = ADDR_FLASH_SECTOR_1;
 	ADCS_Init_VAR();
-	EPS_Init_VAR();
 	FipexInfomationInit();
 	FipexSetDefaultInfo();
 }

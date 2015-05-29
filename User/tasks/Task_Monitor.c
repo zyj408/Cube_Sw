@@ -56,14 +56,15 @@ void ADC_SAMPLE_TASK(void *p_arg)
 			TempAdUpdate();
 			BSP_OS_TimeDlyMs(1);
 		}
-		AdDataFliter(EpsAdValue, 32);
-		AdDataFliter(ObcAdValue, 16);
-		AdDataFliter(TempAdValue, 16);
+		AdDataFliter(EpsAdValue, EpsAdValueAver, 32);
+		AdDataFliter(ObcAdValue,ObcAdValueAver, 16);
+		AdDataFliter(TempAdValue,TempAdValueAver, 16);
 		
 		
-		/* 磁强计调用 */
-		//Get_Mag_Result(MagCurOut);
-		BSP_OS_TimeDlyMs(1000);
+		
+		adc_to_real(EpsAdValueAver, &eps_adc_data); //将adc值填入eps_adc_data结构体
+		eps_data_handling();//数据处理，eps状态量填入相关结构体
+		BSP_OS_TimeDlyMs(100);
 	}
 	
 }

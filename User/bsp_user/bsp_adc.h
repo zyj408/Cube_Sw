@@ -26,17 +26,6 @@
 #define EPS_CS2_LOW()      	EPS_CS2_GPIO->BSRRH = EPS_CS2_PIN
 #define EPS_CS2_HIGH()     	EPS_CS2_GPIO->BSRRL = EPS_CS2_PIN
 
-/* OBC板模拟采样极值 */
-#define TEMP_AD_HIGH         0x0FFF
-#define TEMP_AD_LOW          0x0010
-
-/* OBC板模拟采样极值 */
-#define OBC_AD_HIGH         0x0FFF
-#define OBC_AD_LOW          0x0010
-
-/* OBC板模拟采样极值 */
-#define EPS_AD_HIGH         0x0FFF
-#define EPS_AD_LOW          0x0010
 
 /* OBC板模拟采样极值 */
 #define EPS_AD_CS1          0x01
@@ -53,7 +42,7 @@ uint16_t ObcSendByte(uint16_t _ucValue);
 void EpsAdStart(void);
 uint8_t EpsAdUpdate(uint8_t chip);
 uint16_t EpsSendByte(uint16_t _ucValue, uint8_t _chipNum);
-void AdDataFliter(uint16_t ad_table[][6], uint8_t channel_num);
+void AdDataFliter(uint16_t ad_table[][5], uint16_t* ad_aver_table, uint8_t channel_num);
 uint8_t ObcAdUpdate(void);
 void TempAdStart(void);
 uint8_t TempAdUpdate(void);
