@@ -305,14 +305,16 @@ void bsp_Init_VAR(void)
 	ComRevOTCnt = 0;
 	
 	/* 星务输出变量初始化 */
-	PwmSetDuty_1 = 50;
-	PwmSetDuty_2 = 50;
-	PwmSetDuty_3 = 50;
+	PwmSetDuty_1 = 95;
+	PwmSetDuty_2 = 95;
+	PwmSetDuty_3 = 95;
 	PwmCurDuty_1 = 0;
 	PwmCurDuty_2 = 0;
 	PwmCurDuty_3 = 0;
 	MotorSetOutput = 40000;
 	MotorCurOutput = 0;	
+	PWM_Feq1 = 0.0;
+	PWM_Feq2 = 0.0;
 	
 	CurFlashSetor = ADDR_FLASH_SECTOR_1;
 	ADCS_Init_VAR();

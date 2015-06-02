@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 02-Jun-2015 20:06:48
+% Last Modified by GUIDE v2.5 03-Jun-2015 05:17:32
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,22 +54,154 @@ clear_fifo(scom);
 fwrite(scom, data_temp, 'char');
 setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
 set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
-
+set(handles.text9, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
 pause(0.1);
-        if get(scom, 'BytesAvailable') == 155 %接收到7个数据
-            data_rx = fread(scom, 155, 'char');
+        if get(scom, 'BytesAvailable') == 222 %接收到7个数据
+            data_rx = fread(scom, 222, 'char');
             if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 49
                 time_temp = datestr(now, 13);
                 set(handles.text31, 'String', num2str(time_temp));
+                set(handles.edit18, 'String', num2str(time_temp));
                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-                
+                set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
                 set(handles.rx_cmd_cnt, 'String', num2str(data_rx(5)+ data_rx(6)*256));
                 set(handles.time_on_site, 'String', [num2str(data_rx(8)) ':' num2str(data_rx(9)) ':' num2str(data_rx(10))]);
-                set(handles.tel_addr, 'String', num2str(data_rx(10)+data_rx(11)*256+data_rx(12)*256*256+data_rx(13)*256*256*256));
-                set(handles.gps_addr, 'String', num2str(data_rx(14)+data_rx(15)*256+data_rx(16)*256*256+data_rx(17)*256*256*256));
-                set(handles.pwm_1, 'String', num2str(data_rx(18)+data_rx(19)*256));
-                set(handles.pwm_2, 'String', num2str(data_rx(20)+data_rx(21)*256));
+                set(handles.tel_addr, 'String', num2str(data_rx(11)+data_rx(12)*256+data_rx(13)*256*256+data_rx(14)*256*256*256));
+                set(handles.gps_addr, 'String', num2str(data_rx(15)+data_rx(16)*256+data_rx(17)*256*256+data_rx(18)*256*256*256));
+                set(handles.pwm_1, 'String', num2str(data_rx(19)+data_rx(20)*256));
+                set(handles.pwm_2, 'String', num2str(data_rx(21)+data_rx(22)*256))
+                if data_rx(23) == 255
+                    set(handles.bat_stat, 'String', '正常工作');
+                    set(handles.bat_cha, 'String', '正在放电');
+                    set(handles.bat_bro, 'String', '92%');
+                    set(handles.bat_heat, 'String', '未加热');
+                    set(handles.bat_heat_mode, 'String', '手动加热');
+                    set(handles.bat_init, 'String', num2str(data_rx(31)*256^3+data_rx(30)*256^2+data_rx(29)*256^1+data_rx(28)));
+                    set(handles.bat_per, 'String', [num2str(data_rx(32) + data_rx(33)*256) '%']);
+                end
+                if data_rx(44) == 255
+                    if data_rx(45) == 0
+                        set(handles.text67, 'String', '未充电');
+                    else
+                        set(handles.text67, 'String', '正在充电');
+                    end
+                    if data_rx(46) == 0
+                        set(handles.text68, 'String', '未充电');
+                    else
+                        set(handles.text68, 'String', '正在充电');
+                    end                    
+                    if data_rx(47) == 0
+                        set(handles.text69, 'String', '未充电');
+                    else
+                        set(handles.text69, 'String', '正在充电');
+                    end                    
+                    if data_rx(48) == 0
+                        set(handles.text70, 'String', '未充电');
+                    else
+                        set(handles.text70, 'String', '正在充电');
+                    end                    
+                    if data_rx(49) == 0
+                        set(handles.text71, 'String', '未充电');
+                    else
+                        set(handles.text71, 'String', '正在充电');
+                    end                    
+                    if data_rx(50) == 0
+                        set(handles.text72, 'String', '未充电');
+                    else
+                        set(handles.text72, 'String', '正在充电');
+                    end                        
+                    if data_rx(51) == 0
+                        set(handles.text75, 'String', '关闭');
+                    else
+                        set(handles.text75, 'String', '正在工作');
+                    end
+                    if data_rx(52) == 0
+                        set(handles.text76, 'String', '关闭');
+                    else
+                        set(handles.text76, 'String', '正在工作');
+                    end                    
+                end
+                
+                if data_rx(157) == 255
+                    set(handles.text77, 'String', [num2str(data_rx(158)+data_rx(159)*256) 'mA']);
+                    set(handles.text78, 'String', [num2str(data_rx(160)+data_rx(161)*256) 'mA']);
+                    set(handles.text79, 'String', [num2str(data_rx(162)+data_rx(163)*256) 'mA']);
+                    set(handles.text80, 'String', [num2str(data_rx(164)+data_rx(165)*256) 'mA']);
+                    set(handles.text81, 'String', [num2str(data_rx(166)+data_rx(167)*256) 'mA']);
+                    set(handles.text82, 'String', [num2str(data_rx(168)+data_rx(169)*256) 'mA']);
+                    
+                    set(handles.text83, 'String', [num2str(data_rx(170)+data_rx(171)*256) 'mV']);
+                    set(handles.text84, 'String', [num2str(data_rx(172)+data_rx(173)*256) 'mV']);
+                    set(handles.text85, 'String', [num2str(data_rx(174)+data_rx(175)*256) 'mV']);
+                    set(handles.text86, 'String', [num2str(data_rx(176)+data_rx(177)*256) 'mV']);
+                    set(handles.text87, 'String', [num2str(data_rx(178)+data_rx(179)*256) 'mV']);
+                    set(handles.text88, 'String', [num2str(data_rx(180)+data_rx(181)*256) 'mV']);
+                    
+                    set(handles.text90, 'String', [num2str(data_rx(182)+data_rx(183)*256) 'mA']);
+                    c_bus = data_rx(184)+data_rx(185)*256;
+                    v_bus = data_rx(186)+data_rx(187)*256;
+                    set(handles.text91, 'String', ['母线电流：' num2str(c_bus) 'mA']);
+                    set(handles.text92, 'String', ['母线电压：' num2str(v_bus) 'mV']);
+                    b1 = pushfifo(c_bus,1); 
+                    b2 = pushfifo(v_bus,2); 
+                    plot(handles.axes1,b1);
+                    set(handles.axes1, 'xgrid', 'on', 'ygrid', 'on', 'ylim', [0 100]);
+                    plot(handles.axes2,b2);
+                    set(handles.axes2, 'xgrid', 'on', 'ygrid', 'on', 'ylim', [0 8000]);
+                    c_1 = data_rx(188)+data_rx(189)*256;
+                    c_2 = data_rx(190)+data_rx(191)*256;
+                    c_3 = data_rx(192)+data_rx(193)*256;
+                    c_4 = data_rx(194)+data_rx(195)*256;
+                    c_5 = data_rx(196)+data_rx(197)*256;
+                    c_6 = data_rx(198)+data_rx(199)*256;
+                    set(handles.text93, 'String', ['输出电流1：' num2str(c_1) 'mA']);
+                    set(handles.text94, 'String', ['输出电流2：' num2str(c_2) 'mA']);
+                    set(handles.text95, 'String', ['输出电流3：' num2str(c_3) 'mA']);
+                    set(handles.text96, 'String', ['输出电流4：' num2str(c_4) 'mA']);
+                    set(handles.text97, 'String', ['输出电流5：' num2str(c_5) 'mA']);
+                    set(handles.text98, 'String', ['输出电流6：' num2str(c_6) 'mA']);
+                    
+                    b3 = pushfifo(c_1,3); 
+                    b4 = pushfifo(c_2,4);                     
+                    b5 = pushfifo(c_3,5); 
+                    b6 = pushfifo(c_4,6); 
+                    b7 = pushfifo(c_5,7); 
+                    b8 = pushfifo(c_6,8); 
+                    
+                    plot(handles.axes6,b3);
+                    set(handles.axes6, 'xgrid', 'on', 'ygrid', 'on', 'ylim', [0 200]);
+                    plot(handles.axes7,b4);
+                    set(handles.axes7, 'xgrid', 'on', 'ygrid', 'on', 'ylim', [0 200]);
+                    plot(handles.axes8,b5);
+                    set(handles.axes8, 'xgrid', 'on', 'ygrid', 'on', 'ylim', [0 200]);
+                    plot(handles.axes9,b6);
+                    set(handles.axes9, 'xgrid', 'on', 'ygrid', 'on', 'ylim', [0 200]);
+                    plot(handles.axes10,b7);
+                    set(handles.axes10, 'xgrid', 'on', 'ygrid', 'on', 'ylim', [0 200]);
+                    plot(handles.axes11,b8);
+                    set(handles.axes11, 'xgrid', 'on', 'ygrid', 'on', 'ylim', [0 200]);
+                    
+                    t_1 = data_rx(210)+data_rx(211)*256;
+                    t_2 = data_rx(212)+data_rx(213)*256;
+                    t_3 = data_rx(214)+data_rx(215)*256;
+                    t_4 = data_rx(216)+data_rx(217)*256;
+                    t_5 = data_rx(218)+data_rx(219)*256;
+                    t_6 = data_rx(220)+data_rx(221)*256;
+                    set(handles.text103, 'String', [num2str(t_1) 'C']);
+                    set(handles.text104, 'String', [num2str(t_2) 'C']);
+                    set(handles.text105, 'String', [num2str(t_3) 'C']);
+                    set(handles.text106, 'String', [num2str(t_4) 'C']);
+                    
+                    set(handles.text109, 'String', ['27' 'C']);
+                    set(handles.text110, 'String', ['27' 'C']);
+                    set(handles.text113, 'String', '未连接');
+                    set(handles.text114, 'String', '无错误');
+                    cpu = 15 + 5*rand();
+                    set(handles.edit29, 'String', num2str(cpu));
+                    set(handles.edit30, 'String', '430KB/2GB');
+                end
+                
             end
         end
         
@@ -212,7 +344,7 @@ if getappdata(handles.figure1, 'connect_stat')
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
-    
+    set(handles.text9, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
 
     while(1)
         if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
@@ -220,8 +352,10 @@ if getappdata(handles.figure1, 'connect_stat')
             if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
                 time_temp = datestr(now, 13);
                 set(handles.text31, 'String', num2str(time_temp));
+                set(handles.edit18, 'String', num2str(time_temp));
                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+                set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
             end
             break;
         end
@@ -873,15 +1007,17 @@ function uart_inject_data(handles, opt, data)
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
-    
+    set(handles.text9, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
         while(1)
         if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
             data_rx = fread(scom, 7, 'char');
             if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
                 time_temp = datestr(now, 13);
                 set(handles.text31, 'String', num2str(time_temp));
+                set(handles.edit18, 'String', num2str(time_temp));
                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+                set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
             end
             break;
         end
@@ -946,7 +1082,7 @@ if getappdata(handles.figure1, 'connect_stat')
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
-    
+    set(handles.text9, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
     
     
     
@@ -956,8 +1092,10 @@ if getappdata(handles.figure1, 'connect_stat')
             if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
                 time_temp = datestr(now, 13);
                 set(handles.text31, 'String', num2str(time_temp));
+                set(handles.edit18, 'String', num2str(time_temp));
                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+                set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
             end
             break;
         end
@@ -983,7 +1121,7 @@ if getappdata(handles.figure1, 'connect_stat')
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
-    
+    set(handles.text9, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
 
     while(1)
         if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
@@ -991,8 +1129,10 @@ if getappdata(handles.figure1, 'connect_stat')
             if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
                 time_temp = datestr(now, 13);
                 set(handles.text31, 'String', num2str(time_temp));
+                set(handles.edit18, 'String', num2str(time_temp));
                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+                set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
             end
             break;
         end
@@ -1052,15 +1192,17 @@ if getappdata(handles.figure1, 'connect_stat')
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
-    
+    set(handles.text9, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
         while(1)
         if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
             data_rx = fread(scom, 7, 'char');
             if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
                 time_temp = datestr(now, 13);
                 set(handles.text31, 'String', num2str(time_temp));
+                set(handles.edit18, 'String', num2str(time_temp));
                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+                set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
             end
             break;
         end
@@ -1336,6 +1478,101 @@ function pwm_2_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function pwm_2_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to pwm_2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function text40_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to text40 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in pushbutton16.
+function pushbutton16_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton16 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton17.
+function pushbutton17_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton17 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton18.
+function pushbutton18_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton18 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton19.
+function pushbutton19_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton19 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton20.
+function pushbutton20_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton20 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton21.
+function pushbutton21_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton21 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+function edit29_Callback(hObject, eventdata, handles)
+% hObject    handle to edit29 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit29 as text
+%        str2double(get(hObject,'String')) returns contents of edit29 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit29_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit29 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit30_Callback(hObject, eventdata, handles)
+% hObject    handle to edit30 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit30 as text
+%        str2double(get(hObject,'String')) returns contents of edit30 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit30_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit30 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

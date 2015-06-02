@@ -51,20 +51,20 @@ void bsp_PWMInit(void)
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 	
-	//PWM_CCR = (usPeriod + 1) * PwmSetDuty_1 / 100 - 1 - usPWMOffset;
-	PWM_CCR = 0;    //初始化为0
+	PWM_CCR = (usPeriod + 1) * PwmSetDuty_1 / 100 - 1 - usPWMOffset;
+	//PWM_CCR = 0;    //初始化为0
 	TIM_OCInitStructure.TIM_Pulse = PWM_CCR;
 	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
 	TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
 	
-	//PWM_CCR = (usPeriod + 1) * PwmSetDuty_2 / 100 - 1 - usPWMOffset;
-	PWM_CCR = 0;    //初始化为0
+	PWM_CCR = (usPeriod + 1) * PwmSetDuty_2 / 100 - 1 - usPWMOffset;
+	//PWM_CCR = 0;    //初始化为0
 	TIM_OCInitStructure.TIM_Pulse = PWM_CCR;
 	TIM_OC2Init(TIM1, &TIM_OCInitStructure);
 	TIM_OC2PreloadConfig(TIM1, TIM_OCPreload_Enable);
 	
-	//PWM_CCR = (usPeriod + 1) * PwmSetDuty_3 / 100 - 1 - usPWMOffset;
-	PWM_CCR = 0;    //初始化为0
+	PWM_CCR = (usPeriod + 1) * PwmSetDuty_3 / 100 - 1 - usPWMOffset;
+	//PWM_CCR = 0;    //初始化为0
 	TIM_OCInitStructure.TIM_Pulse = PWM_CCR;	
 	TIM_OC3Init(TIM1, &TIM_OCInitStructure);
 	TIM_OC3PreloadConfig(TIM1, TIM_OCPreload_Enable);

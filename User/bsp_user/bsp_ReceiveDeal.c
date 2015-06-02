@@ -143,7 +143,7 @@ void InsSendHouseKeepingData(void)
 {
 	uint8_t *p, *q;
 	uint8_t ins_checksum;
-	uint8_t ins_data_temp[200];
+	uint8_t ins_data_temp[240];
 	
 	p = ins_data_temp;
 	q = p+3;
@@ -174,12 +174,16 @@ void InsSendHouseKeepingData(void)
 	*p++ = (uint8_t)((uint16_t)PWM_Feq2 & 0xFF);
 	*p++ = (uint8_t)(((uint16_t)PWM_Feq2 >> 8) & 0xFF);
 	
-
+	*p++ = 0xFF;
 	
 	Mem_Copy(p, (uint8_t*)(&eps_bat), sizeof(eps_bat));
 	p += sizeof(eps_bat);
+	*p++ = 0xFF;
 	Mem_Copy(p, (uint8_t*)(&eps_state), sizeof(eps_state));
 	p += sizeof(eps_state);
+	*p++ = 0xFF;
+	Mem_Copy(p, (uint8_t*)(&eps_adc_data), sizeof(eps_adc_data));
+	p += sizeof(eps_adc_data);
 	
 	*q = p - q;
 	
