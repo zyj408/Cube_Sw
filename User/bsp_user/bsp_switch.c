@@ -62,7 +62,8 @@ void bsp_InitSwitch(void)
 	#endif
 	
 	outall_en(ENABLE);
-
+	//out_en(OUT_WHEELA, DISABLE);
+	out_en(OUT_WHEELB, DISABLE);
 	RCC_AHB1PeriphClockCmd(RCC_S0_EN_PORT | RCC_S1_EN_PORT | RCC_S2_EN_PORT | RCC_S3_EN_PORT, ENABLE);
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_S0_EN_PIN;	

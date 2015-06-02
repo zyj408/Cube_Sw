@@ -48,17 +48,37 @@ function SerialUpdate(obj,events,handles)
 time_temp = datestr(now, 13);
 set(handles.edit17, 'String', num2str(time_temp));
 scom = getappdata(handles.figure1, 'uart');
-uart_inject_data(scom, 3, 0);
 
-while(1)
-    a=1;
-end
+data_temp = [235 80 03 04 00 00 00 00 00];
+clear_fifo(scom);
+fwrite(scom, data_temp, 'char');
+setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
+set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
+
+pause(0.1);
+        if get(scom, 'BytesAvailable') == 155 %接收到7个数据
+            data_rx = fread(scom, 155, 'char');
+            if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 49
+                time_temp = datestr(now, 13);
+                set(handles.text31, 'String', num2str(time_temp));
+                setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
+                set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+                
+                set(handles.rx_cmd_cnt, 'String', num2str(data_rx(5)+ data_rx(6)*256));
+                set(handles.time_on_site, 'String', [num2str(data_rx(8)) ':' num2str(data_rx(9)) ':' num2str(data_rx(10))]);
+                set(handles.tel_addr, 'String', num2str(data_rx(10)+data_rx(11)*256+data_rx(12)*256*256+data_rx(13)*256*256*256));
+                set(handles.gps_addr, 'String', num2str(data_rx(14)+data_rx(15)*256+data_rx(16)*256*256+data_rx(17)*256*256*256));
+                set(handles.pwm_1, 'String', num2str(data_rx(18)+data_rx(19)*256));
+                set(handles.pwm_2, 'String', num2str(data_rx(20)+data_rx(21)*256));
+            end
+        end
+        
+    
 % --- Executes just before untitled is made visible.
 function untitled_OpeningFcn(hObject, eventdata, handles, varargin)
-global timer1;
+
 handles.output = hObject;
-timer1 = timer('Period',1,'ExecutionMode','FixedRate','TimerFcn',{@SerialUpdate,handles});
-start(timer1);
+
 
 setappdata(handles.figure1, 'connect_stat',0);
 setappdata(handles.figure1, 'rx_cnt',0);
@@ -74,7 +94,7 @@ guidata(hObject, handles);
 
 function clear_fifo(uart_handle)
 if get(uart_handle, 'BytesAvailable') ~= 0
-    fread(scom, get(uart_handle, 'BytesAvailable'), 'char');
+    fread(uart_handle, get(uart_handle, 'BytesAvailable'), 'char');
 end
 
 % --- Outputs from this function are returned to the command line.
@@ -136,7 +156,7 @@ end
 
 % --- Executes on button press in togglebutton1.
 function togglebutton1_Callback(hObject, eventdata, handles)
-
+global timer1;
 if get(hObject, 'value')
     com_n = sprintf('com%d',get(handles.popupmenu1, 'value'));
     scom = serial(com_n);
@@ -153,6 +173,7 @@ if get(hObject, 'value')
         delete(instrfind);
         return;
     end
+
     set(hObject, 'string', '关闭串口');
     set(handles.text6, 'string', '已连接');
     setappdata(handles.figure1, 'connect_stat',1);
@@ -160,6 +181,8 @@ if get(hObject, 'value')
     set(handles.pushbutton10, 'Enable', 'on');
     setappdata(handles.figure1, 'rx_cnt',0);
     setappdata(handles.figure1, 'tx_cnt',0);
+        timer1 = timer('Period',1,'ExecutionMode','FixedRate','TimerFcn',{@SerialUpdate,handles});
+    start(timer1);
 else
     t = timerfind;
     try
@@ -200,6 +223,7 @@ if getappdata(handles.figure1, 'connect_stat')
                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
             end
+            break;
         end
         pause(0.001);
     end
@@ -844,6 +868,7 @@ function uart_inject_data(handles, opt, data)
     
     scom = getappdata(handles.figure1, 'uart');        
     data_temp = [235 80 opt (4+deta_length) 00 00 00 00 data xor_checksum];
+    
     clear_fifo(scom);
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
@@ -862,8 +887,6 @@ function uart_inject_data(handles, opt, data)
         end
         pause(0.001);
         end
-        
-
 % --- Executes on key press with focus on edit5 and none of its controls.
 function edit5_KeyPressFcn(hObject, eventdata, handles)
 
@@ -918,6 +941,7 @@ function uart_ping(handles)
 if getappdata(handles.figure1, 'connect_stat')
     scom = getappdata(handles.figure1, 'uart');
     data_temp = [235 80 01 04 00 00 00 00 00];
+        
     clear_fifo(scom);
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
@@ -954,6 +978,7 @@ if getappdata(handles.figure1, 'connect_stat')
     scom = getappdata(handles.figure1, 'uart');
     %val = str2num(val);
     data_temp = [235 80 opt 05 00 00 00 00 val val];
+
     clear_fifo(scom);
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
@@ -969,6 +994,7 @@ if getappdata(handles.figure1, 'connect_stat')
                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
             end
+            break;
         end
         pause(0.001);
     end
@@ -1021,6 +1047,7 @@ if getappdata(handles.figure1, 'connect_stat')
     end
     scom = getappdata(handles.figure1, 'uart');        
     data_temp = [235 80 100 10 00 00 00 00 time_temp(1) time_temp(2) time_temp(3) time_temp(4) time_temp(5) time_temp(6) xor_checksum];
+
     clear_fifo(scom);
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
@@ -1039,7 +1066,7 @@ if getappdata(handles.figure1, 'connect_stat')
         end
         pause(0.001);
         end
-    
+
 end
 
 

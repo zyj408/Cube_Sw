@@ -223,7 +223,7 @@ output_state_t out_en(uint8_t chan,FunctionalState NewState)
 			if(eps_state.out_state[chan] == OUTPUT_ON ||
 				eps_state.out_state[chan] == OUTPUT_OFF)
 			{
-				SW_GPSA_DISABLE;
+				out_channel(chan,NewState);
 				eps_state.out_state[chan] = OUTPUT_OFF;
 				return OUTPUT_OFF;
 			}

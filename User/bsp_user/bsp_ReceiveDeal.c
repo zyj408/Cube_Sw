@@ -135,7 +135,7 @@ void InsSendAck(void)
 
 	InsGetCheckSum(&ins_data_temp[4], ins_data_temp[3], &ins_checksum);
 	ins_data_temp[6] = ins_checksum;
-	comSendBuf(COM6, ins_data_temp, 7);
+	comSendBuf(COM1, ins_data_temp, 7);
 }
 
 
@@ -143,8 +143,9 @@ void InsSendHouseKeepingData(void)
 {
 	uint8_t *p, *q;
 	uint8_t ins_checksum;
+	uint8_t ins_data_temp[200];
 	
-	p = (uint8_t*)malloc(200);
+	p = ins_data_temp;
 	q = p+3;
 	*p++ = 0xEB;
 	*p++ = 0x50;
@@ -184,9 +185,7 @@ void InsSendHouseKeepingData(void)
 	
 	InsGetCheckSum(q+1, *q, &ins_checksum);
 	*p = ins_checksum;
-	comSendBuf(COM6, p, p - q + 4);
-	free(p);
-	
+	comSendBuf(COM1, ins_data_temp, p - q + 4);
 
 }
 
@@ -1170,7 +1169,7 @@ void GndTsRxHandle(void)
 {
 	uint8_t response;
 	
-	while(comGetChar(COM6, &response)) //获取一个字符
+	while(comGetChar(COM1, &response)) //获取一个字符
 	{
 		TestRcv(response);
 	}

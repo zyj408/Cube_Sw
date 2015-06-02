@@ -63,7 +63,7 @@ void bsp_Init(void)
 	bsp_InitNorFlash();  /* 初始化NOR_Flash模块 */		
 
 	bsp_InitRTC();       /* RTC初始化 */
-	printf("Current system clock:HSI\r\n");
+	//printf("Current system clock:HSI\r\n");
 	bsp_PVD_Init();      /* 初始化电压监视模块 */
 	bsp_InitRNG();       /* 初始化随机数发生器模块 */
 
