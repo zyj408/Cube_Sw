@@ -220,6 +220,8 @@ extern CPU_INT16U PwmSetDuty_3;
 extern CPU_INT16U PwmCurDuty_1;
 extern CPU_INT16U PwmCurDuty_2;
 extern CPU_INT16U PwmCurDuty_3;
+extern float PWM_Feq1;
+extern float PWM_Feq2;
 /* 卫星星务文件系统 */
 extern FRESULT f_result;
 extern FATFS f_fs;
@@ -292,47 +294,6 @@ extern eps_bat_t eps_bat;	 			/* 定义全局变量 bat结构体 */
 extern eps_hk_state_t eps_state;		/* define eps hk state struct avariable */
 
 /* 电源相关宏 */
-
-/* 开关宏 */
-#define SW_WHL_A                   0x8000 
-#define SW_WHL_B  								 0x4000
-#define SW_MTQ  									 0x2000
-#define SW_USB  									 0x1000
-#define SW_GPS_A  								 0x0800
-#define SW_GPS_B  								 0x0400
-#define SW_MAG  									 0x0200
-#define SW_BAT_A 								   0x0100
-#define SW_BAT_B  						  	 0x0080
-
-#define SW_PLD1                    0x8000 
-#define SW_PLD2                    0x4000 
-#define SW_PLD3                    0x2000 
-#define SW_PLD4                    0x1000 
-#define SW_PLD5                    0x0800 
-#define SW_PLD6                    0x0400 
-#define SW_PLD7                    0x0200 
-/* 故障宏 */
-#define FAL_WHL_A                  0x8000 
-#define FAL_WHL_B  								 0x4000
-#define FAL_MTQ  									 0x2000
-#define FAL_USB  									 0x1000
-#define FAL_GPS_A  								 0x0800
-#define FAL_GPS_B  								 0x0400
-#define FAL_MAG  									 0x0200
-#define FAL_BAT_A 								 0x0100
-#define FAL_BAT_B  						  	 0x0080
-#define FAL_COM  									 0x0040
-#define FAL_3V3_1 								 0x0020
-#define FAL_5V_1  						  	 0x0010
-
-#define FAL_PLD1                   0x8000 
-#define FAL_PLD2                   0x4000 
-#define FAL_PLD3                   0x2000 
-#define FAL_PLD4                   0x1000 
-#define FAL_PLD5                   0x0800 
-#define FAL_PLD6                   0x0400 
-#define FAL_PLD7                   0x0200 
-
 
 
 /* 入站指令 */

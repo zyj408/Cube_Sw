@@ -17,21 +17,21 @@
 	*******************************************************************************************
 	*/
 
-#define OUT_REG1	1
-#define OUT_REG2  	2
-#define OUT_REG3   	3	
-#define OUT_REG4   	4
-#define OUT_REG5   	5
-#define OUT_REG6   	6	
-#define OUT_UREG1   7
-#define OUT_UREG2   8
-#define OUT_UREG3   9
-#define OUT_UREG4   10
-#define OUT_UREG5   11
-#define OUT_DEPLOY  12
+#define OUT_REG1	  0
+#define OUT_REG2  	1
+#define OUT_REG3   	2	
+#define OUT_REG4   	3
+#define OUT_REG5   	4
+#define OUT_REG6   	5	
+#define OUT_UREG1   6
+#define OUT_UREG2   7
+#define OUT_UREG3   8
+#define OUT_UREG4   9
+#define OUT_UREG5   10
+#define OUT_DEPLOY  11
 
 //define with usage name
-#define OUT_ALL 	0
+#define OUT_ALL 	  20
 #define OUT_GPSA    OUT_REG1
 #define OUT_GPSB    OUT_REG2
 #define OUT_MTQ     OUT_UREG1
@@ -140,6 +140,7 @@ typedef enum{
 	OUTPUT_OFF = 0, //output off     output is turned off
 	OUTPUT_ON,      //output on      output is turned on
 	OUTPUT_ERR,     //output err     OUTPUT_TRY 和 OUTPUT_HDTRY 只有在OUT_ERR之后才会出现
+	OUTPUT_OFFERR,  //当output 处于off状态时，由于不可知因素导致通道处于开通状态
 	OUTPUT_SFTRY,     //mannual autotry
 	OUTPUT_HDTRY,    //hardware autotry
 	OUTPUT_TRYOK,   //output aytotry ok,之后进入OUTPUT_ON
@@ -172,14 +173,15 @@ typedef struct eps_hk_state_s{
 *********************************************************************************************
 */
 eps_hk_adc_t * adc_to_real(uint16_t *adc_uint,eps_hk_adc_t *adc_dest);
-void out_en(uint8_t chan,FunctionalState NewState);
+output_state_t out_en(uint8_t chan,FunctionalState NewState);
+int8_t outall_en(FunctionalState NewState);
 void eps_enter_normal(void);
 void eps_enter_safe(void);
 void eps_entern_critical(void);
 void eps_allin_off(void);
 void eps_allin_on(void);
-void bat_heater_on(void);
-void bat_heater_off(void);
+uint8_t bat_heater_on(void);
+uint8_t bat_heater_off(void);
 
 void eps_data_Init(void);
 void eps_data_handling(void);

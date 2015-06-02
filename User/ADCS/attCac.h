@@ -31,8 +31,9 @@ void MtxJtoOGet(double MtxJtoO[3][3],double orbInfo[6]);
 void geoInfoGet(double GeoCord[2],double PosInWGS[3]);
 
 /* 获得地固坐标系下的磁场分量 */
+#if debug_mag_enable
 void ChkMagLst(double MagInFix[3],const double magTable[10682][3],double GeoCord[3]);
-
+#endif
 /* J2000下的磁场分量 */	
 void MagJGet(double MagInJ[3],double JToWGS[3][3],double MagFix[3]);
 

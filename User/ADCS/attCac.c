@@ -268,7 +268,7 @@ void ChkMagLst(double MagInFix[3],const double magTable[10682][3],double GeoCord
 
     if (cx_right==120)
            cx_right=0;
-
+#if debug_mag_enable
     for(k=0;k<3;k=k+1)
            if (cy==0)
            {
@@ -276,6 +276,7 @@ void ChkMagLst(double MagInFix[3],const double magTable[10682][3],double GeoCord
            }
            else if (cy==89)
 					 {
+						 
 						    MagInFix[k] = *((double *)magTable+cy*120*3+3+k);
 					 }
 					 else
@@ -290,6 +291,8 @@ void ChkMagLst(double MagInFix[3],const double magTable[10682][3],double GeoCord
        	        tmp = tmpx + cyw*(tmpy - tmpx);
        	        MagInFix[k] = tmp;
            }
+		   
+#endif
     return;
 }
 

@@ -145,9 +145,6 @@ void bsp_PWMCaptureInit(void)
 }
 
 
-
-float PWM_Feq;
-float PWM_Feq1;
 void TIM1_UP_TIM10_IRQHandler(void)
 {
 	static uint16_t this_time10_CH1 = 0; 
@@ -168,7 +165,7 @@ void TIM1_UP_TIM10_IRQHandler(void)
 				TimerCount_CH1 = ((usCapturePeriod - last_time10_CH1) + this_time10_CH1);  //周期
 			}
 			last_time10_CH1 = this_time10_CH1;			
-			PWM_Feq = 1000000.0 / TimerCount_CH1;			
+			PWM_Feq1 = 1000000.0 / TimerCount_CH1;			
 	}
 }
 
@@ -193,7 +190,7 @@ void TIM1_TRG_COM_TIM11_IRQHandler(void)
 				TimerCount_CH1 = ((usCapturePeriod - last_time11_CH1) + this_time11_CH1);  //周期
 			}
 			last_time11_CH1 = this_time11_CH1;			
-			PWM_Feq1 = 1000000.0 / TimerCount_CH1;			
+			PWM_Feq2 = 1000000.0 / TimerCount_CH1;			
 	}
 }
 

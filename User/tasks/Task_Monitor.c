@@ -1,5 +1,6 @@
 #include  <includes.h>
 
+#define EPS_CHECK_TIME	100
 void STO_UPDATE_TASK(void *p_arg)
 {
 	(void)p_arg;		/* 避免编译器告警 */
@@ -28,6 +29,7 @@ void STO_MONITOR_TASK(void *p_arg)
 	}
 }
 
+uint8_t eps_time = 0;
 void ADC_SAMPLE_TASK(void *p_arg)
 {
 	CPU_INT08U round;
@@ -60,11 +62,13 @@ void ADC_SAMPLE_TASK(void *p_arg)
 		AdDataFliter(ObcAdValue,ObcAdValueAver, 16);
 		AdDataFliter(TempAdValue,TempAdValueAver, 16);
 		
-		
-		
-		adc_to_real(EpsAdValueAver, &eps_adc_data); //将adc值填入eps_adc_data结构体
-		eps_data_handling();//数据处理，eps状态量填入相关结构体
-		BSP_OS_TimeDlyMs(100);
+		if(eps_time++ > EPS_CHECK_TIME)
+		{
+			eps_time = EPS_CHECK_TIME;
+			adc_to_real(EpsAdValueAver, &eps_adc_data); //将adc值填入eps_adc_data结构体
+			eps_data_handling();//数据处理，eps状态量填入相关结构体
+		}
+		BSP_OS_TimeDlyMs(10);
 	}
 	
 }

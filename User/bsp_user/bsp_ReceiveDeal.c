@@ -127,10 +127,10 @@ void InsSendAck(void)
 	uint8_t ins_checksum;
 	
 	ins_data_temp[0] = 0xEB;
-  ins_data_temp[1] = 0x50;
+	ins_data_temp[1] = 0x50;
 	ins_data_temp[2] = 0x30; //Ack指令码
 	ins_data_temp[3] = 0x02; //长度
-  ins_data_temp[4] = (uint8_t)(InsRxCmdCnt & 0x00FF);  //数据域
+	ins_data_temp[4] = (uint8_t)(InsRxCmdCnt & 0x00FF);  //数据域
 	ins_data_temp[5] = (uint8_t)((InsRxCmdCnt >> 8) & 0x00FF); //数据域
 
 	InsGetCheckSum(&ins_data_temp[4], ins_data_temp[3], &ins_checksum);
@@ -141,22 +141,52 @@ void InsSendAck(void)
 
 void InsSendHouseKeepingData(void)
 {
-	uint8_t ins_data_temp[20] = {0};
+	uint8_t *p, *q;
 	uint8_t ins_checksum;
 	
-	ins_data_temp[0] = 0xEB;
-  ins_data_temp[1] = 0x50;
-	ins_data_temp[2] = 0x31; //Ack指令码
-	ins_data_temp[3] = 0x06; //长度
-  ins_data_temp[4] = (uint8_t)(InsRxCmdCnt & 0x00FF);  //数据域
-	ins_data_temp[5] = (uint8_t)((InsRxCmdCnt >> 8) & 0x00FF); //数据域
-  ins_data_temp[6] = CurDate.RTC_Date;
-	ins_data_temp[7] = CurTime.RTC_Hours;
-	ins_data_temp[8] = CurTime.RTC_Minutes;
-	ins_data_temp[9] = CurTime.RTC_Seconds;
-	InsGetCheckSum(&ins_data_temp[4], ins_data_temp[3], &ins_checksum);
-	ins_data_temp[10] = ins_checksum;
-	comSendBuf(COM6, ins_data_temp, 11);
+	p = (uint8_t*)malloc(200);
+	q = p+3;
+	*p++ = 0xEB;
+	*p++ = 0x50;
+	*p++ = 0x31; //Ack指令码
+	*p++ = 0x06; //长度
+	*p++ = (uint8_t)(InsRxCmdCnt & 0x00FF);  //数据域
+	*p++ = (uint8_t)((InsRxCmdCnt >> 8) & 0x00FF); //数据域
+	*p++ = CurDate.RTC_Date;
+	*p++ = CurTime.RTC_Hours;
+	*p++ = CurTime.RTC_Minutes;
+	*p++ = CurTime.RTC_Seconds;
+	
+	*p++ = (uint8_t)(TelCurPtr & 0xFF); 
+	*p++ = (uint8_t)((TelCurPtr >> 8) & 0xFF); 
+	*p++ = (uint8_t)((TelCurPtr >> 16) & 0xFF); 
+	*p++ = (uint8_t)((TelCurPtr >> 24) & 0xFF); 
+	
+	*p++ = (uint8_t)(GpsCurPtr & 0xFF); 
+	*p++ = (uint8_t)((GpsCurPtr >> 8) & 0xFF); 
+	*p++ = (uint8_t)((GpsCurPtr >> 16) & 0xFF); 
+	*p++ = (uint8_t)((GpsCurPtr >> 24) & 0xFF); 	
+
+	*p++ = (uint8_t)((uint16_t)PWM_Feq1 & 0xFF);
+	*p++ = (uint8_t)(((uint16_t)PWM_Feq1 >> 8) & 0xFF);
+
+	*p++ = (uint8_t)((uint16_t)PWM_Feq2 & 0xFF);
+	*p++ = (uint8_t)(((uint16_t)PWM_Feq2 >> 8) & 0xFF);
+	
+
+	
+	Mem_Copy(p, (uint8_t*)(&eps_bat), sizeof(eps_bat));
+	p += sizeof(eps_bat);
+	Mem_Copy(p, (uint8_t*)(&eps_state), sizeof(eps_state));
+	p += sizeof(eps_state);
+	
+	*q = p - q;
+	
+	InsGetCheckSum(q+1, *q, &ins_checksum);
+	*p = ins_checksum;
+	comSendBuf(COM6, p, p - q + 4);
+	free(p);
+	
 
 }
 
@@ -222,7 +252,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_MTQ_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_MTQ_ENABLE;
+				out_en(OUT_MTQ, ENABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -240,7 +270,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_MTQ_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_MTQ_DISABLE;
+				out_en(OUT_MTQ, DISABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -259,7 +289,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_GPSA_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_GPSA_ENABLE;
+				out_en(OUT_GPSA, ENABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -278,7 +308,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_GPSA_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_GPSA_DISABLE;
+				out_en(OUT_GPSA, DISABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -296,7 +326,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_GPSB_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_GPSB_ENABLE;
+				out_en(OUT_GPSB, ENABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -314,7 +344,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_GPSB_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_GPSB_DISABLE;
+				out_en(OUT_GPSB, DISABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -332,7 +362,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_RES_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_RES_ENABLE;
+				out_en(OUT_RES, ENABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -350,7 +380,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_RES_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_RES_DISABLE;
+				out_en(OUT_RES, DISABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -368,7 +398,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_WHEELA_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_WHEELA_ENABLE;
+				out_en(OUT_WHEELA, ENABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -386,7 +416,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_WHEELA_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_WHEELA_DISABLE;
+				out_en(OUT_WHEELA, DISABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -404,7 +434,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_WHEELB_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_WHEELB_ENABLE;
+				out_en(OUT_WHEELB, ENABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -422,7 +452,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_WHEELB_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_WHEELB_DISABLE;
+				out_en(OUT_WHEELB, DISABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -440,7 +470,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_SOLAR_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_SOLAR_ENABLE;
+				out_en(OUT_DEPLOY, ENABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -458,7 +488,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_SOLAR_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_SOLAR_DISABLE;
+				out_en(OUT_DEPLOY, DISABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -476,7 +506,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_USB_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_USB_ENABLE;
+				out_en(OUT_USB, ENABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -494,7 +524,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_USB_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_USB_DISABLE;
+				out_en(OUT_USB, DISABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -512,7 +542,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_S0_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_S0_ENABLE;
+				out_en(OUT_HEAT, ENABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -530,7 +560,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_S0_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_S0_DISABLE;
+				out_en(OUT_HEAT, DISABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -584,6 +614,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_S2_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
+				out_en(OUT_FIPEX5V, ENABLE);
 				SW_S2_ENABLE;;
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
@@ -602,7 +633,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_S2_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_S2_DISABLE;
+				out_en(OUT_FIPEX5V, DISABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -620,7 +651,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_S3_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_S3_ENABLE;;
+				out_en(OUT_FIPEX3V, ENABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -638,7 +669,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			timeout_ms = 0; 
 			while(SW_S3_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
-				SW_S3_DISABLE;
+				out_en(OUT_FIPEX3V, DISABLE);
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -873,7 +904,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
-				upXwAdcsConP = (double)(data_inject / 1000.0);
+				upXwAdcsConP = (double)(data_inject / 100000.0);
 				
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
@@ -899,7 +930,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
-				upXwAdcsConD = (double)(data_inject / 1000.0);
+				upXwAdcsConD = (double)(data_inject / 100000.0);
 				
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
@@ -926,7 +957,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 					data_inject <<=8;
 					data_inject |= InsBuf[i];
 				}
-				upXwAdcsConZ = (double)(data_inject / 1000.0);
+				upXwAdcsConZ = (double)(data_inject / 100000.0);
 				
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
@@ -1077,6 +1108,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 				}
 				upXwAdcsTLENodeo = (double)(data_inject / 1000000.0);	
 				
+				upXwAdcsTLEFlag = VALID;
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
 			}
@@ -1091,7 +1123,8 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 				data_inject <<=8;
 				data_inject |= InsBuf[i];
 			}
-				TinSat = (double)(data_inject / 1000000.0);	
+				upDelta_TinSat = (double)(data_inject / 1000000.0);	
+				updateTimeFlag = VALID;
 				OSTimeSet (0, &err);
 			
 			InsRxCmdCnt++;  //指令计数加1
@@ -1137,7 +1170,7 @@ void GndTsRxHandle(void)
 {
 	uint8_t response;
 	
-	if(comGetChar(COM6, &response)) //获取一个字符
+	while(comGetChar(COM6, &response)) //获取一个字符
 	{
 		TestRcv(response);
 	}

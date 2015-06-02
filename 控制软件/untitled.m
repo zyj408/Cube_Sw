@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 14-May-2015 21:49:36
+% Last Modified by GUIDE v2.5 02-Jun-2015 20:06:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -47,9 +47,12 @@ function SerialUpdate(obj,events,handles)
     
 time_temp = datestr(now, 13);
 set(handles.edit17, 'String', num2str(time_temp));
+scom = getappdata(handles.figure1, 'uart');
+uart_inject_data(scom, 3, 0);
 
-
-
+while(1)
+    a=1;
+end
 % --- Executes just before untitled is made visible.
 function untitled_OpeningFcn(hObject, eventdata, handles, varargin)
 global timer1;
@@ -68,6 +71,11 @@ guidata(hObject, handles);
 % UIWAIT makes untitled wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
+
+function clear_fifo(uart_handle)
+if get(uart_handle, 'BytesAvailable') ~= 0
+    fread(scom, get(uart_handle, 'BytesAvailable'), 'char');
+end
 
 % --- Outputs from this function are returned to the command line.
 function varargout = untitled_OutputFcn(hObject, eventdata, handles) 
@@ -177,6 +185,7 @@ function uart_switch(handles, opt)
 if getappdata(handles.figure1, 'connect_stat')
     scom = getappdata(handles.figure1, 'uart');
     data_temp = [235 80 opt 04 00 00 00 00 00];
+    clear_fifo(scom);
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
@@ -690,38 +699,40 @@ end
 
 % --- Executes on button press in pushbutton8.
 function pushbutton8_Callback(hObject, eventdata, handles)
+
+    pushbutton15_Callback(hObject, eventdata, handles);
     if getappdata(handles.figure1, 'connect_stat')
             data_temp(1) = 255;
      
-        p_value = floor(str2double(get(handles.edit8, 'String')) * 1000000);
+        p_value = floor(str2double(get(handles.edit9, 'String')) * 1000000);
         
         for i = 1:4
             data_temp(1 + i) = floor(p_value /(256^(4-i)));
             p_value = mod(p_value, (256^(4-i)));
         end
         
-         p_value = floor(str2double(get(handles.edit9, 'String')) * 1000000);
+         p_value = floor(str2double(get(handles.edit10, 'String')) * 1000000);
         
         for i = 1:4
             data_temp(5 + i) = floor(p_value /(256^(4-i)));
             p_value = mod(p_value, (256^(4-i)));
         end
         
-                p_value = floor(str2double(get(handles.edit10, 'String')) * 1000000);
+                p_value = floor(str2double(get(handles.edit11, 'String')) * 1000000);
         
         for i = 1:4
             data_temp(9 + i) = floor(p_value /(256^(4-i)));
             p_value = mod(p_value, (256^(4-i)));
         end
         
-                p_value = floor(str2double(get(handles.edit11, 'String')) * 1000000);
+                p_value = floor(str2double(get(handles.edit12, 'String')) * 1000000);
         
         for i = 1:4
             data_temp(13 + i) = floor(p_value /(256^(4-i)));
             p_value = mod(p_value, (256^(4-i)));
         end
         
-                p_value = floor(str2double(get(handles.edit12, 'String')) * 1000000);
+                p_value = floor(str2double(get(handles.edit8, 'String')) * 1000000);
         
         for i = 1:4
             data_temp(17 + i) = floor(p_value /(256^(4-i)));
@@ -833,6 +844,7 @@ function uart_inject_data(handles, opt, data)
     
     scom = getappdata(handles.figure1, 'uart');        
     data_temp = [235 80 opt (4+deta_length) 00 00 00 00 data xor_checksum];
+    clear_fifo(scom);
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
@@ -906,6 +918,7 @@ function uart_ping(handles)
 if getappdata(handles.figure1, 'connect_stat')
     scom = getappdata(handles.figure1, 'uart');
     data_temp = [235 80 01 04 00 00 00 00 00];
+    clear_fifo(scom);
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
@@ -941,6 +954,7 @@ if getappdata(handles.figure1, 'connect_stat')
     scom = getappdata(handles.figure1, 'uart');
     %val = str2num(val);
     data_temp = [235 80 opt 05 00 00 00 00 val val];
+    clear_fifo(scom);
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
@@ -1007,6 +1021,7 @@ if getappdata(handles.figure1, 'connect_stat')
     end
     scom = getappdata(handles.figure1, 'uart');        
     data_temp = [235 80 100 10 00 00 00 00 time_temp(1) time_temp(2) time_temp(3) time_temp(4) time_temp(5) time_temp(6) xor_checksum];
+    clear_fifo(scom);
     fwrite(scom, data_temp, 'char');
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
@@ -1037,7 +1052,7 @@ function pushbutton12_Callback(hObject, eventdata, handles)
         else
             data_temp(1) = 0;
         end    
-        p_value = floor(str2double(get(handles.edit5, 'String')) * 1000);
+        p_value = floor(str2double(get(handles.edit5, 'String')) * 100000);
         
         for i = 1:4
             data_temp(1 + i) = floor(p_value /(256^(4-i)));
@@ -1056,7 +1071,7 @@ function pushbutton13_Callback(hObject, eventdata, handles)
         else
             data_temp(1) = 0;
         end    
-        p_value = floor(str2double(get(handles.edit6, 'String')) * 1000);
+        p_value = floor(str2double(get(handles.edit6, 'String')) * 100000);
         
         for i = 1:4
             data_temp(1 + i) = floor(p_value /(256^(4-i)));
@@ -1074,7 +1089,7 @@ function pushbutton14_Callback(hObject, eventdata, handles)
         else
             data_temp(1) = 0;
         end    
-        p_value = floor(str2double(get(handles.edit7, 'String')) * 1000);
+        p_value = floor(str2double(get(handles.edit7, 'String')) * 100000);
         
         for i = 1:4
             data_temp(1 + i) = floor(p_value /(256^(4-i)));
@@ -1118,3 +1133,187 @@ function pushbutton15_Callback(hObject, eventdata, handles)
         end
         uart_inject_data(handles, 94, data_temp);
     end
+
+
+
+function rx_cmd_cnt_Callback(hObject, eventdata, handles)
+% hObject    handle to rx_cmd_cnt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of rx_cmd_cnt as text
+%        str2double(get(hObject,'String')) returns contents of rx_cmd_cnt as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function rx_cmd_cnt_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to rx_cmd_cnt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function time_on_site_Callback(hObject, eventdata, handles)
+% hObject    handle to time_on_site (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of time_on_site as text
+%        str2double(get(hObject,'String')) returns contents of time_on_site as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function time_on_site_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to time_on_site (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function tel_addr_Callback(hObject, eventdata, handles)
+% hObject    handle to tel_addr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of tel_addr as text
+%        str2double(get(hObject,'String')) returns contents of tel_addr as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function tel_addr_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to tel_addr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function gps_addr_Callback(hObject, eventdata, handles)
+% hObject    handle to gps_addr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of gps_addr as text
+%        str2double(get(hObject,'String')) returns contents of gps_addr as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function gps_addr_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to gps_addr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit26_Callback(hObject, eventdata, handles)
+% hObject    handle to edit26 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit26 as text
+%        str2double(get(hObject,'String')) returns contents of edit26 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit26_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit26 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit27_Callback(hObject, eventdata, handles)
+% hObject    handle to edit27 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit27 as text
+%        str2double(get(hObject,'String')) returns contents of edit27 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit27_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit27 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function pwm_1_Callback(hObject, eventdata, handles)
+% hObject    handle to pwm_1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of pwm_1 as text
+%        str2double(get(hObject,'String')) returns contents of pwm_1 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function pwm_1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pwm_1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function pwm_2_Callback(hObject, eventdata, handles)
+% hObject    handle to pwm_2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of pwm_2 as text
+%        str2double(get(hObject,'String')) returns contents of pwm_2 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function pwm_2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pwm_2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

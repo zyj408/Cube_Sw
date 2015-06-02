@@ -25,6 +25,7 @@ extern enum BOOL  downAdcsattStaFlg;               /* 下行三轴稳定控制标志位 */
 extern int      	downAdcscntAttStaFlag;           /* 下行三轴稳定控制次数 */
 
 /*--------------------------------------上行指令----------------------------------------------- */
+extern double     upDelta_TinSat;               /* 上行地面授时时间 */
 extern enum BOOL  AdcsOrbFlg;                   /*轨道有效标志位*/
 extern enum BOOL  upXwAdcsTLEFlag;              /*TLE轨道上注标志位，数据综合置位*/
 extern enum BOOL  upAdcsTLEFlag;
@@ -80,7 +81,9 @@ extern int cntAttStaFlag;                         /* 三轴稳定控制次数 */
 extern const double ae;			                      /* 地球的半径 */
 extern const double GM;		                        /* 地球引力常数 */
 extern const double J2; 	    	                  /* J2摄动项 */
+#if debug_mag_enable
 extern const double magTable[10682][3];     	    /* 存储在星上的磁场表 */	
+#endif
 extern double PFSt[2];		                        /* 俯仰滤波器状态与协方差阵 */
 extern double PPF[2][2];
 extern double PFB[2]; 			                      /* 俯仰滤波器中用的参量 */
@@ -94,6 +97,7 @@ extern enum BOOL  AdcsOrbGPSFlag;
 extern elsetrec satrecFromGPS;
 extern int CntNoGPS;
 
+extern enum BOOL  updateTimeFlag;                 /* 授时标志位 */
 extern double TinSat0;                            /* 统一初始时间，儒略格式 */
 extern double TinSat;			                       /* 星上实时时间，儒略格式 */
 extern uint32_t adcs_timer;

@@ -125,89 +125,157 @@ eps_hk_adc_t * adc_to_real(uint16_t *adc_uint,eps_hk_adc_t *adc_dest)
 	#define OUT_RES     OUT_REG3
 */
 /**
-*@bref 电源板输出控制
-*@detail
-*@para   chan  对应通道 0表示所有
-         NewState  通道状态
-*@reteval  none
+*@bref output channel switch
+*@para    chan     ;NewState
+*@reteval none
 */
-void out_en(uint8_t chan,FunctionalState NewState)
+static void out_channel(uint8_t chan,FunctionalState NewState)
 {
 	switch (chan)
 	{
-		case OUT_ALL:
-			if(NewState == ENABLE)
-			{
-				SW_MTQ_ENABLE;
-				SW_WHEELA_ENABLE;
-				SW_WHEELB_ENABLE; 	
-				SW_GPSA_ENABLE;
-				SW_GPSB_ENABLE;
-				SW_USB_ENABLE;
-				//SW_S2_ENABLE; //fipex 5v
-				//SW_S3_ENABLE; //fipex 3v
-				
-			}
-			else
-			{
-				SW_MTQ_DISABLE;
-				SW_WHEELA_DISABLE;
-				SW_WHEELB_DISABLE; 	
-				SW_GPSA_DISABLE;
-				SW_GPSB_DISABLE;
-				SW_USB_DISABLE;
-				//SW_S2_DISABLE; //fipex 5v
-				//SW_S3_DISABLE; //fipex 3v
-			}
-			break;
 		case OUT_GPSA:
 			if(NewState == ENABLE) SW_GPSA_ENABLE;
-			else SW_GPSA_DISABLE;
-			break;
+				else SW_GPSA_DISABLE;
+		break;
 		case OUT_GPSB:
 			if(NewState == ENABLE) SW_GPSB_ENABLE;
-			else SW_GPSB_DISABLE;
-			break;
+				else SW_GPSB_DISABLE;
+		break;
 		case OUT_MTQ:
 			if(NewState == ENABLE) SW_MTQ_ENABLE;
-			else SW_MTQ_DISABLE;
-			break;
+				else SW_MTQ_DISABLE;
+		break;
 		case OUT_WHEELA:
 			if(NewState == ENABLE) SW_WHEELA_ENABLE;
-			else SW_WHEELA_DISABLE;
-			break;
+				else SW_WHEELA_DISABLE;
+		break;
 		case OUT_WHEELB:
 			if(NewState == ENABLE) SW_WHEELB_ENABLE;
-			else SW_WHEELB_DISABLE;
-			break;
+				else SW_WHEELB_DISABLE;
+		break;
 		case OUT_USB:
 			if(NewState == ENABLE) SW_USB_ENABLE;
-			else SW_USB_DISABLE;
-			break;
+				else SW_USB_DISABLE;
+		break;
+		case OUT_RES:
+			if(NewState == ENABLE) SW_RES_ENABLE;
+				else SW_RES_DISABLE;
+		break;
 		case OUT_FIPEX5V:
 			if(NewState == ENABLE) SW_S2_ENABLE;
-			else	SW_S2_DISABLE;
-			break;
+				else SW_S2_DISABLE;
+		break;
 		case OUT_FIPEX3V:
 			if(NewState == ENABLE) SW_S3_ENABLE;
-			else SW_S3_DISABLE;
-			break;
+				else SW_S3_DISABLE;
+		break;
 		case OUT_HEAT:
 			if(NewState == ENABLE) SW_S0_ENABLE;
 			else SW_S0_DISABLE;
 			break;
-		case OUT_RES:
-			if(NewState == ENABLE) SW_RES_ENABLE;
-			else SW_RES_DISABLE;
-			break;
 		case OUT_DEPLOY:
 			if(NewState == ENABLE) SW_SOLAR_ENABLE;
 			else SW_SOLAR_DISABLE;
-			break;
+		break;
 		default:
 			break;
 	}
 }
+/**
+*@bref 电源板输出控制
+*@detail
+*@para   chan  对应通道 OUT_GPSA,OUT_GPSB,OUT_MTQ,OUT_WHEELA,
+									      OUT_WHEELB,OUT_USB,OUT_FIPEX5V,OUT_FIPEX3V
+									      OUT_RES,OUT_HEAT,OUT_DEPLOY
+         NewState 通道状态  ENABLE,UNABLE
+*@reteval  通道状态  若打开返回OUTPUT_ON =1;
+*                    若关闭返回OUTPUT_OFF =0;
+*                    若对应通道错误，返回错误标号>1
+*                    OUTPUT_ERR =2 OUTPUT_OFFERR=3,OUTPUT_SFTRY=4,
+*										 OUTPUT_HDTRY=5,OUTPUT_TRYOK=6,OUTPUT_HDERR =7
+*                    OUTPUT_OFFERR不处理，调用程序作后续处理
+*                    OUTPUT_HDERR硬件错误，调用程序自行后续处理
+*                    其他为中间状态，最后会进入0,1,3,7状态中的一个
+*/
+output_state_t out_en(uint8_t chan,FunctionalState NewState)
+{
+	if(chan == OUT_DEPLOY)
+	{
+		out_channel(OUT_DEPLOY,NewState);
+		if(NewState == ENABLE)return OUTPUT_ON;
+		else	return OUTPUT_OFF;
+	}
+	else
+	{
+		if(NewState == ENABLE) 
+		{
+			if(eps_state.out_state[chan] == OUTPUT_OFF ||
+				eps_state.out_state[chan] == OUTPUT_ON)
+			{
+				out_channel(chan,NewState);
+				eps_state.out_state[chan] = OUTPUT_ON;
+				return OUTPUT_ON;
+			}
+			else return eps_state.out_state[chan];
+		}
+		else /*(NewState == DISABLE) */
+		{
+			if(eps_state.out_state[chan] == OUTPUT_ON ||
+				eps_state.out_state[chan] == OUTPUT_OFF)
+			{
+				SW_GPSA_DISABLE;
+				eps_state.out_state[chan] = OUTPUT_OFF;
+				return OUTPUT_OFF;
+			}
+			else return eps_state.out_state[chan];
+		}
+	}		
+}
+/**
+*@bref  all out channels switch (GPSA,GPSB,WHEELA,WHEELB,MTQ,USB)
+*@para  NewState ENABLE;DISABLE
+*@reteval if NewState=DISABLE,return -1;
+*         if NewState=ENABLE,return -1;
+*         if there is one or more channel cannot open or shutdown
+*         then return the last error channel num
+*/
+int8_t outall_en(FunctionalState NewState)
+{
+	output_state_t state = OUTPUT_OFF;
+	if(NewState == ENABLE)
+	{
+		state = out_en(OUT_GPSA,ENABLE);
+		if(state != OUTPUT_ON) return OUT_GPSA;
+		state = out_en(OUT_GPSB,ENABLE);
+		if(state != OUTPUT_ON) return OUT_GPSB;
+		state = out_en(OUT_WHEELA,ENABLE);
+		if(state != OUTPUT_ON) return OUT_WHEELA;
+		state = out_en(OUT_WHEELB,ENABLE);
+		if(state != OUTPUT_ON) return OUT_WHEELB;
+		state = out_en(OUT_MTQ,ENABLE);
+		if(state != OUTPUT_ON) return OUT_MTQ;
+		state = out_en(OUT_USB,ENABLE);
+		if(state != OUTPUT_ON) return OUT_USB;
+		return -1;
+	}
+	else
+	{
+		state = out_en(OUT_GPSA,DISABLE);
+		if(state != OUTPUT_OFF) return OUT_GPSA;
+		state = out_en(OUT_GPSB,DISABLE);
+		if(state != OUTPUT_OFF) return OUT_GPSB;
+		state = out_en(OUT_WHEELA,DISABLE);
+		if(state != OUTPUT_OFF) return OUT_WHEELA;
+		state = out_en(OUT_WHEELB,DISABLE);
+		if(state != OUTPUT_OFF) return OUT_WHEELB;
+		state = out_en(OUT_MTQ,DISABLE);
+		if(state != OUTPUT_OFF) return OUT_MTQ;
+		state = out_en(OUT_USB,DISABLE);
+		if(state != OUTPUT_OFF) return OUT_USB;
+		return -1;		
+	}
+}
+
 void eps_enter_normal(void)
 {
 	if(eps_state.out_state[OUT_GPSA] == OUTPUT_ON)
@@ -229,11 +297,25 @@ void eps_enter_normal(void)
 }
 void eps_enter_safe(void)
 {
+	output_state_t state;
+	state = eps_state.out_state[OUT_MTQ];
 	out_en(OUT_MTQ,DISABLE);
+	if(state != OUTPUT_ON)
+	eps_state.out_state[OUT_MTQ] = state;
 }
 void eps_enter_critical(void)
 {
-	out_en(OUT_ALL,DISABLE);
+	int8_t state;
+	state = outall_en(DISABLE);
+	if(state != -1)
+	{
+		out_en(OUT_GPSA,DISABLE);
+		out_en(OUT_GPSB,DISABLE);
+		out_en(OUT_WHEELA,DISABLE);
+		out_en(OUT_WHEELB,DISABLE);
+		out_en(OUT_USB,DISABLE);
+		out_en(OUT_MTQ,DISABLE);
+	}
 	out_en(OUT_HEAT,DISABLE);
 }
 void eps_allin_off(void)
@@ -244,13 +326,27 @@ void eps_allin_on(void)
 {	
 	
 }
-void bat_heater_on(void)
+/**
+*@bref battery heate switch
+*@para none
+*@reteval   state 
+*           no error  return OUTPUT_ON
+*           error     return error mesg
+*/
+uint8_t bat_heater_on(void)
 {
-	out_en(OUT_HEAT,ENABLE);
+	return out_en(OUT_HEAT,ENABLE);
 }
-void bat_heater_off(void)
+/**
+*@bref    battery heat switch off
+*@para    none
+*@reteval state
+*              no error  return OUTPUT_OFF
+*              error     return error mesg
+*/
+uint8_t bat_heater_off(void)
 {
-	out_en(OUT_HEAT,DISABLE);
+	return 	out_en(OUT_HEAT,DISABLE);
 }
 
 void eps_data_Init(void)
@@ -298,14 +394,14 @@ static void temp_data_processing(eps_hk_adc_t * eps_adc, eps_hk_state_t * eps_st
 *      ....
 *@reteval    state
 */
-static conv_state_t conv_state(uint16_t volt,uint16_t max,uint16_t min,uint16_t errmax,uint16_t errmin)
-{
-	if(volt > errmax || volt < errmin) return CONV_ERR;
-	else if(volt > max) return CONV_OV;
-	else if(volt < min) return CONV_UV;
-	
-		return 0;
-}
+//static conv_state_t conv_state(uint16_t volt,uint16_t max,uint16_t min,uint16_t errmax,uint16_t errmin)
+//{
+//	if(volt > errmax || volt < errmin) return CONV_ERR;
+//	else if(volt > max) return CONV_OV;
+//	else if(volt < min) return CONV_UV;
+//	
+//		return 0;
+//}
 /**
 *@bref 
 *@detail
@@ -346,11 +442,12 @@ static void conv_data_processing(eps_hk_adc_t *eps_adc,eps_hk_state_t *eps_state
 *@para
 *@reteval
 typedef enum{
-	OUTPUT_OFF = 0, //output off
-	OUTPUT_ON,      //output on
+	OUTPUT_OFF = 0, //output off     if c_out[i]>c_off_offset enter OUTPUT_ERR
+	OUTPUT_ON,      //output on      if c_out[i]>c_out_limit[i],enter OUTPUT_ERR
 	OUTPUT_ERR,     //output err     OUTPUT_TRY 和 OUTPUT_HDTRY 只有在OUT_ERR之后才会出现
+	OUTPUT_OFFERR,  //当output 处于off状态时，由于不可知因素导致通道处于开通状态
 	OUTPUT_SFTRY,   //mannual soft autotry
-	OUTPUT_HDTRY,    //hardware autotry
+	OUTPUT_HDTRY,   //hardware autotry
 	OUTPUT_TRYOK,   //output aytotry ok,之后进入OUTPUT_ON 或 OUTPUT_OFF状态
 	OUTPUT_HDERR,   //output hardware err,this channel output will not be opened
 }output_state_t;
@@ -361,19 +458,27 @@ static void output_data_processing(eps_hk_adc_t *eps_adc,eps_hk_state_t *eps_sta
 	// set turn on time and turn off time
 	// if the eps_state.out_Ton > ton ,then the function is not active	
 	// if the eps_state.out_Toff > toff ,then the function is not active	
-	uint16_t ton = 10;
-	uint16_t toff = 10; 
-	static output_state_t pre_state[REG_NUM + UREG_NUM] = {0};//define output pre state enum variable
+	uint16_t ton = 10;  //ticks
+	uint16_t toff = 10; //ticks
+	uint16_t c_off_offset=10;//mA
+	static output_state_t pre_state[REG_NUM + UREG_NUM] = {OUTPUT_OFF};//define output pre state enum variable
 
 	for(i=0;i<(REG_NUM + UREG_NUM);i++)
 	{
 		switch (eps_state->out_state[i])
 		{
 			case OUTPUT_OFF:
-				out_en(i,DISABLE);
-				break;
+				if(eps_adc->c_out[i] > c_off_offset)
+				{
+					out_en(i,DISABLE);
+					eps_state->out_state[i] = OUTPUT_OFFERR;
+					pre_state[i] = OUTPUT_OFF;
+				}
+				else
+				{
+					break;
+				}
 			case OUTPUT_ON:
-				out_en(i,ENABLE);
 				if(eps_adc->c_out[i] > c_out_limit[i])
 				{
 					eps_state->out_state[i] = OUTPUT_ERR;
@@ -396,10 +501,11 @@ static void output_data_processing(eps_hk_adc_t *eps_adc,eps_hk_state_t *eps_sta
 					eps_state->out_Ton[i] = ton; 
 					pre_state[i] = OUTPUT_OFF; //SET as default value
 				}
-				else//表明是由于硬件fault中断导致的error
+				else /*if(pre_state[i] == OUTPUT_ERR)*/ //表明是由于硬件fault中断导致的error
 				{
-					eps_state->out_state[i] = OUTPUT_HDTRY;			
+					eps_state->out_state[i] = OUTPUT_HDTRY;
 				}
+				
 				eps_state->out_fault[i]++; //单个通道对应的错误加1
 				eps_state->out_faults++;//所有的错误量加1
 
@@ -407,13 +513,17 @@ static void output_data_processing(eps_hk_adc_t *eps_adc,eps_hk_state_t *eps_sta
 //				break;
 				//软件设定等待一段时间开启故障通道，设定时间在上一个case
 			case OUTPUT_SFTRY:
-				if((eps_state->out_Ton[i] > 0) && (eps_state->out_Ton[i] < ton+1)) eps_state->out_Ton[i]--;
-				//设定时间到，打开故障通道
-				if(eps_state->out_Ton == 0)
+				if((eps_state->out_Ton[i] > 0) && (eps_state->out_Ton[i] < ton+1)) 
 				{
-					out_en(i,ENABLE);
-					//设定故障通道关断时间，
-					eps_state->out_Toff[i] = toff;
+					eps_state->out_Ton[i]--;
+					//设定时间到，打开故障通道
+					if(eps_state->out_Ton == 0)
+					{
+						out_en(i,ENABLE);
+						eps_state->out_state[i] = OUTPUT_SFTRY;
+						//设定故障通道关断时间，
+						eps_state->out_Toff[i] = toff;
+					}
 				}
 				//判断是否在Toff时间内
 				//在此时间内没有出现电流超出限制事件，则保持通道开通
@@ -424,9 +534,9 @@ static void output_data_processing(eps_hk_adc_t *eps_adc,eps_hk_state_t *eps_sta
 					eps_state->out_Toff[i]--;
 					if(eps_adc->c_out[i] > c_out_limit[i])
 					{
-						eps_state->out_state[i] = OUTPUT_HDERR;
-						eps_state->out_Toff[i] = 0;
 						out_en(i,DISABLE);
+						eps_state->out_Toff[i] = 0;
+						eps_state->out_state[i] = OUTPUT_HDERR;
 					}
 					else
 					{
@@ -448,6 +558,7 @@ static void output_data_processing(eps_hk_adc_t *eps_adc,eps_hk_state_t *eps_sta
 					eps_state->out_state[i] = OUTPUT_TRYOK;
 					eps_state->out_Toff[i] = toff;
 					pre_state[i] = OUTPUT_ERR;
+					break;
 				}
 				//后面再次进入
 				else
@@ -461,16 +572,16 @@ static void output_data_processing(eps_hk_adc_t *eps_adc,eps_hk_state_t *eps_sta
 				}
 //				break;
 			case OUTPUT_TRYOK:
+				out_en(i,ENABLE);
 				eps_state->out_state[i] = OUTPUT_ON;
 				pre_state[i] = OUTPUT_OFF;
-				out_en(i,ENABLE);
 				break;
 			case OUTPUT_HDERR:
-				//lock the output state in HARDWARE ERROE STATE,
-				eps_state->out_state[i] = OUTPUT_HDERR;
 				//lock the output in disable state
 				out_en(i,DISABLE);
 				pre_state[i] = OUTPUT_OFF;
+				//lock the output state in HARDWARE ERROE STATE,
+				eps_state->out_state[i] = OUTPUT_HDERR;
 				break;
 			default:
 			break;
@@ -684,6 +795,10 @@ static void bat_data_processing(eps_hk_adc_t *eps_adc,eps_bat_t *eps_bat)
 	*@batSOC  battery SOC function
 	*/
 	batSOC(eps_bat,bat_volt,bat_curr);
+	/**
+	******************************************************************
+	*@batSOCpermanent  battery SOC function
+	*/	
 	batSOCpermanent(eps_bat,bat_volt,bat_curr);
 }
 

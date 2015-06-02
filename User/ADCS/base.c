@@ -1,48 +1,27 @@
 #include <includes.h>
 
-
 /***************************************/
 /* 姿态信息采集任务---每2s执行一次 */
 void AppTaskSenGet(void)
 {
    OS_ERR err;
-	 int i;
+   int i;
    double PosInWGS[3],VelInWGS[3];
-	 double tTime,dt,PosInTEME[3],VelInTEME[3];
-	 int temp = 1440;
-	
+   double tTime,dt,PosInTEME[3],VelInTEME[3];
+   int temp = 1440;
+	 
    while(1)
    {
 
-			BSP_OS_SemWait(&SEM_CYC_INFO, 0);
-      
-		 	/*读磁强计读数*/
-	
+		  BSP_OS_SemWait(&SEM_CYC_INFO, 0);
+		 
+	      /*读磁强计读数*/
 		  Get_Mag_Result(MagCurOut);
-	    #if debug_enable
-	   
-			printf("%04.8f %04.8f %04.8f %04.8f\r\n",MagCurOut[0],MagCurOut[1],MagCurOut[2],MagCurOut[3]);
-		#endif
 		  magnetometer[0] = MagCurOut[0];
 		  magnetometer[1] = MagCurOut[1];
 		  magnetometer[2] = MagCurOut[2];
-		 
-		 
-      if(upXwAdcsReDmp == VALID)                          /*阻尼恢复*/
-      {
-            upXwAdcsReDmp = INVALID;
-            magDotDmpFlg = VALID;
-            pitFltComFlg = INVALID;
-            attStaFlg = INVALID ;
-            cntDmpFlag = 0 ;
-            cntPitcomFlag = 0 ;
-            cntAttStaFlag = 0;
-      }
-			
-			adcs_timer = OSTimeGet(&err);
-			TinSat = TinSat0 + ((double)adcs_timer) * 1.0 / 1000.0 / 86400.0;
-			
-			if(upXwAdcsTLEFlag == VALID)                         /*原ORBFlag 轨道上注有效标志位 现7分钟释放一次,upXwAdcsTLEFlag为轨道上注有效标志*/ 
+	   
+		 	if(upXwAdcsTLEFlag == VALID)                         /*原ORBFlag 轨道上注有效标志位 现7分钟释放一次,upXwAdcsTLEFlag为轨道上注有效标志*/ 
 			{ 
 				 upXwAdcsTLEFlag = INVALID;                        /*标志位复位*/         
 				 upAdcsTLEFlag = VALID;
@@ -57,58 +36,81 @@ void AppTaskSenGet(void)
 				 CntSGP4 = 0;
 			}
 			
-			/*  在姿态捕获模式开启之前是不需要进行轨道采集和递推的，可能会占用系统资源并且可靠性降低   */
-      if(AdcsGpsUse == VALID) 
-			{				
-				 AdcsOrbFlg = VALID;
-			   AdcsGpsUse = INVALID;
-		     for (i=0;i<3;i++)
-			   {
-					   PosInWGS[i] = WGS84PV[i];
-					   VelInWGS[i] = WGS84PV[i+3];
-			   }
-			   posVelInJ_GPSGet(orbInfoGPS,PosInWGS,VelInWGS,&TinSat);
-				 AdcsOrbGPSFlag = VALID;
-				 CntNoGPS = 0;
-			}
-			else if(upAdcsTLEFlag == VALID)
+			if(updateTimeFlag == VALID)                          /* 星务接收到GPS信号或者地面指令授时成功时置位，断电重启后为无效 */
 			{
-				 AdcsOrbFlg = VALID;
-				 dt = (TinSat - satrec.jdsatepoch) * temp;
-         if (CntSGP4 == 0)
-				 {
-					  sgp4init(&satrec);
-         }
-				 CntSGP4++;
-	       sgp4(PosInTEME,VelInTEME,&satrec,&dt);
-	       posVelInJ_SGP4Get(orbInfo,PosInTEME,VelInTEME,&TinSat);
-			}
-			else if(AdcsOrbGPSFlag == VALID)
-			{
-				 if (CntNoGPS == 0)
-				 {
-					  GetTLEFromGPS(&satrecFromGPS,orbInfoGPS,&TinSat);
-					  sgp4init(&satrecFromGPS);
-				 }
-				 dt = CntNoGPS * tInterval;
-				 if (dt < 43200)
-				 {
-					  AdcsOrbFlg = VALID;
-				    sgp4(PosInTEME,VelInTEME,&satrecFromGPS,&dt);
-	          posVelInJ_SGP4Get(orbInfo,PosInTEME,VelInTEME,&tTime);
-				    CntNoGPS++;
-				 }
-				 else
-				 {
-					 AdcsOrbGPSFlag = INVALID;
-				 }
+			    adcs_timer = OSTimeGet (&err);
+			    TinSat = TinSat0 + upDelta_TinSat + ((double)adcs_timer) * 1.0 / 1000.0 / 86400.0;
+				
+				  /*  在姿态捕获模式开启之前是不需要进行轨道采集和递推的，可能会占用系统资源并且可靠性降低   */
+					if(AdcsGpsUse == VALID)                          /* GPS有效 */
+					{				
+						 AdcsOrbFlg = VALID;
+						 AdcsGpsUse = INVALID;
+						 for (i=0;i<3;i++)
+						 {
+								 PosInWGS[i] = WGS84PV[i];
+								 VelInWGS[i] = WGS84PV[i+3];
+						 }
+						 posVelInJ_GPSGet(orbInfoGPS,PosInWGS,VelInWGS,&TinSat);
+						 AdcsOrbGPSFlag = VALID;
+						 CntNoGPS = 0;
+					}
+					else if(upAdcsTLEFlag == VALID)                   /* 上注轨道有效 */
+					{
+						 AdcsOrbFlg = VALID;
+						 dt = (TinSat - satrec.jdsatepoch) * temp;
+						 if (CntSGP4 == 0)
+						 {
+								sgp4init(&satrec);
+						 }
+						 CntSGP4++;
+						 sgp4(PosInTEME,VelInTEME,&satrec,&dt);
+						 posVelInJ_SGP4Get(orbInfo,PosInTEME,VelInTEME,&TinSat);
+					}
+					else if(AdcsOrbGPSFlag == VALID)                  /* 利用GPS数据做轨道外推 */
+					{
+						 if (CntNoGPS == 0)
+						 {
+								GetTLEFromGPS(&satrecFromGPS,orbInfoGPS,&TinSat);
+								sgp4init(&satrecFromGPS);
+						 }
+						 CntNoGPS++;
+						 dt = CntNoGPS * tInterval;
+						 if (dt < 43200)
+						 {
+								AdcsOrbFlg = VALID;
+								sgp4(PosInTEME,VelInTEME,&satrecFromGPS,&dt);
+								posVelInJ_SGP4Get(orbInfo,PosInTEME,VelInTEME,&tTime);
+						 }
+						 else
+						 {
+							   AdcsOrbFlg = INVALID;
+						 }
+					}
+					else
+					{
+						  AdcsOrbFlg = INVALID;
+					}
 			}
 			else
 			{
-				 AdcsOrbFlg = INVALID;
+				  AdcsOrbFlg = INVALID;
 			}
+			
 
-     
+
+			
+			
+      if(upXwAdcsReDmp == VALID)                          /*阻尼恢复*/
+      {
+            upXwAdcsReDmp = INVALID;
+            magDotDmpFlg = VALID;
+            pitFltComFlg = INVALID;
+            attStaFlg = INVALID ;
+            cntDmpFlag = 0 ;
+            cntPitcomFlag = 0 ;
+            cntAttStaFlag = 0;
+      }
       /******************************************************************************/
       /*上行参数由数据综合系统获得后给姿控系统参数进行赋值*/
       if(upXwAdcsConPFlag == VALID)                                      /*三轴稳定控制律P系数上注标志位，数据综合置位姿控清零*/
@@ -144,9 +146,11 @@ void AppTaskSenGet(void)
 
       /*****************************************************************************************/
 
-      if(AdcsOrbFlg == INVALID)              /*姿控信息采集任务时刻关注上行轨道标志位、阻尼标志位和俯仰滤波标志位，一旦检测到有效即发出信号灯执行相应任务*/
-				 pitFltComFlg = INVALID;
-			   magDotDmpFlg = VALID;
+      if(AdcsOrbFlg == INVALID)  /*姿控信息采集任务时刻关注上行轨道标志位、阻尼标志位和俯仰滤波标志位，一旦检测到有效即发出信号灯执行相应任务*/
+	  {		 
+			pitFltComFlg = INVALID;
+			magDotDmpFlg = VALID;
+	  }
       if(magDotDmpFlg == VALID)	
 				 BSP_OS_SemPost(&SEM_MAG_DOT_DMP);
       if(pitFltComFlg == VALID)
@@ -170,13 +174,13 @@ void AppTaskMagDotDmp(void)
    double tmp1,tmp2,tmp3;
    double Vout[3];
    int i,t0 = 2999;
-   tmp1 =1/2.2565; tmp2 =1/2.2061; tmp3 =1/2.1068;
+   tmp1 =1/1; tmp2 =1/1; tmp3 =1/1;
    while(1)
    {
-	  	BSP_OS_SemWait(&SEM_MAG_DOT_DMP, 0);
+	   BSP_OS_SemWait(&SEM_MAG_DOT_DMP, 0);
 
-      if(cntDmpFlag < 0.1)
-			{
+		if(cntDmpFlag < 0.1)
+		{
          mtxCpy(magTmp,magnetometer,1,3);
          for(i=0;i<3;i=i+1)
               MTQOut[i] = 0;                                    /*首次执行时磁力矩器输出为0*/
@@ -187,7 +191,7 @@ void AppTaskMagDotDmp(void)
       	mtxCpy(magTmp,magnetometer,1,3);
       	for(i=0;i<3;i=i+1)
         {
-           MTQOut[i] = (-1)*(1e6)*magInc[i]/tInterval;          /*阻尼控制率*/
+           MTQOut[i] = (-1)*(1e-3)*magInc[i]/tInterval;          /*阻尼控制率*/
            if(MTQOut[i] > 0.2)
               MTQOut[i] = 0.2;
            else if(MTQOut[i] < -0.2)
@@ -195,7 +199,7 @@ void AppTaskMagDotDmp(void)
            else
               MTQOut[i] = 0;
         }
-			}
+	   }
 			
       Vout[0] = MTQOut[0]*tmp1;
       Vout[1] = MTQOut[1]*tmp2;
@@ -235,7 +239,7 @@ void AppTaskPitFltCom(void)
 	  	BSP_OS_SemWait(&SEM_PIT_FLT_COM, 0);
 
 	    adcs_timer = OSTimeGet (&err);
-			TinSat=TinSat0+adcs_timer*1.0/1000.0/86400.0;
+			TinSat=TinSat0 + upDelta_TinSat + ((double)adcs_timer)*1.0/1000.0/86400.0;
 
      if(AdcsGpsUse == VALID)                                              /*GPS正常工作*/
      {
@@ -248,7 +252,9 @@ void AppTaskPitFltCom(void)
       cordMtxJToWGSGet(JToWGS,&TinSat);
       posInWGSGet(PosInWGS,JToWGS,orbInfo);
       geoInfoGet(GeoCord,PosInWGS);
-      //ChkMagLst(MagInFix,magTable,GeoCord);
+	 #if debug_mag_enable
+      ChkMagLst(MagInFix,magTable,GeoCord);
+	 #endif
       
       MagJGet(MagInJ,JToWGS,MagInFix);
       MtxJtoOGet(MtxJtoO,orbInfo);
@@ -263,12 +269,14 @@ void AppTaskPitFltCom(void)
       /*printf(" MagInO= %f  %f %f\n",MagInO[0] ,MagInO[1] ,MagInO[2] );*/
 
       if(cntPitcomFlag == INVALID)
-         pitFltInit(PFSt,PPF,&PitM);                          /*首次执行，滤波器状态向量和协方差矩阵初始化*/   
+			{
+         pitFltInit(PFSt,PPF,&PitM);                          /*首次执行，滤波器状态向量和协方差矩阵初始化*/  
+			}				
       else
       {
           pitFltMagUpd(PFSt,PPF,&PitM);                        /*滤波器量测更新*/   
           /*printf(" PitM_Mag= %f \n",PitM*180/PI );*/
-       }
+      }
 
        downAdcsMeasAng = PitM*RadToDeg;                     /*下行俯仰角测量值*/        
        mtxCpy(downAdcsFltAngRate,PFSt,1,2);
@@ -300,7 +308,7 @@ void AppTaskAttStaCtl(void)
    double Vout[3];
 	 double TqNom[3];
    int i,j;   
-   tmp1 =1/2.2565; tmp2 =1/2.2061; tmp3 =1/2.1068;
+   tmp1 =1/1; tmp2 =1/1; tmp3 =1/1;
    	
    while(1)
    {

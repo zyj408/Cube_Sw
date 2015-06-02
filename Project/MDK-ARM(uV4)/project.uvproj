@@ -467,11 +467,6 @@
               <FilePath>..\..\User\bsp_stm32f4xx\bsp_os.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_fsmc_sram.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_fsmc_sram.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_led.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_led.c</FilePath>
@@ -505,6 +500,11 @@
               <FileName>bsp_spi_sd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_user\bsp_spi_sd.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_fsmc_sram.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_fsmc_sram.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1486,11 +1486,6 @@
               <FilePath>..\..\User\bsp_stm32f4xx\bsp_os.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_fsmc_sram.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_fsmc_sram.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_led.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_led.c</FilePath>
@@ -1524,6 +1519,11 @@
               <FileName>bsp_spi_sd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_user\bsp_spi_sd.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_fsmc_sram.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_fsmc_sram.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2505,11 +2505,6 @@
               <FilePath>..\..\User\bsp_stm32f4xx\bsp_os.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_fsmc_sram.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_fsmc_sram.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_led.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_led.c</FilePath>
@@ -2543,6 +2538,11 @@
               <FileName>bsp_spi_sd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\bsp_user\bsp_spi_sd.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_fsmc_sram.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\bsp_stm32f4xx\src\bsp_fsmc_sram.c</FilePath>
             </File>
           </Files>
         </Group>

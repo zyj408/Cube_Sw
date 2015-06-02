@@ -19,11 +19,12 @@ double     downAdcsMagnetometer[3];         /* 下行磁强计测量值 */
 enum BOOL  downAdcsmagDotDmpFlg;            /* 下行阻尼标志位 */
 int        downAdcscntDmpFlag;              /* 下行阻尼次数 */
 enum BOOL  downAdcspitFltComFlg;            /* 下行测量标志位 */
-int      	 downAdcscntPitcomFlag;           /* 下行测量次数 */
+int        downAdcscntPitcomFlag;           /* 下行测量次数 */
 enum BOOL  downAdcsattStaFlg;               /* 下行三轴稳定控制标志位 */
-int      	 downAdcscntAttStaFlag;           /* 下行三轴稳定控制次数 */
+int        downAdcscntAttStaFlag;           /* 下行三轴稳定控制次数 */
 
 /*--------------------------------------上行指令----------------------------------------------- */
+double     upDelta_TinSat;               /* 上行地面或GPS授时时间 */
 enum BOOL  AdcsOrbFlg;                   /*轨道有效标志位*/
 enum BOOL  upXwAdcsTLEFlag;              /* TLE轨道上注标志位，数据综合置位 */
 enum BOOL  upAdcsTLEFlag;
@@ -89,8 +90,9 @@ enum BOOL  AdcsOrbGPSFlag;
 elsetrec satrecFromGPS;
 int CntNoGPS;
 
+enum BOOL  updateTimeFlag;                 /* 授时标志位 */
 double TinSat0;                            /* 统一初始时间，儒略格式 */
-double TinSat;			                       /* 星上实时时间，儒略格式 */
+double TinSat;			                   /* 星上实时时间，儒略格式 */
 uint32_t adcs_timer;                       /* 星上计时器 */
 /*------------------------------------------------------------------------------------- */
 
@@ -103,14 +105,14 @@ void ADCS_Init_VAR(void)
   for(i=0; i<3; i++)
 		orbInc[i] = 0.0;
 	
-	for(i=0; i<3; i++)
+  for(i=0; i<3; i++)
     mtqTq[i] = 0.0;   /* 目标控制力矩 */
  
 	
    PFB[0] = 0;
-	 PFB[1] = 1.0/3.353;   /* 俯仰滤波器参数初始化 */
-   RPF = 1.0;    /*  */
-   QPF = 1.0;    /*  */
+   PFB[1] = 1.0/0.01282;   /* 俯仰滤波器参数初始化 */
+   RPF = 0.07;    /*  */
+   QPF = 3.68e-8;    /*  */
 
    magDotDmpFlg = VALID;			
    pitFltComFlg = INVALID;			       
@@ -128,9 +130,9 @@ void ADCS_Init_VAR(void)
    upXwAdcsTLEFlag = INVALID;  
 
    /* 初始化指令信息参数 */
-   upAdcsConP = 0.0003;                        /*三轴稳定控制律P系数*/
-   upAdcsConD = 0.006;                         /*三轴稳定控制律D系数  */
-   upAdcsConZ = 0.08;                          /*章进动控制律Z系数    */
+   upAdcsConP = 3.2e-6;                        /*三轴稳定控制律P系数*/
+   upAdcsConD = 4.05e-5;                         /*三轴稳定控制律D系数  */
+   upAdcsConZ = 8e-4;                          /*章进动控制律Z系数    */
 
    upXwAdcsConPFlag = INVALID;        
    upXwAdcsConDFlag = INVALID;                
@@ -144,6 +146,7 @@ void ADCS_Init_VAR(void)
 
    /***************************************/                 
    /* 初始化时间起点 */
-	 year = 2015; month = 3; day = 28; hour = 0; minute = 0; second = 0;
+	 year = 2014; month = 4; day = 15; hour = 0; minute = 0; second = 0;
 	 timeFormTrans(&TinSat0,&year,&month,&day,&hour,&minute,&second);
+	 updateTimeFlag = INVALID;
 }

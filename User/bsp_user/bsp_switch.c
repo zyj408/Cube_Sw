@@ -61,7 +61,7 @@ void bsp_InitSwitch(void)
 	
 	#endif
 	
-	out_en(OUT_ALL, ENABLE);
+	outall_en(ENABLE);
 
 	RCC_AHB1PeriphClockCmd(RCC_S0_EN_PORT | RCC_S1_EN_PORT | RCC_S2_EN_PORT | RCC_S3_EN_PORT, ENABLE);
 	

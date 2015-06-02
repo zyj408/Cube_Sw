@@ -77,6 +77,10 @@ CPU_INT16U PwmSetDuty_3;
 CPU_INT16U PwmCurDuty_1;
 CPU_INT16U PwmCurDuty_2;
 CPU_INT16U PwmCurDuty_3;
+
+float PWM_Feq1;
+float PWM_Feq2;
+
 /* 卫星星务文件系统 */
 FRESULT f_result;
 FATFS f_fs;
@@ -267,11 +271,11 @@ void bsp_Init_VAR(void)
 	GpsCurPtr = GPS_STO_ADDR;      /* GPS存储地址 */
 	PldCurPtr = PLOAD_STO_ADDR;    /* 载荷存储地址 */
 	TelOverRangeCnt = 0;           /* 遥测指针越界计数 */
-  GpsOverRangeCnt = 0;           /* GPS指针越界计数 */
-  PldOverRangeCnt = 0;           /* 载荷指针越界计数 */
+	GpsOverRangeCnt = 0;           /* GPS指针越界计数 */
+	PldOverRangeCnt = 0;           /* 载荷指针越界计数 */
 	TelCurStrCnt = 0;              /* 当前遥测存储数 */
-  GpsCurStrCnt = 0;              /* 当前GPS存储数 */
-  PldCurStrCnt = 0;              /* 当前载荷存储数 */
+	GpsCurStrCnt = 0;              /* 当前GPS存储数 */
+	PldCurStrCnt = 0;              /* 当前载荷存储数 */
 	
 	Mem_Set(&GpsStrInfo, 0x00, sizeof(struct OBCStoreInfoStr));
 	Mem_Set(&TelStrInfo, 0x00, sizeof(struct OBCStoreInfoStr));
@@ -292,26 +296,28 @@ void bsp_Init_VAR(void)
 
 	/* 星上开机状态初始化 */
 	Mem_Set(&OBCBootInfo, 0x00, sizeof(struct OBCBootInfoStr));
-  LowVolCnt = 0;
+	LowVolCnt = 0;
 
 	/* 板级通信变量初始化 */
-  EpsTranOTCnt = 0;                 
-  EpsRevOTCnt = 0;       
-  ComTranOTCnt = 0;            
-  ComRevOTCnt = 0;
+	EpsTranOTCnt = 0;                 
+	EpsRevOTCnt = 0;       
+	ComTranOTCnt = 0;            
+	ComRevOTCnt = 0;
 	
 	/* 星务输出变量初始化 */
-  PwmSetDuty_1 = 50;
-  PwmSetDuty_2 = 50;
-  PwmSetDuty_3 = 50;
-  PwmCurDuty_1 = 0;
-  PwmCurDuty_2 = 0;
-  PwmCurDuty_3 = 0;
-  MotorSetOutput = 40000;
-  MotorCurOutput = 0;	
+	PwmSetDuty_1 = 50;
+	PwmSetDuty_2 = 50;
+	PwmSetDuty_3 = 50;
+	PwmCurDuty_1 = 0;
+	PwmCurDuty_2 = 0;
+	PwmCurDuty_3 = 0;
+	MotorSetOutput = 40000;
+	MotorCurOutput = 0;	
 	
 	CurFlashSetor = ADDR_FLASH_SECTOR_1;
 	ADCS_Init_VAR();
+	
+	eps_data_Init();  	 /* EPS变量初始化 */
 	FipexInfomationInit();
 	FipexSetDefaultInfo();
 }
