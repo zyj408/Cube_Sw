@@ -129,6 +129,14 @@ struct OBCBootInfoStr
 	char BootLSI_Error;       /* 内部时钟错误次数 */
 };
 
+struct OBCPWM_OutPutStr
+{
+	unsigned short 	PwmSetDuty;
+	unsigned short 	PwmCurDuty;
+	unsigned short 	PwmSetDutyOld;
+	unsigned char	PwmSetDir;
+	unsigned char	PwmCurDir;
+};
 
 struct OBCStoreInfoStr
 {
@@ -159,10 +167,10 @@ extern OS_TMR  GPS_OT_TIMER;
 extern OS_TMR  COM_OT_TIMER;;
 
 /* GPS存储信号灯 */
-extern OS_SEM   SEM_GPS_STO;	
-extern OS_SEM   SEM_TEL_STO;
-extern OS_SEM   SEM_PLOAD_STO;
-
+extern OS_SEM			SEM_GPS_STO;	
+extern OS_SEM   		SEM_TEL_STO;
+extern OS_SEM   		SEM_PLOAD_STO;
+extern BSP_OS_MUTEX 	MUTEX_MAG_CAP;
 /* 声明GPS接收缓冲变量 */
 extern CPU_INT08U GpsRevBuf[GPS_MAX_REV_SIZE]; 
 extern volatile CPU_INT16U GpsRevCnt;
@@ -213,13 +221,9 @@ extern CPU_INT32U MotorSetOutput;
 extern CPU_INT32U MotorCurOutput;
 
 extern double MagCurOut[4];
-extern CPU_INT08U MotorCommErr;
-extern CPU_INT16U PwmSetDuty_1;
-extern CPU_INT16U PwmSetDuty_2;
-extern CPU_INT16U PwmSetDuty_3;
-extern CPU_INT16U PwmCurDuty_1;
-extern CPU_INT16U PwmCurDuty_2;
-extern CPU_INT16U PwmCurDuty_3;
+
+extern struct OBCPWM_OutPutStr PwmOutPut[3];
+
 extern float PWM_Feq1;
 extern float PWM_Feq2;
 /* 卫星星务文件系统 */
@@ -380,4 +384,5 @@ extern eps_hk_state_t eps_state;		/* define eps hk state struct avariable */
 #define INS_GPS_ADRS           0x63    //GPS存储指针变更
 #define INS_TIME_IN            0x64    //时间注入
 #define INS_FIPEX_SCRIPT_IN    0x65    //Fipex指令注入
+#define INS_MAG_TABLE_IN   	   0x66    //Fipex指令注入
 #endif

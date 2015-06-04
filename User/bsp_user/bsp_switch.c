@@ -54,16 +54,28 @@ void bsp_InitSwitch(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_MTQ3_DIR_PIN;	
 	GPIO_Init(GPIO_MTQ3_DIR_PORT, &GPIO_InitStructure);
 	
-	MTQ1_DIR_POS;
-	MTQ2_DIR_POS;
-	MTQ3_DIR_POS;
 	
+	if(PwmOutPut[0].PwmCurDir)
+		MTQ1_DIR_NAG;
+	else
+		MTQ1_DIR_POS;
 	
+	if(PwmOutPut[1].PwmCurDir)
+		MTQ2_DIR_NAG;
+	else
+		MTQ2_DIR_POS;
+
+	if(PwmOutPut[2].PwmCurDir)
+		MTQ3_DIR_NAG;
+	else
+		MTQ3_DIR_POS;	
 	#endif
 	
-	outall_en(ENABLE);
+	outall_en(DISABLE);
 	//out_en(OUT_WHEELA, DISABLE);
-	out_en(OUT_WHEELB, DISABLE);
+	//out_en(OUT_WHEELB, DISABLE);
+	
+	
 	RCC_AHB1PeriphClockCmd(RCC_S0_EN_PORT | RCC_S1_EN_PORT | RCC_S2_EN_PORT | RCC_S3_EN_PORT, ENABLE);
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_S0_EN_PIN;	

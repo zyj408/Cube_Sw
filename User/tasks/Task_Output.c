@@ -1,23 +1,17 @@
 #include  <includes.h>
 #include "globalavr.h"
 
-CPU_INT16U PwmCurDutyOld_1;
-CPU_INT16U PwmCurDutyOld_2;
-CPU_INT16U PwmCurDutyOld_3;
 CPU_INT08U PwmPwrStatusOld;
 void OUTPUT_TASK(void *p_arg)
 {
+	char i;
 	char timeout = 0;
 	(void)p_arg;
-	
-	//PwmCurDuty_1 = PwmSetDuty_1;
-  //PwmCurDuty_2 = PwmSetDuty_2;
-  //PwmCurDuty_3 = PwmSetDuty_3;
 	
 	while((!MTQ_POWER_PIN()) && timeout < 50)  //第一次启动等待至POWER拉高再进行处理
 	{
 		timeout++;
-		BSP_OS_TimeDlyMs(100);
+		BSP_OS_TimeDlyMs(10);
 	}
 	
 	if(MTQ_POWER_PIN())
@@ -36,21 +30,19 @@ void OUTPUT_TASK(void *p_arg)
 			{
 				MTQ_WAKEN;   //芯片醒来
 				
-				PwmSetDuty_1 = PwmCurDutyOld_1;
-				PwmSetDuty_2 = PwmCurDutyOld_2;
-				PwmSetDuty_3 = PwmCurDutyOld_3;
+				for(i=0; i<3; i++)
+				{
+					PwmOutPut[i].PwmSetDuty = PwmOutPut[i].PwmSetDutyOld;
+				}
 			}
 			else   //电源关闭
 			{
-				PwmCurDutyOld_1 = PwmCurDuty_1;
-				PwmCurDutyOld_2 = PwmCurDuty_2;
-				PwmCurDutyOld_3 = PwmCurDuty_3;
-				PwmCurDuty_1 = 0;
-				PwmCurDuty_2 = 0;
-				PwmCurDuty_3 = 0;
-				bsp_SetPWMDutyCycle(PwmCurDuty_1, 1);
-				bsp_SetPWMDutyCycle(PwmCurDuty_2, 2);
-				bsp_SetPWMDutyCycle(PwmCurDuty_3, 3);
+				for(i=0; i<3; i++)
+				{
+					PwmOutPut[i].PwmSetDutyOld = PwmOutPut[i].PwmSetDuty;
+					PwmOutPut[i].PwmCurDuty = 0;
+					bsp_SetPWMDutyCycle(PwmOutPut[i].PwmCurDuty, i+1);
+				}
 				
 				MTQ_SLEEP;   //关闭芯片
 			}
@@ -59,22 +51,41 @@ void OUTPUT_TASK(void *p_arg)
 		
 		if(MTQ_POWER_PIN() && MTQ_SLEEP_PIN())  //MTQ打开
 		{
-			if(PwmCurDuty_1 != PwmSetDuty_1)
+			for(i=0; i<3; i++)
 			{
-				PwmCurDuty_1 = PwmSetDuty_1;
-				bsp_SetPWMDutyCycle(PwmCurDuty_1, 1);			
-			}
-			if(PwmCurDuty_2 != PwmSetDuty_2)
-			{
-				PwmCurDuty_2 = PwmSetDuty_2;
-				bsp_SetPWMDutyCycle(PwmCurDuty_2, 2);			
-			}
-			if(PwmCurDuty_3 != PwmSetDuty_3)
-			{
-				PwmCurDuty_3 = PwmSetDuty_3;
-				bsp_SetPWMDutyCycle(PwmCurDuty_3, 3);
-			}
-			
+				if(PwmOutPut[i].PwmSetDir != PwmOutPut[i].PwmCurDir || PwmOutPut[i].PwmSetDuty != PwmOutPut[i].PwmCurDuty)
+				{
+					PwmOutPut[i].PwmCurDuty =  PwmOutPut[i].PwmSetDuty;
+					PwmOutPut[i].PwmCurDir = PwmOutPut[i].PwmSetDir;
+					
+					if(PwmOutPut[0].PwmCurDir)
+						MTQ1_DIR_NAG;
+					else
+						MTQ1_DIR_POS;
+
+					if(PwmOutPut[1].PwmCurDir)
+						MTQ2_DIR_NAG;
+					else
+						MTQ2_DIR_POS;
+
+					if(PwmOutPut[2].PwmCurDir)
+						MTQ3_DIR_NAG;
+					else
+						MTQ3_DIR_POS;
+					
+					if(PwmOutPut[i].PwmCurDir)
+					{
+						
+						bsp_SetPWMDutyCycle(PwmOutPut[i].PwmCurDuty, i+1);
+					}
+					else
+					{
+						
+						bsp_SetPWMDutyCycle(100 - PwmOutPut[i].PwmCurDuty, i+1);
+					}
+				}
+
+			}		
 		}
 		
 		

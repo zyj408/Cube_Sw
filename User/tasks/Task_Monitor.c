@@ -44,20 +44,24 @@ void ADC_SAMPLE_TASK(void *p_arg)
 	
 	while(1)
 	{
+		
+		BSP_OS_MutexWait(&MUTEX_MAG_CAP, 0);
 		for(round = 0; round < 16; round++)
 		{
 			EpsAdUpdate(EPS_AD_CS1);
-			BSP_OS_TimeDlyMs(1);
+			//BSP_OS_TimeDlyMs(1);
 			
 			EpsAdUpdate(EPS_AD_CS2);
-			BSP_OS_TimeDlyMs(1);
+			//BSP_OS_TimeDlyMs(1);
 			
 			ObcAdUpdate();
-			BSP_OS_TimeDlyMs(1);
+			//BSP_OS_TimeDlyMs(1);
 			
 			TempAdUpdate();
-			BSP_OS_TimeDlyMs(1);
+			//BSP_OS_TimeDlyMs(1);
 		}
+		BSP_OS_MutexPost(&MUTEX_MAG_CAP);
+		
 		AdDataFliter(EpsAdValue, EpsAdValueAver, 32);
 		AdDataFliter(ObcAdValue,ObcAdValueAver, 16);
 		AdDataFliter(TempAdValue,TempAdValueAver, 16);

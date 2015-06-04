@@ -92,8 +92,8 @@ void Init_GPIO(void)
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;    	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12; 
-  GPIO_Init(GPIOB, &GPIO_InitStructure);                       //CS PIN
+	GPIO_InitStructure.GPIO_Pin = AD7192_CS_PIN; 
+  GPIO_Init(AD7192_CS_GPIO, &GPIO_InitStructure);                       //CS PIN
 	
 	//AD7192_SET_LOW();
 	AD7192_SET_HIGH();
@@ -274,7 +274,7 @@ void Mag_Reset(int delaytime)
 
  
  
- 
+double AD7192_Data_d = 0.0; 
 void Get_Mag_Read(double* M)
 {
 	int CH=0;
@@ -282,7 +282,8 @@ void Get_Mag_Read(double* M)
   while(CH < 4)
 	{	
 	   	AD7192Data = AD7192ReadConvertingData();
-			vin = AD7192Data*5.0/16777215.00000000;	
+		AD7192_Data_d = (double)AD7192Data;
+			vin = AD7192_Data_d * 5.0 / 16777215.0;	
 		  if(CH==0)
 	  	{
 				M[0]=vin;

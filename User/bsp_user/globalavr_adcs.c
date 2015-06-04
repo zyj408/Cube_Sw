@@ -107,7 +107,6 @@ void ADCS_Init_VAR(void)
 	
   for(i=0; i<3; i++)
     mtqTq[i] = 0.0;   /* 目标控制力矩 */
- 
 	
    PFB[0] = 0;
    PFB[1] = 1.0/0.01282;   /* 俯仰滤波器参数初始化 */

@@ -468,16 +468,16 @@ static void output_data_processing(eps_hk_adc_t *eps_adc,eps_hk_state_t *eps_sta
 		switch (eps_state->out_state[i])
 		{
 			case OUTPUT_OFF:
-				if(eps_adc->c_out[i] > c_off_offset)
-				{
-					out_en(i,DISABLE);
-					eps_state->out_state[i] = OUTPUT_OFFERR;
-					pre_state[i] = OUTPUT_OFF;
-				}
-				else
-				{
-					break;
-				}
+//				if(eps_adc->c_out[i] > c_off_offset)
+//				{
+//					out_en(i,DISABLE);
+//					eps_state->out_state[i] = OUTPUT_OFFERR;
+//					pre_state[i] = OUTPUT_OFF;
+//				}
+//				else
+//				{
+//					break;
+//				}
 			case OUTPUT_ON:
 				if(eps_adc->c_out[i] > c_out_limit[i])
 				{

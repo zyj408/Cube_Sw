@@ -5,7 +5,7 @@
 #define SWITCH_TIMEOUT_MS  5
 enum INS_STATUS InsState=INS_IDLE;  /* 地面测试状态初始化 */
 
-
+enum MAG_TAB_STATUS	MagState = MAG_IDLE;
 
 
 OS_ERR   err;
@@ -143,7 +143,9 @@ void InsSendHouseKeepingData(void)
 {
 	uint8_t *p, *q;
 	uint8_t ins_checksum;
-	uint8_t ins_data_temp[240];
+	
+	uint32_t data_temp;
+	uint8_t ins_data_temp[250];
 	
 	p = ins_data_temp;
 	q = p+3;
@@ -184,6 +186,32 @@ void InsSendHouseKeepingData(void)
 	*p++ = 0xFF;
 	Mem_Copy(p, (uint8_t*)(&eps_adc_data), sizeof(eps_adc_data));
 	p += sizeof(eps_adc_data);
+	*p++ = 0xFF;
+	
+	*p++ = PwmOutPut[0].PwmCurDir;
+	*p++ = PwmOutPut[1].PwmCurDir;
+	*p++ = PwmOutPut[2].PwmCurDir;
+	*p++ = (uint8_t)PwmOutPut[0].PwmCurDuty;
+	*p++ = (uint8_t)PwmOutPut[1].PwmCurDuty;
+	*p++ = (uint8_t)PwmOutPut[2].PwmCurDuty;
+	
+	data_temp = (uint32_t)MagCurOut[0] * 100;
+	*p++ = (uint8_t)(data_temp & 0xFF); 
+	*p++ = (uint8_t)((data_temp >> 8) & 0xFF); 
+	*p++ = (uint8_t)((data_temp >> 16) & 0xFF); 
+	*p++ = (uint8_t)((data_temp >> 24) & 0xFF); 
+
+	data_temp = (uint32_t)MagCurOut[1] * 100;
+	*p++ = (uint8_t)(data_temp & 0xFF); 
+	*p++ = (uint8_t)((data_temp >> 8) & 0xFF); 
+	*p++ = (uint8_t)((data_temp >> 16) & 0xFF); 
+	*p++ = (uint8_t)((data_temp >> 24) & 0xFF); 	
+	
+	data_temp = (uint32_t)MagCurOut[2] * 100;
+	*p++ = (uint8_t)(data_temp & 0xFF); 
+	*p++ = (uint8_t)((data_temp >> 8) & 0xFF); 
+	*p++ = (uint8_t)((data_temp >> 16) & 0xFF); 
+	*p++ = (uint8_t)((data_temp >> 24) & 0xFF); 
 	
 	*q = p - q;
 	
@@ -438,6 +466,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			while(SW_WHEELB_PIN() == Bit_RESET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
 				out_en(OUT_WHEELB, ENABLE);
+				//SW_WHEELB_ENABLE;
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -456,6 +485,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			while(SW_WHEELB_PIN() == Bit_SET && timeout_ms < SWITCH_TIMEOUT_MS)
 			{
 				out_en(OUT_WHEELB, DISABLE);
+				//SW_WHEELB_DISABLE;
 				BSP_OS_TimeDlyMs(1);
 				timeout_ms++;
 			}
@@ -701,6 +731,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			}
 			else
 			{
+				PwmOutPut[0].PwmSetDir = 0;
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
 			}
@@ -719,6 +750,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			}
 			else
 			{
+				PwmOutPut[0].PwmSetDir = 1;
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
 			}
@@ -737,6 +769,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			}
 			else
 			{
+				PwmOutPut[1].PwmSetDir = 0;
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
 			}			
@@ -755,6 +788,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			}
 			else
 			{
+				PwmOutPut[1].PwmSetDir = 1;
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
 			}			
@@ -773,6 +807,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			}
 			else
 			{
+				PwmOutPut[2].PwmSetDir = 0;
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
 			}			
@@ -791,6 +826,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			}
 			else
 			{
+				PwmOutPut[2].PwmSetDir = 1;
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
 			}			
@@ -799,7 +835,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 		case INS_MTQ1_PWM:
 			if(InsBuf[6] <= 100)
 			{
-				PwmSetDuty_1 = InsBuf[6];
+				PwmOutPut[0].PwmSetDuty = InsBuf[6];
 				
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
@@ -813,7 +849,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 		case INS_MTQ2_PWM:
 			if(InsBuf[6] <= 100)
 			{
-				PwmSetDuty_2 = InsBuf[6];
+				PwmOutPut[1].PwmSetDuty = InsBuf[6];
 				
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
@@ -827,7 +863,7 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 		case INS_MTQ3_PWM:
 			if(InsBuf[6] <= 100)
 			{
-				PwmSetDuty_3 = InsBuf[6];
+				PwmOutPut[2].PwmSetDuty = InsBuf[6];
 				
 				InsRxCmdCnt++;  //指令计数加1
 				InsSendAck();
@@ -1160,6 +1196,9 @@ CPU_INT08U InsDecode(uint8_t *InsBuf)
 			InsSendAck();
 		break;
 				
+		case INS_MAG_TABLE_IN:
+			//MagTableInject();
+			break;
 		default:
 			//UartSend(USART1,0xFF);
 			break;
@@ -1179,3 +1218,42 @@ void GndTsRxHandle(void)
 	}
 	
 }
+
+//#define MAG_FIFO_SIZE	1024
+//void MagTableInject(void)
+//{
+//	uint8_t response;
+//	uint32_t MagTabAddr = ADDR_FLASH_SECTOR_10;
+//	uint8_t MagFiFo[MAG_FIFO_SIZE] = {0};
+//	
+//	comClearTxFifo(COM1);
+//	
+//	while(comGetChar(COM1, &response))
+//	{
+//		switch(MagState)
+//		{
+//			case MAG_IDLE:
+//				if(response == 0xEB)
+//					MagState = MAG_INJECT;
+//				else
+//					return;
+//				
+//				break;
+//			case MAG_INJECT:
+//				
+//				while()
+//			
+//				bsp_WriteCpuFlash(MagTabAddr, MagFiFo, MAG_FIFO_SIZE);
+//			
+//				break;
+//			case MAG_DONE:
+//				
+//				break;
+//			
+//		}
+//		
+//	}
+
+//	
+//}
+

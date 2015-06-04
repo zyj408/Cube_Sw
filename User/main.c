@@ -82,7 +82,7 @@ static  OS_TCB   ADC_SAMPLE_TASK_TCB;
 static  CPU_STK  ADC_SAMPLE_TASK_STK[ADC_SAMPLE_TASK_STK_SIZE];
 
 static  OS_TCB   AppTaskSenGetTCB;
-static  CPU_STK  AppTaskSenGetStk[1024];
+static  CPU_STK  AppTaskSenGetStk[2048];
 
 static  OS_TCB   AppTaskMagDotDmpTCB;
 static  CPU_STK  AppTaskMagDotDmpStk[1024];
@@ -93,9 +93,10 @@ static  CPU_STK  AppTaskPitFltComStk[1024];
 static  OS_TCB   AppTaskAttStaCtlTCB;
 static  CPU_STK  AppTaskAttStaCtlStk[1024];
  
-OS_SEM   SEM_GPS_STO;	   
-OS_SEM   SEM_TEL_STO;	   
-OS_SEM   SEM_PLOAD_STO;	   
+OS_SEM   		SEM_GPS_STO;	   
+OS_SEM   		SEM_TEL_STO;	   
+OS_SEM   		SEM_PLOAD_STO;	  
+BSP_OS_MUTEX 	MUTEX_MAG_CAP;
 /*
 *********************************************************************************************************
 *                                         FUNCTION PROTOTYPES
@@ -491,6 +492,8 @@ static  void  AppObjCreate (void)
 					0,	
 					(CPU_CHAR *)"SEM_PLOAD_STO");   /* ÔØºÉ´æ´¢ÐÅºÅµÆ */
 	
+	//BSP_OS_MutexCreate (&MUTEX_MAG_CAP,
+      //                  (CPU_CHAR *)"MUTEX_MAG_CAP");
 /********************×Ë¿ØÐÅºÅµÆ*********************/
 	
 	BSP_OS_SemCreate(&SEM_CYC_INFO,

@@ -268,7 +268,7 @@ void ChkMagLst(double MagInFix[3],const double magTable[10682][3],double GeoCord
 
     if (cx_right==120)
            cx_right=0;
-#if debug_mag_enable
+
     for(k=0;k<3;k=k+1)
            if (cy==0)
            {
@@ -292,7 +292,7 @@ void ChkMagLst(double MagInFix[3],const double magTable[10682][3],double GeoCord
        	        MagInFix[k] = tmp;
            }
 		   
-#endif
+
     return;
 }
 

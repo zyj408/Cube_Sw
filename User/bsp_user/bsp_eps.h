@@ -17,7 +17,7 @@
 	*******************************************************************************************
 	*/
 
-#define OUT_REG1	  0
+#define OUT_REG1	0
 #define OUT_REG2  	1
 #define OUT_REG3   	2	
 #define OUT_REG4   	3

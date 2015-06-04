@@ -51,19 +51,31 @@ void bsp_PWMInit(void)
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 	
-	PWM_CCR = (usPeriod + 1) * PwmSetDuty_1 / 100 - 1 - usPWMOffset;
+	
+	if(PwmOutPut[0].PwmCurDir)
+		PWM_CCR = (usPeriod + 1) * PwmOutPut[0].PwmCurDuty / 100 - usPWMOffset;
+	else
+		PWM_CCR = (usPeriod + 1) * (100 - PwmOutPut[0].PwmCurDuty) / 100 - usPWMOffset;
 	//PWM_CCR = 0;    //初始化为0
 	TIM_OCInitStructure.TIM_Pulse = PWM_CCR;
 	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
 	TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
 	
-	PWM_CCR = (usPeriod + 1) * PwmSetDuty_2 / 100 - 1 - usPWMOffset;
+	
+	if(PwmOutPut[1].PwmCurDir)
+		PWM_CCR = (usPeriod + 1) * PwmOutPut[1].PwmCurDuty / 100 - usPWMOffset;
+	else
+		PWM_CCR = (usPeriod + 1) * (100 - PwmOutPut[1].PwmCurDuty) / 100 - usPWMOffset;
 	//PWM_CCR = 0;    //初始化为0
 	TIM_OCInitStructure.TIM_Pulse = PWM_CCR;
 	TIM_OC2Init(TIM1, &TIM_OCInitStructure);
 	TIM_OC2PreloadConfig(TIM1, TIM_OCPreload_Enable);
 	
-	PWM_CCR = (usPeriod + 1) * PwmSetDuty_3 / 100 - 1 - usPWMOffset;
+	
+	if(PwmOutPut[2].PwmCurDir)
+		PWM_CCR = (usPeriod + 1) * PwmOutPut[2].PwmCurDuty / 100 - usPWMOffset;
+	else
+		PWM_CCR = (usPeriod + 1) * (100 - PwmOutPut[2].PwmCurDuty) / 100 - usPWMOffset;
 	//PWM_CCR = 0;    //初始化为0
 	TIM_OCInitStructure.TIM_Pulse = PWM_CCR;	
 	TIM_OC3Init(TIM1, &TIM_OCInitStructure);
@@ -201,7 +213,7 @@ void bsp_SetPWMDutyCycle(uint16_t PWMValue, unsigned char PWMChannel)
 	if(PWMValue > 100)    //超范围保护
 		PWMValue = 100;
 	
-	PWM_CCR = (usPeriod + 1) * PWMValue / 100 - 1 - usPWMOffset;
+	PWM_CCR = (usPeriod + 1) * PWMValue / 100 - usPWMOffset;
 
 	switch(PWMChannel)
 	{

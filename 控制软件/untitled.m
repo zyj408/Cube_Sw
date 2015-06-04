@@ -56,8 +56,8 @@ setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1)
 set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
 set(handles.text9, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
 pause(0.1);
-        if get(scom, 'BytesAvailable') == 222 %接收到7个数据
-            data_rx = fread(scom, 222, 'char');
+        if get(scom, 'BytesAvailable') == 241 %接收到7个数据
+            data_rx = fread(scom, 241, 'char');
             if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 49
                 time_temp = datestr(now, 13);
                 set(handles.text31, 'String', num2str(time_temp));
@@ -202,6 +202,37 @@ pause(0.1);
                     set(handles.edit30, 'String', '430KB/2GB');
                 end
                 
+                if data_rx(222) == 255
+                    if data_rx(223) == 1
+                       set(handles.text120, 'String', '反向'); 
+                    else
+                        set(handles.text120, 'String', '正向'); 
+                    end
+                    
+                    if data_rx(224) == 1
+                       set(handles.text121, 'String', '反向'); 
+                    else
+                        set(handles.text121, 'String', '正向'); 
+                    end
+                    
+                    if data_rx(225) == 1
+                       set(handles.text122, 'String', '反向'); 
+                    else
+                        set(handles.text122, 'String', '正向'); 
+                    end
+                    
+                    set(handles.text123, 'String', [num2str(data_rx(226)) '%']); 
+                    set(handles.text124, 'String', [num2str(data_rx(227)) '%']); 
+                    set(handles.text125, 'String', [num2str(data_rx(228)) '%']); 
+                    
+                    data_ma = data_rx(229)*256^3+data_rx(230)*256^2+data_rx(231)*256^1+data_rx(232);
+                    set(handles.text129, 'String', num2str(data_ma / 100)); 
+                    data_ma = data_rx(233)*256^3+data_rx(234)*256^2+data_rx(235)*256^1+data_rx(236);
+                    set(handles.text130, 'String', num2str(data_ma / 100)); 
+                    data_ma = data_rx(237)*256^3+data_rx(238)*256^2+data_rx(239)*256^1+data_rx(240);
+                    set(handles.text131, 'String', num2str(data_ma / 100));
+                    
+                end  
             end
         end
         
@@ -346,21 +377,21 @@ if getappdata(handles.figure1, 'connect_stat')
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
     set(handles.text9, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
 
-    while(1)
-        if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
-            data_rx = fread(scom, 7, 'char');
-            if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
-                time_temp = datestr(now, 13);
-                set(handles.text31, 'String', num2str(time_temp));
-                set(handles.edit18, 'String', num2str(time_temp));
-                setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
-                set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-                set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-            end
-            break;
-        end
-        pause(0.001);
-    end
+%     while(1)
+%         if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
+%             data_rx = fread(scom, 7, 'char');
+%             if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
+%                 time_temp = datestr(now, 13);
+%                 set(handles.text31, 'String', num2str(time_temp));
+%                 set(handles.edit18, 'String', num2str(time_temp));
+%                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
+%                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+%                 set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+%             end
+%             break;
+%         end
+%         pause(0.001);
+%     end
 end
 
 
@@ -1008,21 +1039,21 @@ function uart_inject_data(handles, opt, data)
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
     set(handles.text9, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
-        while(1)
-        if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
-            data_rx = fread(scom, 7, 'char');
-            if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
-                time_temp = datestr(now, 13);
-                set(handles.text31, 'String', num2str(time_temp));
-                set(handles.edit18, 'String', num2str(time_temp));
-                setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
-                set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-                set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-            end
-            break;
-        end
-        pause(0.001);
-        end
+%         while(1)
+%         if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
+%             data_rx = fread(scom, 7, 'char');
+%             if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
+%                 time_temp = datestr(now, 13);
+%                 set(handles.text31, 'String', num2str(time_temp));
+%                 set(handles.edit18, 'String', num2str(time_temp));
+%                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
+%                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+%                 set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+%             end
+%             break;
+%         end
+%         pause(0.001);
+%         end
 % --- Executes on key press with focus on edit5 and none of its controls.
 function edit5_KeyPressFcn(hObject, eventdata, handles)
 
@@ -1086,21 +1117,21 @@ if getappdata(handles.figure1, 'connect_stat')
     
     
     
-    while(1)
-        if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
-            data_rx = fread(scom, 7, 'char');
-            if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
-                time_temp = datestr(now, 13);
-                set(handles.text31, 'String', num2str(time_temp));
-                set(handles.edit18, 'String', num2str(time_temp));
-                setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
-                set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-                set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-            end
-            break;
-        end
-        pause(0.001);
-    end
+%     while(1)
+%         if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
+%             data_rx = fread(scom, 7, 'char');
+%             if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
+%                 time_temp = datestr(now, 13);
+%                 set(handles.text31, 'String', num2str(time_temp));
+%                 set(handles.edit18, 'String', num2str(time_temp));
+%                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
+%                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+%                 set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+%             end
+%             break;
+%         end
+%         pause(0.001);
+%     end
 end
 
 % --- Executes on button press in pushbutton10.
@@ -1123,21 +1154,21 @@ if getappdata(handles.figure1, 'connect_stat')
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
     set(handles.text9, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
 
-    while(1)
-        if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
-            data_rx = fread(scom, 7, 'char');
-            if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
-                time_temp = datestr(now, 13);
-                set(handles.text31, 'String', num2str(time_temp));
-                set(handles.edit18, 'String', num2str(time_temp));
-                setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
-                set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-                set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-            end
-            break;
-        end
-        pause(0.001);
-    end
+%     while(1)
+%         if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
+%             data_rx = fread(scom, 7, 'char');
+%             if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
+%                 time_temp = datestr(now, 13);
+%                 set(handles.text31, 'String', num2str(time_temp));
+%                 set(handles.edit18, 'String', num2str(time_temp));
+%                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
+%                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+%                 set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+%             end
+%             break;
+%         end
+%         pause(0.001);
+%     end
 end
 
 % --- Executes on key press with focus on edit1 and none of its controls.
@@ -1193,21 +1224,21 @@ if getappdata(handles.figure1, 'connect_stat')
     setappdata(handles.figure1, 'tx_cnt', getappdata(handles.figure1, 'tx_cnt') + 1); 
     set(handles.edit19, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
     set(handles.text9, 'String', num2str(getappdata(handles.figure1, 'tx_cnt')));
-        while(1)
-        if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
-            data_rx = fread(scom, 7, 'char');
-            if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
-                time_temp = datestr(now, 13);
-                set(handles.text31, 'String', num2str(time_temp));
-                set(handles.edit18, 'String', num2str(time_temp));
-                setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
-                set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-                set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
-            end
-            break;
-        end
-        pause(0.001);
-        end
+%         while(1)
+%         if get(scom, 'BytesAvailable') >= 7 %接收到7个数据
+%             data_rx = fread(scom, 7, 'char');
+%             if data_rx(1) == 235 && data_rx(2) == 80 && data_rx(3) == 48
+%                 time_temp = datestr(now, 13);
+%                 set(handles.text31, 'String', num2str(time_temp));
+%                 set(handles.edit18, 'String', num2str(time_temp));
+%                 setappdata(handles.figure1, 'rx_cnt', data_rx(5)+ data_rx(6)*256); 
+%                 set(handles.edit20, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+%                 set(handles.text10, 'String', num2str(getappdata(handles.figure1, 'rx_cnt')));
+%             end
+%             break;
+%         end
+%         pause(0.001);
+%         end
 
 end
 

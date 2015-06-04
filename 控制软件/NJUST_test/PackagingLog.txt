@@ -1,9 +1,0 @@
-ant:
-<ant>
-  <mkdir dir="D:\Documents\GitHub\Cube_Sw\控制软件\NJUST_test\for_redistribution" />
-  <mkdir dir="D:\Documents\GitHub\Cube_Sw\控制软件\NJUST_test\for_testing" />
-</ant>
-mcc -C -o NJUST_test -W WinMain:NJUST_test -T link:exe -d D:\Documents\GitHub\Cube_Sw\控制软件\NJUST_test\for_testing -v D:\Documents\GitHub\Cube_Sw\控制软件\untitled.m 
-Test checkout of feature 'Compiler' failed.
-
-mcc 失败。

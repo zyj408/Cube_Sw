@@ -16,7 +16,10 @@ void AppTaskSenGet(void)
 		  BSP_OS_SemWait(&SEM_CYC_INFO, 0);
 		 
 	      /*¶Á´ÅÇ¿¼Æ¶ÁÊý*/
+		//BSP_OS_MutexWait(&MUTEX_MAG_CAP, 0);
 		  Get_Mag_Result(MagCurOut);
+	    //BSP_OS_MutexPost(&MUTEX_MAG_CAP);
+	 
 		  magnetometer[0] = MagCurOut[0];
 		  magnetometer[1] = MagCurOut[1];
 		  magnetometer[2] = MagCurOut[2];
@@ -252,9 +255,9 @@ void AppTaskPitFltCom(void)
       cordMtxJToWGSGet(JToWGS,&TinSat);
       posInWGSGet(PosInWGS,JToWGS,orbInfo);
       geoInfoGet(GeoCord,PosInWGS);
-	 #if debug_mag_enable
-      ChkMagLst(MagInFix,magTable,GeoCord);
-	 #endif
+
+      ChkMagLst(MagInFix,(const double (*)[3])magTable,GeoCord);
+
       
       MagJGet(MagInJ,JToWGS,MagInFix);
       MtxJtoOGet(MtxJtoO,orbInfo);

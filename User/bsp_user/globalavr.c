@@ -71,12 +71,7 @@ CPU_INT32U MotorSetOutput;
 CPU_INT32U MotorCurOutput;
 
 CPU_INT08U MotorCommErr;
-CPU_INT16U PwmSetDuty_1;
-CPU_INT16U PwmSetDuty_2;
-CPU_INT16U PwmSetDuty_3;
-CPU_INT16U PwmCurDuty_1;
-CPU_INT16U PwmCurDuty_2;
-CPU_INT16U PwmCurDuty_3;
+struct OBCPWM_OutPutStr PwmOutPut[3];
 
 float PWM_Feq1;
 float PWM_Feq2;
@@ -305,12 +300,22 @@ void bsp_Init_VAR(void)
 	ComRevOTCnt = 0;
 	
 	/* 星务输出变量初始化 */
-	PwmSetDuty_1 = 95;
-	PwmSetDuty_2 = 95;
-	PwmSetDuty_3 = 95;
-	PwmCurDuty_1 = 0;
-	PwmCurDuty_2 = 0;
-	PwmCurDuty_3 = 0;
+	
+	PwmOutPut[0].PwmCurDir = 0;
+	PwmOutPut[1].PwmCurDir = 0;
+	PwmOutPut[2].PwmCurDir = 0;
+	PwmOutPut[0].PwmSetDir = 0;
+	PwmOutPut[1].PwmSetDir = 0;
+	PwmOutPut[2].PwmSetDir = 0;
+	
+	PwmOutPut[0].PwmCurDuty = 0;
+	PwmOutPut[1].PwmCurDuty = 0;
+	PwmOutPut[2].PwmCurDuty = 0;
+	PwmOutPut[0].PwmSetDuty = 0;
+	PwmOutPut[1].PwmSetDuty = 0;	
+	PwmOutPut[2].PwmSetDuty = 0;	
+	
+	
 	MotorSetOutput = 40000;
 	MotorCurOutput = 0;	
 	PWM_Feq1 = 0.0;

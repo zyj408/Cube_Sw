@@ -39,7 +39,7 @@
 ; </h>
 
 ; armfly : 将堆栈由 0x400 调大到 0x4000
-Stack_Size      EQU     0x00004000
+Stack_Size      EQU     0x00001000
 
                 AREA    STACK, NOINIT, READWRITE, ALIGN=3
 Stack_Mem       SPACE   Stack_Size

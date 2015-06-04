@@ -83,6 +83,8 @@ extern const double GM;		                        /* 地球引力常数 */
 extern const double J2; 	    	                  /* J2摄动项 */
 #if debug_mag_enable
 extern const double magTable[10682][3];     	    /* 存储在星上的磁场表 */	
+#else
+extern double (*magTable)[3];
 #endif
 extern double PFSt[2];		                        /* 俯仰滤波器状态与协方差阵 */
 extern double PPF[2][2];
