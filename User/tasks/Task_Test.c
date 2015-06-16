@@ -22,7 +22,11 @@ char pl_on = 2;
 
 void TEST_TASK(void *p_arg)
 {	
-//	UINT bw, br;
+	#if adcs_debug_enable
+	uint8_t buf;
+	uint8_t adcs_debug_mode = 0;
+	
+	#endif
 	(void)p_arg;
 	
 //	f_result = f_mount(FS_SD, &f_fs);
@@ -30,27 +34,56 @@ void TEST_TASK(void *p_arg)
 //	{
 //		DEBUG_LOG("File System Init OK\r\n");
 //	}
-	
+	out_en(OUT_USB, ENABLE);
 	while(1)
 	{
 //		GndTsRxHandle();
 //		BSP_OS_TimeDlyMs(100);
-		#if adcs_debug
-		uint8_t buf;
-		
-		if(comGetChar(COM1, &buf))
+		#if adcs_debug_enable
+
+		switch (adcs_debug_mode)
 		{
-		
-			if(buf == '1')
-			{
-				BSP_OS_SemPost(&SEM_CYC_INFO);
-			}
+			case 0:
+				if(comGetChar(COM1, &buf))
+				{
+					if(buf == 'a')
+					{
+						printf("enter ADCS debug mode!\r\n");
+						adcs_debug_mode++;
+					}
+					else
+					{
+						BSP_OS_SemPost(&SEM_CYC_INFO);
+					}
+				}
+				else
+				{
+					BSP_OS_SemPost(&SEM_CYC_INFO);
+				}
+				BSP_OS_TimeDlyMs(2000);
+			break;
+			case 1:
+				if(comGetChar(COM1, &buf))
+				{
+					if(buf == '1')
+					{
+						Get_Mag_Result(MagCurOut);
+						printf("%4.4lf %4.4lf %4.4lf",MagCurOut[0], MagCurOut[1], MagCurOut[2]);
+						//BSP_OS_SemPost(&SEM_CYC_INFO);
+					}
+					else
+					{
+						adcs_debug_mode = 0;
+						printf("exit ADCS debug mode!\r\n");
+					}
+				}
+				BSP_OS_TimeDlyMs(10);
+			break;
 		}
 		#else
 			GndTsRxHandle();
 		#endif
 		
-		BSP_OS_TimeDlyMs(10);
 //	f_result = f_open(&f_file, "0:/haha2.txt", FA_READ | FA_WRITE | FA_OPEN_EXISTING);  // NOTE:建立文件名最好全英文
 //	f_result = f_lseek(&f_file,f_file.fsize);
 //	f_result = f_write(&f_file, "haha", 4, &bw);

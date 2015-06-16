@@ -16,8 +16,10 @@
 	*@defineoutput
 	*******************************************************************************************
 	*/
-
-#define OUT_REG1	0
+/*版本号定义*/
+#define EPS_V4_2_2  
+/*输出端口定义*/
+#define OUT_REG1	  0
 #define OUT_REG2  	1
 #define OUT_REG3   	2	
 #define OUT_REG4   	3
@@ -96,15 +98,18 @@ typedef enum{
 #define  bat_heater_high     (10) //turn heater off at [degc]
 
 typedef enum{
-	BAT_DISCH = 0,
-	BAT_CHARGE,
-	BAT_NOCURR
-}bat_char_state_t;
+	BAT_NOCURR = 0,
+	BAT_DISCH,
+	BAT_SV_CHARGE,
+	BAT_EXT_CHARGE,
+	BAT_EXT_CHARGE_PRE,
+	BAT_DISCH_PRE,
+}bat_charge_state_t;
 typedef enum{NO,YES= !NO}bat_heater_state_t;
 //电池所有状态量结构体
 typedef struct{ 
 	bat_state_t         bat_state;         //电池当前状态
-	bat_char_state_t    bat_charge;        //电池充电状态
+	bat_charge_state_t  bat_charge;        //电池充电状态
 	bat_heater_state_t  bat_heater_status; //电池加热状态
 	uint32_t            bat_fullcap;       //电池初始能量
 	uint16_t            bat_percent;       //当前电量百分比
@@ -160,19 +165,21 @@ typedef struct eps_hk_state_s{
 	uint16_t out_faults;      //eps ALL outputs fault count number 
 	uint16_t out_ocp[REG_NUM + UREG_NUM];//eps out over current soft detecct count number
 	uint16_t out_Ton[REG_NUM + UREG_NUM];      // outputs set n seconds to turn on the output
+	uint16_t out_Thderr[REG_NUM + UREG_NUM];   /*从HDERR状态恢复的时间 单位[ticks]*/
 	uint16_t out_Toff[REG_NUM + UREG_NUM];     // outputs set n second to turn off the output
 	uint16_t out_fault[REG_NUM + UREG_NUM];    //eps every regulated and unregulated outputs fault count number
 	uint8_t eps_state_reserved; //eps state reserved
 } eps_hk_state_t;
 
 
-
-
 /**
 *@
 *********************************************************************************************
 */
+
 eps_hk_adc_t * adc_to_real(uint16_t *adc_uint,eps_hk_adc_t *adc_dest);
+void out_state_setforce(uint8_t chan,FunctionalState NewState);
+void out_state_clear(uint8_t chan);
 output_state_t out_en(uint8_t chan,FunctionalState NewState);
 int8_t outall_en(FunctionalState NewState);
 void eps_enter_normal(void);

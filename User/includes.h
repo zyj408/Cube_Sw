@@ -58,8 +58,8 @@
 *********************************************************************************************************
 */
 
-#define debug_enable 0
-#define debug_adcs 0
+#define debug_enable 1
+#define adcs_debug_enable 1
 #define debug_mag_enable 0
 
 #include  <bsp.h>

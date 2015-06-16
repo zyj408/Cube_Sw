@@ -2,6 +2,15 @@
 #include "globalavr.h"
 
 CPU_INT08U PwmPwrStatusOld;
+
+void MtqSwitch_CallBack(OS_TMR *p_tmr, void *p_arg)
+{
+	out_en(OUT_MTQ, DISABLE);
+	#if adcs_debug_enable
+		printf("MTQ off at 1.8s...\r\n");
+	#endif
+}
+
 void OUTPUT_TASK(void *p_arg)
 {
 	char i;
@@ -100,6 +109,6 @@ void OUTPUT_TASK(void *p_arg)
 		}
 */	
 		PwmPwrStatusOld = MTQ_POWER_PIN();
-		BSP_OS_TimeDlyMs(100);
+		BSP_OS_TimeDlyMs(1);
 	}
 }

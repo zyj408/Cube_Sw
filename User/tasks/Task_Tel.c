@@ -19,7 +19,8 @@ void TEL_SAM_TASK(void *p_arg)
 			BSP_OS_SemPost(&SEM_TEL_STO);
 		}
 
-		BSP_OS_SemPost(&SEM_CYC_INFO);
+		//BSP_OS_SemPost(&SEM_CYC_INFO);
+		//Get_Mag_Result(MagCurOut);
 		BSP_OS_TimeDlyMs(2000);		
 	}
 }

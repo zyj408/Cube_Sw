@@ -17,7 +17,17 @@ void AppTaskSenGet(void)
 		 
 	      /*读磁强计读数*/
 		//BSP_OS_MutexWait(&MUTEX_MAG_CAP, 0);
+	   
+	   
+	   
+ 
+	   OSTmrStart(&MTQ_SW_TIMER, &err);
 		  Get_Mag_Result(MagCurOut);
+	   		#if adcs_debug_enable
+				printf("Sample MAG...\r\n");
+			#endif	  
+
+	     
 	    //BSP_OS_MutexPost(&MUTEX_MAG_CAP);
 	 
 		  magnetometer[0] = MagCurOut[0];
@@ -177,7 +187,7 @@ void AppTaskMagDotDmp(void)
    double tmp1,tmp2,tmp3;
    double Vout[3];
    int i,t0 = 2999;
-   tmp1 =1/1; tmp2 =1/1; tmp3 =1/1;
+   tmp1 =1.26 / 0.2; tmp2 =1.48 / 0.2; tmp3 = 5.0 / 0.2;
    while(1)
    {
 	   BSP_OS_SemWait(&SEM_MAG_DOT_DMP, 0);
@@ -207,13 +217,29 @@ void AppTaskMagDotDmp(void)
       Vout[0] = MTQOut[0]*tmp1;
       Vout[1] = MTQOut[1]*tmp2;
       Vout[2] = MTQOut[2]*tmp3;
-      /* printf("mtq: %f %f %f\n",Vout[0],Vout[1],Vout[2]); */
       
      	mtxCpy(downAdcsMtqV,Vout,1,3);                                /*下行磁力矩器电压值*/
 		  mtxCpy(downAdcsMagnetometer,magnetometer,1,3);                /*下行磁强计测量值*/
-
-//			daTran2(1,&Vout[0]); daTran2(2,&Vout[1]);daTran2(3,&Vout[2]); /*向DA通道1、2、3分别输出三轴磁力矩器电压值*/
-      
+	   
+		for(i = 0; i<3; i++)
+		{
+			if(Vout[i] >= 0)
+			{
+				PwmOutPut[i].PwmSetDutyOld = (unsigned short)(Vout[i] * 100.0 / 5.0);
+				PwmOutPut[i].PwmSetDir = 1;
+			}
+			else
+			{
+				PwmOutPut[i].PwmSetDutyOld = (unsigned short)( - Vout[i] * 100.0 / 5.0);
+				PwmOutPut[i].PwmSetDir = 0;
+			}
+		}
+      		//out_en(OUT_MTQ, ENABLE);
+	   
+			#if adcs_debug_enable
+				printf("MTQ on...\r\n");
+			#endif
+	   
       if(pitFltComFlg == INVALID)
       {
          cntDmpFlag++;

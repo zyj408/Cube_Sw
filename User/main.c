@@ -35,7 +35,7 @@
 OS_TMR  SPI1_OT_TIMER;
 OS_TMR  COM_OT_TIMER;
 OS_TMR  GPS_OT_TIMER;
-
+OS_TMR  MTQ_SW_TIMER;
 /*
 *********************************************************************************************************
 *                                       LOCAL GLOBAL VARIABLES
@@ -112,7 +112,7 @@ static  void  AppTimerCreate          (void);
 /* 超时函数 */
 void ComOT_CallBack (OS_TMR *p_tmr, void *p_arg);
 void GPSOT_CallBack (OS_TMR *p_tmr, void *p_arg);
-
+void MtqSwitch_CallBack(OS_TMR *p_tmr, void *p_arg);
 
 /* 声明函数 */
 extern void TEL_SAM_TASK(void *p_arg);
@@ -536,7 +536,15 @@ static  void  AppTimerCreate (void)
 							(OS_TMR_CALLBACK_PTR) ComOT_CallBack,
 							(void              *) 0,
 							(OS_ERR            *) &err);
-				
+							
+	OSTmrCreate((OS_TMR            *) &MTQ_SW_TIMER,
+							(CPU_CHAR          *) "Mtq Switch Timer",
+							(OS_TICK            ) 18,
+							(OS_TICK            ) 0,
+							(OS_OPT             ) OS_OPT_TMR_ONE_SHOT,
+							(OS_TMR_CALLBACK_PTR) MtqSwitch_CallBack,
+							(void              *) 0,
+							(OS_ERR            *) &err);			
 	/* 建立GPS接收超时定时器 */								
 	OSTmrCreate((OS_TMR            *) &GPS_OT_TIMER,
 							(CPU_CHAR          *) "GPS Over Timer",

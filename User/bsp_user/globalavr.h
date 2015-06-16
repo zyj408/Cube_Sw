@@ -164,8 +164,8 @@ struct OBCTaskStatus
 
 /* 声明外部软件超时定时器 */
 extern OS_TMR  GPS_OT_TIMER;
-extern OS_TMR  COM_OT_TIMER;;
-
+extern OS_TMR  COM_OT_TIMER;
+extern OS_TMR  MTQ_SW_TIMER;
 /* GPS存储信号灯 */
 extern OS_SEM			SEM_GPS_STO;	
 extern OS_SEM   		SEM_TEL_STO;

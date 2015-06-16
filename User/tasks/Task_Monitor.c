@@ -72,7 +72,7 @@ void ADC_SAMPLE_TASK(void *p_arg)
 			adc_to_real(EpsAdValueAver, &eps_adc_data); //将adc值填入eps_adc_data结构体
 			eps_data_handling();//数据处理，eps状态量填入相关结构体
 		}
-		BSP_OS_TimeDlyMs(10);
+		BSP_OS_TimeDlyMs(100);
 	}
 	
 }

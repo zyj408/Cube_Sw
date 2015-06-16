@@ -2,9 +2,10 @@
 #include "globalavr.h"
 
 
-#define SWITCH_TIMEOUT_MS  5
-enum INS_STATUS InsState=INS_IDLE;  /* 地面测试状态初始化 */
+#define SWITCH_TIMEOUT_MS  	5
+#define COM_CMD 			COM6
 
+enum INS_STATUS InsState=INS_IDLE;  /* 地面测试状态初始化 */
 enum MAG_TAB_STATUS	MagState = MAG_IDLE;
 
 
@@ -135,7 +136,7 @@ void InsSendAck(void)
 
 	InsGetCheckSum(&ins_data_temp[4], ins_data_temp[3], &ins_checksum);
 	ins_data_temp[6] = ins_checksum;
-	comSendBuf(COM1, ins_data_temp, 7);
+	comSendBuf(COM_CMD, ins_data_temp, 7);
 }
 
 
@@ -217,7 +218,7 @@ void InsSendHouseKeepingData(void)
 	
 	InsGetCheckSum(q+1, *q, &ins_checksum);
 	*p = ins_checksum;
-	comSendBuf(COM1, ins_data_temp, p - q + 4);
+	comSendBuf(COM_CMD, ins_data_temp, p - q + 4);
 
 }
 
@@ -1212,7 +1213,7 @@ void GndTsRxHandle(void)
 {
 	uint8_t response;
 	
-	while(comGetChar(COM1, &response)) //获取一个字符
+	while(comGetChar(COM_CMD, &response)) //获取一个字符
 	{
 		TestRcv(response);
 	}
